@@ -7,6 +7,10 @@
         <h5 class="text-danger">{{ session('error') }}</h5>
     @endif
 
+    @if (session('success'))
+        <h5 class="text-success">{{ session('success') }}</h5>
+    @endif
+
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -36,6 +40,10 @@
                                     <a class="btn btn-warning" href="#" data-toggle="modal"
                                         data-target="#editModal-{{ $user->id }}">Edit</a>
                                     @include('cms.user.partials.admin.edit-admin', ['user' => $user])
+
+                                    <a class="btn btn-danger" href="#" data-toggle="modal"
+                                        data-target="#deleteModal-{{ $user->id }}">Hapus</a>
+                                    @include('cms.user.partials.admin.delete-admin', ['user' => $user])
                                 </td>
                             </tr>
                         @endforeach

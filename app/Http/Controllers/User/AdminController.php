@@ -5,12 +5,13 @@ namespace App\Http\Controllers\User;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules;
 
 class AdminController extends Controller
 {
@@ -94,15 +95,16 @@ class AdminController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, string $id)
     {
+        $user = User::find($id);
+
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
-            'username' => ['sometimes', 'string', 'max:255', 'unique:users,username,' . $user->id],
-            'email' => ['sometimes', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            // 'password' => ['sometimes', 'nullable', Rules\Password::defaults()],
+            'username' => ['sometimes', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id),],
+            'email' => ['sometimes', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id),],
         ]);
-
+        
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
@@ -111,10 +113,11 @@ class AdminController extends Controller
 
         $data = $validator->validated();
 
-        $user->name = $data['name'];
-        $user->username = $data['username'];
-        $user->email = $data['email'];
-        // $user->password = $data['password'];
+        $user->update([
+            'name' => $data['name'],
+            'username' => $data['username'],
+            'email' => $data['email'],
+        ]);
 
         $auth = Auth::user();
         if ($auth->roles->first()?->name == 'superadmin') {
@@ -125,16 +128,18 @@ class AdminController extends Controller
             $user->syncRoles('admin');
         }
 
-        $user->save();
-
         return redirect()->route('users-admin.index')->with('success', 'User berhasil diperbarui!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request): RedirectResponse
     {
-        //
+        $user = User::findOrFail($request->user_id);
+
+        $user->delete();
+
+        return redirect()->route('users-admin.index')->with('success', 'User berhasil dihapus!');
     }
 }
