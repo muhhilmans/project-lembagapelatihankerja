@@ -13,7 +13,7 @@
             <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#createModal">
                 Tambah
             </a>
-            @include('cms.user.partials.create')
+            @include('cms.user.partials.admin.create-admin')
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -33,7 +33,9 @@
                                 <td>{{ $user->email }}</td>
                                 <td>{{ $user->username }}</td>
                                 <td>
-                                    edit | hapus
+                                    <a class="btn btn-warning" href="#" data-toggle="modal"
+                                        data-target="#editModal-{{ $user->id }}">Edit</a>
+                                    @include('cms.user.partials.admin.edit-admin', ['user' => $user])
                                 </td>
                             </tr>
                         @endforeach

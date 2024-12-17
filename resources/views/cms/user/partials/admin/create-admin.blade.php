@@ -7,7 +7,7 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('users-admin.store') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('users-admin.store') }}">
                 @csrf
                 <div class="modal-body">
                     <div class="form-row">
