@@ -18,4 +18,9 @@ class EmployeDetail extends Model
         'address',
         'phone'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
