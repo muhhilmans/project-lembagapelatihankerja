@@ -4,10 +4,11 @@ namespace App\Http\Controllers\User;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\EmployeDetail;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Models\EmployeDetail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
@@ -74,7 +75,7 @@ class EmployeController extends Controller
                 ]);
             });
             if ($store) {
-                return redirect()->route('users-employe.index')->with('success', 'Users Majikan berhasil ditambahkan!');
+                return redirect()->route('users-employe.index')->with('success', 'Majikan berhasil ditambahkan!');
             } else {
                 return back()->with('error', 'Users Majikan gagal ditambahkan!');
             }
@@ -109,14 +110,47 @@ class EmployeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $user = User::find($id);
+
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['sometimes', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id),],
+            'email' => ['sometimes', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id),],
+            'phone' => ['required', 'string', 'max:255'],
+            'address' => ['required', 'string', 'max:255'],
+        ]);
+        
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $validator->validated();
+
+        $user->update([
+            'name' => $data['name'],
+            'username' => $data['username'],
+            'email' => $data['email'],
+        ]);
+
+        $user->employeDetails()->update([
+            'phone' => $data['phone'],
+            'address' => $data['address']
+        ]);
+
+        return redirect()->route('users-employe.index')->with('success', 'Majikan berhasil diperbarui!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request): RedirectResponse
     {
-        //
+        $user = User::findOrFail($request->user_id);
+
+        $user->delete();
+
+        return redirect()->route('users-employe.index')->with('success', 'Majikan berhasil dihapus!');
     }
 }

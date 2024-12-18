@@ -2,15 +2,15 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Edit Admin</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Edit Majikan</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('users-admin.update', $user->id) }}">
+            <form method="POST" action="{{ route('users-employe.update', $user->id) }}">
                 @csrf
                 @method('PUT')
-                
+
                 <div class="modal-body">
                     <div class="form-row">
                         <div class="form-group col-md-6">
@@ -30,6 +30,17 @@
                             <label for="email">Email</label>
                             <input type="email" class="form-control" id="email" name="email" 
                                    value="{{ old('email', $user->email) }}" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="phone">Nomor Telepon <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="phone" name="phone" maxlength="13" value="{{ old('phone', $user->employeDetails->phone ?? '') }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="address">Alamat <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="address" id="address" rows="3" required>{{ old('address', $user->employeDetails->address ?? '') }}</textarea>
                         </div>
                     </div>
                 </div>

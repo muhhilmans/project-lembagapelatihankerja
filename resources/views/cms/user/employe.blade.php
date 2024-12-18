@@ -43,11 +43,11 @@
                                 <td>
                                     <a class="btn btn-warning" href="#" data-toggle="modal"
                                         data-target="#editModal-{{ $user->id }}">Edit</a>
-                                    {{-- @include('cms.user.partials.admin.edit-admin', ['user' => $user]) --}}
+                                    @include('cms.user.partials.employe.edit-employe', ['user' => $user])
 
                                     <a class="btn btn-danger" href="#" data-toggle="modal"
                                         data-target="#deleteModal-{{ $user->id }}">Hapus</a>
-                                    {{-- @include('cms.user.partials.admin.delete-admin', ['user' => $user]) --}}
+                                    @include('cms.user.partials.employe.delete-employe', ['user' => $user])
                                 </td>
                             </tr>
                         @endforeach

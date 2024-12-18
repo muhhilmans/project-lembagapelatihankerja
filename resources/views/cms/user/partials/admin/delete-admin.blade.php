@@ -11,7 +11,7 @@
                 <div class="modal-body">Apakah anda yakin untuk menghapus <b>{{ $user->name }}</b> ini?</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <form action="{{ route('users-admin.destroy', $user->id) }}" method="POST">
+                    <form action="{{ route('users-employe.destroy', $user->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
                         <input type="hidden" id="user_id" name="user_id" value="{{ $user->id }}" />
