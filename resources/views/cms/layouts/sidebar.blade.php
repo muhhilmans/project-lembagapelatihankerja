@@ -67,22 +67,28 @@
                 <span>Kategori</span></a>
         </li>
 
-        @hasrole('superadmin|owner')
+        @hasrole('superadmin|owner|admin')
             <!-- Nav Item - Users Collapse Menu -->
-            <li class="nav-item {{ Route::is('users-admin.*', 'users-employe.*') ? 'active' : '' }}">
-                <a class="nav-link {{ Route::is('users-admin.*', 'users-employe.*') ? '' : 'collapsed' }}" href="#" data-toggle="collapse"
-                    data-target="#collapseUsers" aria-expanded="{{ Route::is('users-admin.*', 'users-employe.*') ? 'true' : 'false' }}"
+            <li class="nav-item {{ Route::is('users-admin.*', 'users-employe.*', 'users-servant.*') ? 'active' : '' }}">
+                <a class="nav-link {{ Route::is('users-admin.*', 'users-employe.*', 'users-servant.*') ? '' : 'collapsed' }}"
+                    href="#" data-toggle="collapse" data-target="#collapseUsers"
+                    aria-expanded="{{ Route::is('users-admin.*', 'users-employe.*', 'users-servant.*') ? 'true' : 'false' }}"
                     aria-controls="collapseUsers">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Users</span>
                 </a>
-                <div id="collapseUsers" class="collapse {{ Route::is('users-admin.*', 'users-employe.*') ? 'show' : '' }}"
+                <div id="collapseUsers"
+                    class="collapse {{ Route::is('users-admin.*', 'users-employe.*', 'users-servant.*') ? 'show' : '' }}"
                     aria-labelledby="headingUsers" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item {{ Route::is('users-employe.*') ? 'active' : '' }}" href="{{ route('users-employe.index') }}">Majikan</a>
-                        <a class="collapse-item" href="#">Pembantu</a>
-                        <a class="collapse-item {{ Route::is('users-admin.*') ? 'active' : '' }}"
-                            href="{{ route('users-admin.index') }}">Admin</a>
+                        <a class="collapse-item {{ Route::is('users-employe.*') ? 'active' : '' }}"
+                            href="{{ route('users-employe.index') }}">Majikan</a>
+                        <a class="collapse-item {{ Route::is('users-servant.*') ? 'active' : '' }}"
+                            href="{{ route('users-servant.index') }}">Pembantu</a>
+                        @hasrole('superadmin|owner')
+                            <a class="collapse-item {{ Route::is('users-admin.*') ? 'active' : '' }}"
+                                href="{{ route('users-admin.index') }}">Admin</a>
+                        @endhasrole
                     </div>
                 </div>
             </li>

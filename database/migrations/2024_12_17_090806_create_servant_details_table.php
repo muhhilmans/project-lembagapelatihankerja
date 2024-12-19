@@ -35,6 +35,8 @@ return new class extends Migration
             $table->string('identity_card')->nullable();
             $table->string('family_card')->nullable();
             $table->boolean('working_status')->default(false);
+            $table->string('experience')->default('-');
+            $table->string('description')->default('-');
             $table->timestamps();
         });
     }

@@ -16,4 +16,9 @@ class Profession extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function servant()
+    {
+        return $this->hasOne(ServantDetail::class, 'profession_id');
+    }
 }

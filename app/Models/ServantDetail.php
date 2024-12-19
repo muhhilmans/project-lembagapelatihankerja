@@ -19,7 +19,7 @@ class ServantDetail extends Model
         'place_of_birth',
         'date_of_birth',
         'religion',
-        'martial_status',
+        'marital_status',
         'children',
         'profession_id',
         'last_education',
@@ -37,4 +37,14 @@ class ServantDetail extends Model
         'family_card',
         'working_status',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function profession()
+    {
+        return $this->belongsTo(Profession::class);
+    }
 }

@@ -23,7 +23,8 @@
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
-                        <tr>
+                        <tr class="text-center">
+                            <th>No</th>
                             <th>Nama</th>
                             <th>Email</th>
                             <th>Username</th>
@@ -33,16 +34,17 @@
                     <tbody>
                         @foreach ($users as $user)
                             <tr>
+                                <td class="text-center">{{ $loop->iteration }}</td>
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>{{ $user->username }}</td>
-                                <td>
-                                    <a class="btn btn-warning" href="#" data-toggle="modal"
-                                        data-target="#editModal-{{ $user->id }}">Edit</a>
+                                <td class="text-center">
+                                    <a class="btn btn-warning mb-2 mb-lg-0" href="#" data-toggle="modal"
+                                        data-target="#editModal-{{ $user->id }}"><i class="fas fa-fw fa-user-edit"></i></a>
                                     @include('cms.user.partials.admin.edit-admin', ['user' => $user])
 
                                     <a class="btn btn-danger" href="#" data-toggle="modal"
-                                        data-target="#deleteModal-{{ $user->id }}">Hapus</a>
+                                        data-target="#deleteModal-{{ $user->id }}"><i class="fas fa-fw fa-trash"></i></a>
                                     @include('cms.user.partials.admin.delete-admin', ['user' => $user])
                                 </td>
                             </tr>

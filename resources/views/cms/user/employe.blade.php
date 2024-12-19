@@ -13,42 +13,56 @@
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#createModal">
-                Tambah
-            </a>
-            @include('cms.user.partials.employe.create-employe')
-        </div>
+        @hasrole('superadmin|admin')
+            <div class="card-header py-3">
+                <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#createModal">
+                    Tambah
+                </a>
+                @include('cms.user.partials.employe.create-employe')
+            </div>
+        @endhasrole
+
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                     <thead>
-                        <tr>
+                        <tr class="text-center">
+                            <th>No</th>
                             <th>Nama</th>
                             <th>Email</th>
                             <th>Username</th>
                             <th>Alamat</th>
                             <th>No Telepon</th>
-                            <th>Aksi</th>
+                            @hasrole('superadmin|admin')
+                                <th>Aksi</th>
+                            @endhasrole
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($users as $user)
                             <tr>
+                                <td class="text-center">{{ $loop->iteration }}</td>
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>{{ $user->username }}</td>
                                 <td>{{ $user->employeDetails->address ?? 'Belum diisi' }}</td>
-                                <td>{{ $user->employeDetails->phone == '-' ? 'Belum diisi' : $user->employeDetails->phone  ?? 'Belum diisi' }}</td>
-                                <td>
-                                    <a class="btn btn-warning" href="#" data-toggle="modal"
-                                        data-target="#editModal-{{ $user->id }}">Edit</a>
-                                    @include('cms.user.partials.employe.edit-employe', ['user' => $user])
-
-                                    <a class="btn btn-danger" href="#" data-toggle="modal"
-                                        data-target="#deleteModal-{{ $user->id }}">Hapus</a>
-                                    @include('cms.user.partials.employe.delete-employe', ['user' => $user])
+                                <td>{{ $user->employeDetails->phone == '-' ? 'Belum diisi' : $user->employeDetails->phone ?? 'Belum diisi' }}
                                 </td>
+                                @hasrole('superadmin|admin')
+                                    <td class="text-center">
+                                        <a class="btn btn-warning mb-2 mb-lg-0" href="#" data-toggle="modal"
+                                            data-target="#editModal-{{ $user->id }}"><i class="fas fa-fw fa-user-edit"></i></a>
+                                        @include('cms.user.partials.employe.edit-employe', [
+                                            'user' => $user,
+                                        ])
+
+                                        <a class="btn btn-danger" href="#" data-toggle="modal"
+                                            data-target="#deleteModal-{{ $user->id }}"><i class="fas fa-fw fa-trash"></i></a>
+                                        @include('cms.user.partials.employe.delete-employe', [
+                                            'user' => $user,
+                                        ])
+                                    </td>
+                                @endhasrole
                             </tr>
                         @endforeach
                     </tbody>
