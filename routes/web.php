@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UtilityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,8 @@ use App\Http\Controllers\AuthController;
 Route::get('/', [AuthController::class, 'login'])->name('login');
 
 Route::post('/authenticate', [AuthController::class, 'authenticate'])->name('authenticate');
+
+Route::get('storage/img/{path}/{imageName}', [UtilityController::class, 'displayImage'])->name('getImage');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-servant', function () {

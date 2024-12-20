@@ -4,7 +4,11 @@
     <!-- Page Heading -->
     <div class="d-flex justify-content-between align-items-baseline">
         <h1 class="h3 mb-4 text-gray-800">Detail Pembantu</h1>
-        <a href="{{ route('users-servant.index') }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
+        <div class="d-flex">
+            <a href="{{ route('users-servant.edit', $user->id) }}" class="btn btn-warning mr-1"><i
+                    class="fas fa-fw fa-user-edit"></i></a>
+            <a href="{{ route('users-servant.index') }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
+        </div>
     </div>
     @if (session('error'))
         <h5 class="text-danger">{{ session('error') }}</h5>
@@ -14,11 +18,16 @@
         <h5 class="text-success">{{ session('success') }}</h5>
     @endif
 
-    <div class="row">
-        <div class="col-lg-4">
+    <div class="row mb-4">
+        <div class="col-lg-4 mb-3 mb-lg-0">
             <div class="card shadow mb-3 p-3">
-                <img src="{{ asset('assets/img/undraw_profile_1.svg') }}" class="img-fluid rounded mx-auto d-block"
-                    style="max-height: 150px;" alt="...">
+                @if ($user->servantDetails->photo)
+                    <img src="{{ route('getImage', ['path' => 'photo', 'imageName' => $user->servantDetails->photo]) }}"
+                        class="img-fluid rounded mx-auto d-block zoomable-image" style="max-height: 150px;" alt="...">
+                @else
+                    <img src="{{ asset('assets/img/undraw_rocket.svg') }}"
+                        class="img-fluid rounded mx-auto d-block zoomable-image" style="max-height: 150px;" alt="...">
+                @endif
 
                 <div class="card-body">
                     <table class="table table-responsive table-borderless">
@@ -64,7 +73,7 @@
         </div>
 
         <div class="col-lg-8">
-            <div class="card shadow">
+            <div class="card shadow mb-3">
                 <div class="card-header">
                     <h1 class="h5 font-weight-bold">Detail Informasi</h1>
                 </div>
@@ -130,9 +139,19 @@
                                     @if ($user->servantDetails->last_education == 'not_filled')
                                         -
                                     @else
-                                    {{ $user->servantDetails->last_education }}
+                                        {{ $user->servantDetails->last_education }}
                                     @endif
                                 </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Nomor Telepon</th>
+                                <td>:</td>
+                                <td>{{ $user->servantDetails->phone ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Nomor Darurat</th>
+                                <td>:</td>
+                                <td>{{ $user->servantDetails->emergency_number ?? '-' }}</td>
                             </tr>
                             <tr>
                                 <th scope="row">Alamat</th>
@@ -153,6 +172,45 @@
                                 <th scope="row">Deskripsi</th>
                                 <td>:</td>
                                 <td>{{ $user->servantDetails->description }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header">
+                    <h1 class="h5 font-weight-bold">Berkas Kelengkapan</h1>
+                </div>
+
+                <div class="card-body">
+                    <table class="table table-responsive table-borderless">
+                        <tbody>
+                            <tr>
+                                <th scope="row">KTP</th>
+                                <td>:</td>
+                                <td>
+                                    @if ($user->servantDetails->identity_card == null)
+                                        -
+                                    @else
+                                        <img src="{{ route('getImage', ['path' => 'identity_card', 'imageName' => $user->servantDetails->identity_card]) }}"
+                                            alt="Kartu Tanda Penduduk" class="img-fluid rounded zoomable-image"
+                                            style="max-height: 150px;">
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Kartu Keluarga</th>
+                                <td>:</td>
+                                <td>
+                                    @if ($user->servantDetails->family_card == null)
+                                        -
+                                    @else
+                                        <img src="{{ route('getImage', ['path' => 'family_card', 'imageName' => $user->servantDetails->family_card]) }}"
+                                            alt="Kartu Tanda Penduduk" class="img-fluid rounded zoomable-image"
+                                            style="max-height: 150px;">
+                                    @endif
+                                </td>
                             </tr>
                         </tbody>
                     </table>

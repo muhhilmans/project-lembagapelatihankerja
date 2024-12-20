@@ -23,6 +23,33 @@
     <!-- Custom styles for this page -->
     <link href="{{ asset('assets/vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
 
+    <style>
+        .zoomable-image {
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .zoomable-image:hover {
+            transform: scale(1.05);
+        }
+
+        .modal-content-img {
+            background: rgba(0, 0, 0, 0.85);
+            border: none;
+            padding: 10px;
+        }
+
+        #fullscreenImage {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100vh;
+            display: block;
+            margin: auto;
+        }
+    </style>
+
+    @stack('custom-style')
 </head>
 
 <body id="page-top">
@@ -93,6 +120,19 @@
         </div>
     </div>
 
+    <!-- Fullscreen Image Modal -->
+    <div id="fullscreenModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content-img bg-dark text-center">
+                <button type="button" class="close text-white position-absolute"
+                    style="top: 10px; right: 15px; z-index: 1051;" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <img id="fullscreenImage" src="" alt="Fullscreen Image" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap core JavaScript-->
     <script src="{{ asset('assets/vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
@@ -113,6 +153,26 @@
     <script src="{{ asset('assets/js/demo/chart-pie-demo.js') }}"></script>
     <script src="{{ asset('assets/js/demo/datatables-demo.js') }}"></script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const zoomableImages = document.querySelectorAll('.zoomable-image');
+            const fullscreenModal = document.getElementById('fullscreenModal');
+            const fullscreenImage = document.getElementById('fullscreenImage');
+
+            zoomableImages.forEach(image => {
+                image.addEventListener('click', function() {
+                    fullscreenImage.src = this.src;
+                    $(fullscreenModal).modal('show');
+                });
+            });
+
+            $('#fullscreenModal').on('hidden.bs.modal', function() {
+                fullscreenImage.src = '';
+            });
+        });
+    </script>
+
+    @stack('custom-script')
 </body>
 
 </html>
