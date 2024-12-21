@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 
 class UtilityController extends Controller
 {
-    public function displayImage($path ,$imageName)
+    public function displayImage($path, $imageName)
     {
-        $path = storage_path('app/public/images/'. $path . '/' . $imageName);
+        $path = storage_path('app/public/images/' . $path . '/' . $imageName);
         if (!File::exists($path)) {
             abort(404);
         }
@@ -22,5 +23,24 @@ class UtilityController extends Controller
         $respose->header('Content-Type', $type);
 
         return $respose;
+    }
+
+    public function allServant()
+    {
+        $datas = User::with(['roles', 'servantDetails'])
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'pembantu');
+            })->where('is_active', true)->whereHas('servantDetails', function ($query) {
+                $query->where('working_status', false);
+            })->get();
+
+        return view('cms.servant.index', compact('datas'));
+    }
+
+    public function showServant(string $id)
+    {
+        $data = User::findOrFail($id);
+
+        return view('cms.servant.partials.detail', compact('data'));
     }
 }

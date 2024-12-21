@@ -31,6 +31,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard-employe');
 
     require __DIR__.'/role/admin.php';
+    require __DIR__.'/role/employe.php';
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

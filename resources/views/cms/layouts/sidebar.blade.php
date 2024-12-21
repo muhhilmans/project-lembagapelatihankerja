@@ -59,17 +59,30 @@
     <!-- Divider -->
     <hr class="sidebar-divider">
 
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Interface
-    </div>
-
-    <!-- Nav Item - Menu -->
+    @hasrole('superadmin|admin|pembantu')
+    <!-- Nav Item - Cari Lowongan -->
     <li class="nav-item">
         <a class="nav-link" href="#">
-            <i class="fas fa-fw fa-folder"></i>
-            <span>Menu</span></a>
+            <i class="fas fa-fw fa-search"></i>
+            <span>Cari Lowongan</span></a>
     </li>
+    @endhasrole
+
+    @hasrole('superadmin|admin|majikan')
+    <!-- Nav Item - Lowongan -->
+    <li class="nav-item">
+        <a class="nav-link" href="#">
+            <i class="fas fa-fw fa-file"></i>
+            <span>Lowongan</span></a>
+    </li>
+
+    <!-- Nav Item - Pembantu -->
+    <li class="nav-item {{ Route::is('all-servant') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('all-servant') }}">
+            <i class="fas fa-fw fa-user-tie"></i>
+            <span>Pembantu</span></a>
+    </li>
+    @endhasrole
 
     @hasrole('superadmin|admin|owner')
         <!-- Divider -->
