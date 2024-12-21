@@ -61,4 +61,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(ServantDetail::class, 'user_id');
     }
+
+    public function servantSkills()
+    {
+        return $this->hasMany(ServantSkill::class, 'user_id');
+    }
 }

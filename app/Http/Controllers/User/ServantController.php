@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\ServantSkill;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
@@ -238,5 +239,79 @@ class ServantController extends Controller
         $statusMessage = $user->is_active == 1 ? 'Diaktifkan' : 'Dinonaktifkan';
 
         return redirect()->route('users-servant.index')->with('success', 'Pembantu Berhasil ' . $statusMessage);
+    }
+
+    public function storeSkill(Request $request, string $id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        
+        $validator = Validator::make($request->all(), [
+            'skill' => ['required', 'string', 'max:255'],
+            'level' => ['required', 'string', 'max:255'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::transaction(function () use ($data, $user) {
+                ServantSkill::create([
+                    'user_id' => $user->id,
+                    'skill' => $data['skill'],
+                    'level' => $data['level'],
+                ]);
+            });
+
+            return redirect()->route('users-servant.show', $user->id)->with('success', 'Keahlian berhasil ditambahkan!');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
+    }
+
+    public function updateSkill(Request $request, string $id, string $skill_id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        $skill = ServantSkill::findOrFail($skill_id);
+        
+        $validator = Validator::make($request->all(), [
+            'skill' => ['required', 'string', 'max:255'],
+            'level' => ['required', 'string', 'max:255'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::transaction(function () use ($data, $skill) {
+                $skill->update([
+                    'skill' => $data['skill'],
+                    'level' => $data['level'],
+                ]);
+            });
+
+            return redirect()->route('users-servant.show', $user->id)->with('success', 'Keahlian berhasil diperbarui!');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
+    }
+
+    public function destroySkill(string $id, string $skill_id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        $skill = ServantSkill::findOrFail($skill_id);
+
+        $skill->delete();
+
+        return redirect()->route('users-servant.show', $user->id)->with('success', 'Keahlian berhasil dihapus!');
     }
 }

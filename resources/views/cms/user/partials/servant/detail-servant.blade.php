@@ -5,8 +5,10 @@
     <div class="d-flex justify-content-between align-items-baseline">
         <h1 class="h3 mb-4 text-gray-800">Detail Pembantu</h1>
         <div class="d-flex">
-            <a href="{{ route('users-servant.edit', $user->id) }}" class="btn btn-warning mr-1"><i
-                    class="fas fa-fw fa-user-edit"></i></a>
+            @hasrole('superadmin|admin')
+                <a href="{{ route('users-servant.edit', $user->id) }}" class="btn btn-warning mr-1"><i
+                        class="fas fa-fw fa-user-edit"></i></a>
+            @endhasrole
             <a href="{{ route('users-servant.index') }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
         </div>
     </div>
@@ -62,11 +64,38 @@
 
             <div class="card shadow">
                 <div class="card-header">
-                    <h1 class="h5 font-weight-bold">Keahlian</h1>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1 class="h5 font-weight-bold">Keahlian</h1>
+                        @hasrole('superadmin|admin')
+                            <a class="btn btn-primary mb-2 mb-lg-0" href="#" data-toggle="modal"
+                                data-target="#createSkillModal-{{ $user->id }}">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                            @include('cms.user.partials.servant.skill.create', [
+                                'user' => $user,
+                            ])
+                        @endhasrole
+                    </div>
                 </div>
                 <div class="card-body">
                     <ul>
-                        <li>memasak</li>
+                        @if ($user->servantSkills->count() > 0)
+                            @foreach ($user->servantSkills as $dataSkill)
+                                <li>
+                                    <a class="text-capitalize" href="#" data-toggle="modal"
+                                        data-target="#updateSkillModal-{{ $dataSkill->id }}">
+                                        {{ $dataSkill->skill }} ({{ $dataSkill->level }})
+                                    </a>
+                                    @include('cms.user.partials.servant.skill.edit', [
+                                        'user' => $user,
+                                    ])
+                                </li>
+                            @endforeach
+                        @else
+                            <li>
+                                Belum Ada Keahlian
+                            </li>
+                        @endif
                     </ul>
                 </div>
             </div>
@@ -180,7 +209,22 @@
 
             <div class="card shadow">
                 <div class="card-header">
-                    <h1 class="h5 font-weight-bold">Berkas Kelengkapan</h1>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1 class="h5 font-weight-bold">Berkas Kelengkapan</h1>
+                        @hasrole('superadmin|admin')
+                            <a class="btn btn-warning mb-2 mb-lg-0" href="#" data-toggle="modal"
+                                data-target="#changeModal-{{ $user->id }}">
+                                @if ($user->is_active == 1)
+                                    <i class="fas fa-fw fa-toggle-off"></i>
+                                @else
+                                    <i class="fas fa-fw fa-toggle-on"></i>
+                                @endif
+                            </a>
+                            @include('cms.user.partials.servant.change-servant', [
+                                'user' => $user,
+                            ])
+                        @endhasrole
+                    </div>
                 </div>
 
                 <div class="card-body">
