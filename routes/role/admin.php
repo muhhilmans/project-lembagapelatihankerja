@@ -1,9 +1,10 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfessionController;
 use App\Http\Controllers\User\AdminController;
 use App\Http\Controllers\User\EmployeController;
 use App\Http\Controllers\User\ServantController;
-use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
     Route::get('/dashboard', function () {
@@ -16,6 +17,8 @@ Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
     Route::post('users-servant/{user}/skill/store', [ServantController::class, 'storeSkill'])->name('users-servant.store.skill');
     Route::put('users-servant/{user}/skill/{skill}/update', [ServantController::class, 'updateSkill'])->name('users-servant.update.skill');
     Route::delete('users-servant/{user}/skill/{skill}/delete', [ServantController::class, 'destroySkill'])->name('users-servant.destroy.skill');
+
+    Route::resource('professions', ProfessionController::class)->except('create', 'show', 'edit');
 });
 
 Route::group(['middleware' => ['role:superadmin|owner']], function () {

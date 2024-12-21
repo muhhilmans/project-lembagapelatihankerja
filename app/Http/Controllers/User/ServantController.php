@@ -213,7 +213,12 @@ class ServantController extends Controller
     
             return redirect()->route('users-servant.show', $user->id)->with('success', 'Pembantu berhasil diperbarui!');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
         }
     }
 
@@ -269,7 +274,12 @@ class ServantController extends Controller
 
             return redirect()->route('users-servant.show', $user->id)->with('success', 'Keahlian berhasil ditambahkan!');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
         }
     }
 
@@ -301,7 +311,12 @@ class ServantController extends Controller
 
             return redirect()->route('users-servant.show', $user->id)->with('success', 'Keahlian berhasil diperbarui!');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
         }
     }
 
