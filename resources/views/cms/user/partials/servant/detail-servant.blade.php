@@ -185,7 +185,7 @@
                             <tr>
                                 <th scope="row">Alamat</th>
                                 <td>:</td>
-                                <td>{{ $user->servantDetails->address }}</td>
+                                <td>{{ $user->servantDetails->address }} RT {{ $user->servantDetails->rt }} RW {{ $user->servantDetails->rw }}, {{ $user->servantDetails->village }}, {{ $user->servantDetails->district }}, {{ $user->servantDetails->regency }}, {{ $user->servantDetails->province }}</td>
                             </tr>
                             <tr>
                                 <th scope="row">Status Kerja</th>

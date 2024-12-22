@@ -57,7 +57,7 @@
     @endhasrole
 
     <!-- Divider -->
-    <hr class="sidebar-divider">
+    <hr class="sidebar-divider my-0">
 
     @hasrole('superadmin|admin|pembantu')
     <!-- Nav Item - Cari Lowongan -->

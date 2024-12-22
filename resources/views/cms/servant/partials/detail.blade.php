@@ -86,7 +86,7 @@
                                 <th scope="row">TTL</th>
                                 <td>:</td>
                                 <td>{{ $data->servantDetails->place_of_birth }},
-                                    {{ $data->servantDetails->date_of_birth }}
+                                    {{ \Carbon\Carbon::parse($data->servantDetails->date_of_birth)->format('d/m/Y') }}
                                 </td>
                             </tr>
                             <tr>
@@ -158,7 +158,7 @@
                             <tr>
                                 <th scope="row">Alamat</th>
                                 <td>:</td>
-                                <td>{{ $data->servantDetails->address }}</td>
+                                <td>{{ $data->servantDetails->address }} RT {{ $data->servantDetails->rt }} RW {{ $data->servantDetails->rw }}, {{ $data->servantDetails->village }}, {{ $data->servantDetails->district }}, {{ $data->servantDetails->regency }}, {{ $data->servantDetails->province }}</td>
                             </tr>
                             <tr>
                                 <th scope="row">Pengalaman Kerja</th>
