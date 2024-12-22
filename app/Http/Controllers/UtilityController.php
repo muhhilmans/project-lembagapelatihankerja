@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Profession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
@@ -34,7 +35,9 @@ class UtilityController extends Controller
                 $query->where('working_status', false);
             })->get();
 
-        return view('cms.servant.index', compact('datas'));
+            $professions = Profession::all();
+
+        return view('cms.servant.index', compact(['datas', 'professions']));
     }
 
     public function showServant(string $id)
