@@ -3,10 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Vacancy;
+use App\Models\ApplyJob;
 use App\Models\Profession;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Validator;
+use Exception;
 
 class UtilityController extends Controller
 {
@@ -35,7 +41,7 @@ class UtilityController extends Controller
                 $query->where('working_status', false);
             })->get();
 
-            $professions = Profession::all();
+        $professions = Profession::all();
 
         return view('cms.servant.index', compact(['datas', 'professions']));
     }
@@ -45,5 +51,147 @@ class UtilityController extends Controller
         $data = User::findOrFail($id);
 
         return view('cms.servant.partials.detail', compact('data'));
+    }
+
+    public function allVacancy()
+    {
+        $datas = Vacancy::where('closing_date', '>=', now())->get();
+
+        return view('cms.seek-vacancy.index', compact('datas'));
+    }
+
+    public function showVacancy(string $id)
+    {
+        $data = Vacancy::findOrFail($id);
+        $dataApplicants = ApplyJob::with('servant')->where('vacancy_id', $id)->get();
+
+        return view('cms.seek-vacancy.partial.detail', compact(['data', 'dataApplicants']));
+    }
+
+    public function applyJob(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'servant_id' => ['required', 'exists:users,id'],
+            'vacancy_id' => ['required', 'exists:vacancies,id'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::transaction(function () use ($data) {
+                ApplyJob::create([
+                    'servant_id' => $data['servant_id'],
+                    'vacancy_id' => $data['vacancy_id'],
+                ]);
+            });
+
+            return redirect()->back()->with('success', 'Berhasil mengirimkan lamaran!');
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
+    public function changeStatus(Request $request, Vacancy $vacancy, User $user)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => ['required', 'string'],
+            'notes' => ['nullable', 'string'],
+            'interview_date' => ['sometimes', 'date'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $data = $validator->validated();
+
+        $update = ApplyJob::where('vacancy_id', $vacancy->id)->where('servant_id', $user->id)->first();
+
+        try {
+            DB::transaction(function () use ($update, $data) {
+                if ($data['status'] == 'interview') {
+                    $update->update([
+                        'status' => $data['status'],
+                        'notes' => $data['notes'],
+                        'interview_date' => $data['interview_date'],
+                    ]);
+                } else {
+                    $update->update([
+                        'status' => $data['status'],
+                        'notes' => $data['notes'],
+                    ]);
+                }
+            });
+
+            return redirect()->back()->with('success', 'Berhasil memproses pelamar!');
+        }
+        catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
+    public function uploadContract(Request $request, Vacancy $vacancy, User $user)
+    {
+        $request->validate([
+            'file_contract' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        try {
+            $applyJob = ApplyJob::where('vacancy_id', $vacancy->id)
+                ->where('servant_id', $user->id)
+                ->first();
+
+            $directory = "contracts/vacancy_{$vacancy->name}";
+            $fileName = "contract_{$user->name}." . $request->file('file_contract')->getClientOriginalExtension();
+
+            if (!Storage::exists($directory)) {
+                Storage::makeDirectory($directory);
+            }
+
+            if ($applyJob->file_contract && Storage::exists($applyJob->file_contract)) {
+                Storage::delete($applyJob->file_contract);
+            }
+
+            $path = $request->file('file_contract')->storeAs($directory, $fileName);
+
+            $applyJob->update([
+                'status' => 'accepted',
+                'file_contract' => $path,
+            ]);
+
+            return redirect()->back()->with('success', 'File kontrak berhasil diunggah.');
+
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengunggah file kontrak: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadContract($applyJobId)
+    {
+        try {
+            $applyJob = ApplyJob::findOrFail($applyJobId);
+
+            if ($applyJob->file_contract && Storage::exists($applyJob->file_contract)) {
+                return Storage::download($applyJob->file_contract);
+            }
+
+            return redirect()->back()->with('error', 'File kontrak tidak ditemukan.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 }

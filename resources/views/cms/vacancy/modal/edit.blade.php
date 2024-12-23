@@ -85,8 +85,6 @@
                     toolbar: [
                         ['font', ['bold', 'italic', 'underline', 'clear']],
                         ['para', ['ul']],
-                        ['table', ['table']],
-                        ['insert', ['link', 'picture', 'video']],
                     ]
                 });
 
@@ -97,8 +95,6 @@
                     toolbar: [
                         ['font', ['bold', 'italic', 'underline', 'clear']],
                         ['para', ['ul']],
-                        ['table', ['table']],
-                        ['insert', ['link', 'picture', 'video']],
                     ]
                 });
 
@@ -109,8 +105,6 @@
                     toolbar: [
                         ['font', ['bold', 'italic', 'underline', 'clear']],
                         ['para', ['ul']],
-                        ['table', ['table']],
-                        ['insert', ['link', 'picture', 'video']],
                     ]
                 });
             });

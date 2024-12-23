@@ -4,7 +4,7 @@
     <!-- Page Heading -->
     <div class="d-flex justify-content-between align-items-baseline">
         <h1 class="h3 mb-4 text-gray-800">Detail Pembantu</h1>
-        <a href="{{ route('all-servant') }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
+        <a href="{{ url()->previous() }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
     </div>
 
     <div class="row mb-4">

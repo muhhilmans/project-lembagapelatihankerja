@@ -61,8 +61,8 @@
 
     @hasrole('superadmin|admin|pembantu')
     <!-- Nav Item - Cari Lowongan -->
-    <li class="nav-item">
-        <a class="nav-link" href="#">
+    <li class="nav-item {{ Route::is('all-vacancy', 'show-vacancy') ? 'active' : '' }}">
+        <a class="nav-link {{ Route::is('all-vacancy', 'show-vacancy') ? 'active' : '' }}" href="{{ route('all-vacancy')}}">
             <i class="fas fa-fw fa-search"></i>
             <span>Cari Lowongan</span></a>
     </li>
@@ -77,8 +77,8 @@
     </li>
 
     <!-- Nav Item - Pembantu -->
-    <li class="nav-item {{ Route::is('all-servant') ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('all-servant') }}">
+    <li class="nav-item {{ Route::is('all-servant', 'show-servant') ? 'active' : '' }}">
+        <a class="nav-link {{ Route::is('all-servant', 'show-servant') ? 'active' : '' }}" href="{{ route('all-servant') }}">
             <i class="fas fa-fw fa-user-tie"></i>
             <span>Pembantu</span></a>
     </li>

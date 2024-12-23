@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->text('requirements');
-            $table->text('benefits');
+            $table->text('benefits')->nullable();
             $table->date('closing_date');
             $table->boolean('status')->default(true);
             $table->timestamps();

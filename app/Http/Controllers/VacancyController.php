@@ -40,7 +40,7 @@ class VacancyController extends Controller
             'user_id' => ['required', 'exists:users,id'],
             'description' => ['required'],
             'requirements' => ['required'],
-            'benefits' => ['required'],
+            'benefits' => ['sometimes'],
         ]);
 
         if ($validator->fails()) {
@@ -96,7 +96,7 @@ class VacancyController extends Controller
             'user_id' => ['required', 'exists:users,id'],
             'description' => ['required'],
             'requirements' => ['required'],
-            'benefits' => ['required'],
+            'benefits' => ['sometimes'],
         ]);
 
         if ($validator->fails()) {

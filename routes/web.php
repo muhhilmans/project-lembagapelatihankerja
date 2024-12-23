@@ -32,6 +32,9 @@ Route::middleware(['auth'])->group(function () {
 
     require __DIR__.'/role/admin.php';
     require __DIR__.'/role/employe.php';
+    require __DIR__.'/role/servant.php';
+    
+    Route::get('contract/download/{applyJob}', [UtilityController::class, 'downloadContract'])->name('contract.download');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

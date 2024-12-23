@@ -71,4 +71,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Vacancy::class, 'user_id');
     }
+
+    public function applyJobs()
+    {
+        return $this->hasMany(ApplyJob::class, 'servant_id');
+    }
 }
