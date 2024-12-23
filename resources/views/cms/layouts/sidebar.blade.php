@@ -70,8 +70,8 @@
 
     @hasrole('superadmin|admin|majikan')
     <!-- Nav Item - Lowongan -->
-    <li class="nav-item">
-        <a class="nav-link" href="#">
+    <li class="nav-item {{ Route::is('vacancies.*') ? 'active' : '' }}">
+        <a class="nav-link {{ Route::is('vacancies.*') ? 'active' : '' }}" href="{{ route('vacancies.index') }}">
             <i class="fas fa-fw fa-file"></i>
             <span>Lowongan</span></a>
     </li>

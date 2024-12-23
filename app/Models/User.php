@@ -66,4 +66,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ServantSkill::class, 'user_id');
     }
+
+    public function vacancies()
+    {
+        return $this->hasMany(Vacancy::class, 'user_id');
+    }
 }
