@@ -3,13 +3,6 @@
 @section('content')
     <!-- Page Heading -->
     <h1 class="h3 mb-4 text-gray-800">Kelola Profesi</h1>
-    @if (session('error'))
-        <h5 class="text-danger">{{ session('error') }}</h5>
-    @endif
-
-    @if (session('success'))
-        <h5 class="text-success">{{ session('success') }}</h5>
-    @endif
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">

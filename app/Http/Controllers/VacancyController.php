@@ -7,6 +7,7 @@ use App\Models\Vacancy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class VacancyController extends Controller
 {
@@ -44,7 +45,7 @@ class VacancyController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->route('vacancies.index')->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -62,7 +63,8 @@ class VacancyController extends Controller
                 ]);
             });
 
-            return redirect()->route('vacancies.index')->with('success', 'Lowongan berhasil ditambahkan!');
+            Alert::success('Berhasil', 'Lowongan berhasil ditambahkan!');
+            return redirect()->route('vacancies.index');
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -100,7 +102,7 @@ class VacancyController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->route('vacancies.index')->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -117,7 +119,8 @@ class VacancyController extends Controller
                 ]);
             });
 
-            return redirect()->route('vacancies.index')->with('success', 'Lowongan berhasil diperbarui!');
+            Alert::success('Berhasil', 'Lowongan berhasil diperbarui!');
+            return redirect()->route('vacancies.index');
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -133,6 +136,14 @@ class VacancyController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $data = Vacancy::findOrFail($id);
+
+        if ($data->applyJobs->count() > 0) {
+            return redirect()->route('vacancies.index')->with('toast_error', 'Lowongan masih digunakan oleh pelamar!');
+        }
+
+        $data->delete();
+
+        return redirect()->route('vacancies.index')->with('toast_success', 'Lowongan berhasil dihapus!');
     }
 }

@@ -6,13 +6,6 @@
         <h1 class="h3 mb-4 text-gray-800">Detail Lowongan</h1>
         <a href="{{ route('vacancies.index') }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
     </div>
-    @if (session('error'))
-        <h5 class="text-danger">{{ session('error') }}</h5>
-    @endif
-
-    @if (session('success'))
-        <h5 class="text-success">{{ session('success') }}</h5>
-    @endif
 
     <div class="card shadow">
         <div class="card-header">

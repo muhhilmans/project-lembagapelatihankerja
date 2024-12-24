@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class ProfessionController extends Controller
 {
@@ -30,7 +31,7 @@ class ProfessionController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->route('professions.index')->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -42,7 +43,8 @@ class ProfessionController extends Controller
                 ]);
             });
 
-            return redirect()->route('professions.index')->with('success', 'Profesi berhasil ditambahkan!');
+            Alert::success('Berhasil', 'Profesi berhasil ditambahkan!');
+            return redirect()->route('professions.index');
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -65,7 +67,7 @@ class ProfessionController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->route('professions.index')->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -77,7 +79,8 @@ class ProfessionController extends Controller
                 ]);
             });
 
-            return redirect()->route('professions.index')->with('success', 'Profesi berhasil diperbarui!');
+            Alert::success('Berhasil', 'Profesi berhasil diperbarui!');
+            return redirect()->route('professions.index');
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -96,7 +99,7 @@ class ProfessionController extends Controller
         $data = Profession::findOrFail($request->data_id);
 
         if ($data->servant()->count() > 0) {
-            return redirect()->route('professions.index')->with('error', 'Profesi masih digunakan oleh pembantu!');
+            return redirect()->route('professions.index')->with('toast_error', 'Profesi masih digunakan oleh pembantu!');
         }
 
         $data->delete();

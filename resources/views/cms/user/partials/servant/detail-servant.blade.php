@@ -12,13 +12,6 @@
             <a href="{{ route('users-servant.index') }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
         </div>
     </div>
-    @if (session('error'))
-        <h5 class="text-danger">{{ session('error') }}</h5>
-    @endif
-
-    @if (session('success'))
-        <h5 class="text-success">{{ session('success') }}</h5>
-    @endif
 
     <div class="row mb-4">
         <div class="col-lg-4 mb-3 mb-lg-0">

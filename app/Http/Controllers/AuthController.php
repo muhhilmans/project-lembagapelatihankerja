@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class AuthController extends Controller
 {
@@ -53,11 +54,14 @@ class AuthController extends Controller
                 }
             } else {
                 Auth::logout();
-                return back()->with('error', 'Akun belum aktif! Silahkan hubungi Admin..');
+
+                Alert::error('Akun belum aktif!', 'Silahkan hubungi Admin..');
+                return redirect()->back();
             }
         }
 
-        return back()->with('error', 'Akun yang dimasukkan salah!');
+        Alert::error('Gagal!', 'Akun yang dimasukkan salah!');
+        return redirect()->back();
     }
 
     public function logout(Request $request)
@@ -67,6 +71,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        Alert::success('Berhasil!', 'Anda berhasil logout!');
         return redirect()->to('/');
     }
 }

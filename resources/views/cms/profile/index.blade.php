@@ -7,13 +7,6 @@
         <a href="{{ route('profile.edit', $data->id) }}" class="btn btn-warning mr-1"><i
                 class="fas fa-fw fa-user-edit"></i></a>
     </div>
-    @if (session('error'))
-        <h5 class="text-danger">{{ session('error') }}</h5>
-    @endif
-
-    @if (session('success'))
-        <h5 class="text-success">{{ session('success') }}</h5>
-    @endif
 
     @if ($data->roles->first()->name === 'pembantu')
         @include('cms.profile.partial.servant')

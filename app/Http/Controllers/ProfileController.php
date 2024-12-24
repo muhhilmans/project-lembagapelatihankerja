@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class ProfileController extends Controller
 {
@@ -68,9 +69,7 @@ class ProfileController extends Controller
         ]);
         
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->route('profile', $user->id)->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -128,7 +127,8 @@ class ProfileController extends Controller
                 ]);
             });
     
-            return redirect()->route('profile', $user->id)->with('success', 'Profile berhasil diperbarui!');
+            Alert::success('Berhasil', 'Profile berhasil diperbarui!');
+            return redirect()->route('profile', $user->id);
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -149,9 +149,7 @@ class ProfileController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->route('profile', $user->id)->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -165,7 +163,8 @@ class ProfileController extends Controller
                 ]);
             });
 
-            return redirect()->route('profile', $user->id)->with('success', 'Keahlian berhasil ditambahkan!');
+            Alert::success('Berhasil', 'Keahlian berhasil ditambahkan!');
+            return redirect()->route('profile', $user->id);
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -187,9 +186,7 @@ class ProfileController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->route('profile', $user->id)->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -202,7 +199,8 @@ class ProfileController extends Controller
                 ]);
             });
 
-            return redirect()->route('profile', $user->id)->with('success', 'Keahlian berhasil diperbarui!');
+            Alert::success('Berhasil', 'Keahlian berhasil diperbarui!');
+            return redirect()->route('profile', $user->id);
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -220,7 +218,7 @@ class ProfileController extends Controller
 
         $skill->delete();
 
-        return redirect()->route('profile', $user->id)->with('success', 'Keahlian berhasil dihapus!');
+        return redirect()->route('profile', $user->id)->with('toast_success', 'Keahlian berhasil dihapus!');
     }
 
     public function updateEmploye(Request $request, string $id)
@@ -236,9 +234,7 @@ class ProfileController extends Controller
         ]);
         
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->route('profile', $user->id)->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -254,6 +250,7 @@ class ProfileController extends Controller
             'address' => $data['address']
         ]);
 
-        return redirect()->route('profile', $user->id)->with('success', 'Profile berhasil diperbarui!');
+        Alert::success('Berhasil', 'Profile berhasil diperbarui!');
+        return redirect()->route('profile', $user->id);
     }
 }

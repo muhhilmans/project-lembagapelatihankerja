@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class EmployeController extends Controller
 {
@@ -52,7 +53,7 @@ class EmployeController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return back()->with('error', $validator->errors());
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         try {
@@ -75,9 +76,10 @@ class EmployeController extends Controller
                 ]);
             });
             if ($store) {
+                Alert::success('Berhasil!', 'Majikan berhasil ditambahkan!');
                 return redirect()->route('users-employe.index')->with('success', 'Majikan berhasil ditambahkan!');
             } else {
-                return back()->with('error', 'Users Majikan gagal ditambahkan!');
+                return back()->with('toast_error', 'Users Majikan gagal ditambahkan!');
             }
         } catch (\Throwable $th) {
             $data = [
@@ -87,22 +89,6 @@ class EmployeController extends Controller
 
             return view('error', compact('data'));
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
     }
 
     /**
@@ -121,9 +107,7 @@ class EmployeController extends Controller
         ]);
         
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -139,7 +123,8 @@ class EmployeController extends Controller
             'address' => $data['address']
         ]);
 
-        return redirect()->route('users-employe.index')->with('success', 'Majikan berhasil diperbarui!');
+        Alert::success('Berhasil!', 'Majikan berhasil diperbarui!');
+        return redirect()->route('users-employe.index');
     }
 
     /**
@@ -149,8 +134,13 @@ class EmployeController extends Controller
     {
         $user = User::findOrFail($request->user_id);
 
+        if ($user->vacancies->count() > 0) {
+            return redirect()->route('users-employe.index')->with('toast_error', 'Majikan memiliki lowongan pekerjaan!');
+        }
+
         $user->delete();
 
-        return redirect()->route('users-employe.index')->with('success', 'Majikan berhasil dihapus!');
+        Alert::success('Berhasil!', 'Majikan berhasil dihapus!');
+        return redirect()->route('users-employe.index');
     }
 }

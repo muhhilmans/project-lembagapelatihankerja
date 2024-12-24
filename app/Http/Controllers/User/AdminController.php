@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class AdminController extends Controller
 {
@@ -50,9 +51,7 @@ class AdminController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -73,23 +72,8 @@ class AdminController extends Controller
             $user->assignRole('admin');
         }
 
-        return redirect()->route('users-admin.index')->with('success', 'User berhasil ditambahkan!');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        Alert::success('Berhasil!', 'User berhasil ditambahkan!');
+        return redirect()->route('users-admin.index');
     }
 
     /**
@@ -106,9 +90,7 @@ class AdminController extends Controller
         ]);
         
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -128,7 +110,8 @@ class AdminController extends Controller
             $user->syncRoles('admin');
         }
 
-        return redirect()->route('users-admin.index')->with('success', 'User berhasil diperbarui!');
+        Alert::success('Berhasil!', 'User berhasil diperbarui!');
+        return redirect()->route('users-admin.index');
     }
 
     /**
@@ -140,6 +123,7 @@ class AdminController extends Controller
 
         $user->delete();
 
-        return redirect()->route('users-admin.index')->with('success', 'User berhasil dihapus!');
+        Alert::success('Berhasil!', 'User berhasil dihapus!');
+        return redirect()->route('users-admin.index');
     }
 }

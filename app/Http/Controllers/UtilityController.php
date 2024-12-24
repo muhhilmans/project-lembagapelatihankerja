@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use Exception;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class UtilityController extends Controller
 {
@@ -76,7 +77,7 @@ class UtilityController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -89,7 +90,8 @@ class UtilityController extends Controller
                 ]);
             });
 
-            return redirect()->back()->with('success', 'Berhasil mengirimkan lamaran!');
+            Alert::success('Berhasil', 'Berhasil mengirimkan lamaran!');
+            return redirect()->back();
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -109,7 +111,7 @@ class UtilityController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -132,7 +134,8 @@ class UtilityController extends Controller
                 }
             });
 
-            return redirect()->back()->with('success', 'Berhasil memproses pelamar!');
+            Alert::success('Berhasil', 'Berhasil memproses pelamar!');
+            return redirect()->back();
         }
         catch (\Throwable $th) {
             $data = [
@@ -173,10 +176,11 @@ class UtilityController extends Controller
                 'file_contract' => $path,
             ]);
 
-            return redirect()->back()->with('success', 'File kontrak berhasil diunggah.');
+            Alert::success('Berhasil', 'File kontrak berhasil diunggah.');
+            return redirect()->back();
 
         } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Gagal mengunggah file kontrak: ' . $e->getMessage());
+            return redirect()->back()->with('toast_error', 'Gagal mengunggah file kontrak: ' . $e->getMessage());
         }
     }
 
@@ -189,9 +193,9 @@ class UtilityController extends Controller
                 return Storage::download($applyJob->file_contract);
             }
 
-            return redirect()->back()->with('error', 'File kontrak tidak ditemukan.');
+            return redirect()->back()->with('toast_error', 'File kontrak tidak ditemukan.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->back()->with('toast_error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 }

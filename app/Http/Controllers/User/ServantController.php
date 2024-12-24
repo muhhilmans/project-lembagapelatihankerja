@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class ServantController extends Controller
 {
@@ -47,7 +48,7 @@ class ServantController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
+            return back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         try {
@@ -69,9 +70,10 @@ class ServantController extends Controller
                 ]);
             });
             if ($store) {
-                return redirect()->route('users-servant.index')->with('success', 'Pembantu berhasil ditambahkan!');
+                Alert::success('Berhasil!', 'Pembantu berhasil ditambahkan!');
+                return redirect()->route('users-servant.index');
             } else {
-                return back()->with('error', 'Pembantu gagal ditambahkan!');
+                return back()->with('toast_error', 'Pembantu gagal ditambahkan!');
             }
         } catch (\Throwable $th) {
             $data = [
@@ -142,9 +144,7 @@ class ServantController extends Controller
         ]);
         
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -203,7 +203,8 @@ class ServantController extends Controller
                 ]);
             });
     
-            return redirect()->route('users-servant.show', $user->id)->with('success', 'Pembantu berhasil diperbarui!');
+            Alert::success('Berhasil!', 'Pembantu berhasil diperbarui!');
+            return redirect()->route('users-servant.show', $user->id);
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -221,9 +222,14 @@ class ServantController extends Controller
     {
         $user = User::findOrFail($request->user_id);
 
+        if ($user->applyJobs->count() > 0) {
+            return redirect()->route('users-servant.index')->with('toast_error', 'Pembantu memiliki lamaran pekerjaan!');
+        }
+
         $user->delete();
 
-        return redirect()->route('users-servant.index')->with('success', 'Pembantu berhasil dihapus!');
+        Alert::success('Berhasil!', 'Pembantu berhasil dihapus!');
+        return redirect()->route('users-servant.index');
     }
 
     public function changeStatus(Request $request)
@@ -235,7 +241,8 @@ class ServantController extends Controller
 
         $statusMessage = $user->is_active == 1 ? 'Diaktifkan' : 'Dinonaktifkan';
 
-        return redirect()->route('users-servant.index')->with('success', 'Pembantu Berhasil ' . $statusMessage);
+        Alert::success('Berhasil!', 'Pembantu berhasil ' . $statusMessage);
+        return redirect()->route('users-servant.index');
     }
 
     public function storeSkill(Request $request, string $id): RedirectResponse
@@ -248,9 +255,7 @@ class ServantController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -264,7 +269,8 @@ class ServantController extends Controller
                 ]);
             });
 
-            return redirect()->route('users-servant.show', $user->id)->with('success', 'Keahlian berhasil ditambahkan!');
+            Alert::success('Berhasil', 'Keahlian berhasil ditambahkan!');
+            return redirect()->route('users-servant.show', $user->id);
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -286,9 +292,7 @@ class ServantController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
@@ -301,7 +305,8 @@ class ServantController extends Controller
                 ]);
             });
 
-            return redirect()->route('users-servant.show', $user->id)->with('success', 'Keahlian berhasil diperbarui!');
+            Alert::success('Berhasil', 'Keahlian berhasil diperbarui!');
+            return redirect()->route('users-servant.show', $user->id);
         } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
@@ -319,6 +324,7 @@ class ServantController extends Controller
 
         $skill->delete();
 
-        return redirect()->route('users-servant.show', $user->id)->with('success', 'Keahlian berhasil dihapus!');
+        Alert::success('Berhasil', 'Keahlian berhasil dihapus!');
+        return redirect()->route('users-servant.show', $user->id);
     }
 }
