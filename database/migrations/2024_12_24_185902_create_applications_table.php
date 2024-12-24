@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('apply_jobs', function (Blueprint $table) {
+        Schema::create('applications', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('servant_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreignUuid('vacancy_id')->references('id')->on('vacancies')->onDelete('cascade');
+            $table->foreignUuid('vacancy_id')->nullable()->references('id')->on('vacancies')->onDelete('cascade');
+            $table->foreignUuid('employe_id')->nullable()->references('id')->on('users')->onDelete('cascade');
             $table->enum('status', ['pending', 'interview', 'accepted', 'rejected'])->default('pending');
             $table->text('notes')->nullable();
             $table->date('interview_date')->nullable();
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('apply_jobs');
+        Schema::dropIfExists('applications');
     }
 };

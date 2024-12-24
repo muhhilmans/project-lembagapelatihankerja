@@ -1,17 +1,39 @@
-<div class="modal fade" id="acceptModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="hireModal-{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Proses Pelamar</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Kerjakan Pembantu</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('vacancies.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
+            <form method="POST" action="{{ route('hire-servant', $data->id) }}">
                 @csrf
-                @method('PUT')
                 <div class="modal-body text-left">
                     <input type="text" name="status" value="interview" hidden>
+
+                    @if (auth()->user()->hasRole('majikan'))
+                        <input type="text" name="employe_id" value="{{ auth()->user()->id }}" hidden>
+                    @else
+                        <div class="form-group">
+                            <label for="employe_id">Majikan <span class="text-danger">*</span></label>
+                            <select class="form-control" id="employe_id" name="employe_id" required>
+                                <option selected disabled>Pilih Majikan...</option>
+                                @foreach ($employes as $employe)
+                                    @php
+                                        $applicationExists = \App\Models\Application::where('servant_id', $data->id)
+                                            ->where('employe_id', $employe->id)
+                                            ->where('status', 'interview')
+                                            ->exists();
+                                    @endphp
+                                    @if (!$applicationExists)
+                                        <option value="{{ $employe->id }}">{{ $employe->name }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
 
                     <div class="form-group">
                         <label for="interview_date">Tanggal Interview <span class="text-danger">*</span></label>
@@ -35,7 +57,7 @@
 @push('custom-script')
     <script>
         $(document).ready(function() {
-            $('#acceptModal-{{ $d->id }}').on('shown.bs.modal', function () {
+            $('#hireModal-{{ $data->id }}').on('shown.bs.modal', function() {
                 $('#notes-editor').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
@@ -47,7 +69,7 @@
                 });
             });
 
-            $('#acceptModal-{{ $d->id }}').on('hidden.bs.modal', function () {
+            $('#hireModal-{{ $data->id }}').on('hidden.bs.modal', function() {
                 $('#notes-editor').summernote('destroy');
             });
         });

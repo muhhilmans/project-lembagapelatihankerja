@@ -4,7 +4,22 @@
     <!-- Page Heading -->
     <div class="d-flex justify-content-between align-items-baseline">
         <h1 class="h3 mb-4 text-gray-800">Detail Pembantu</h1>
-        <a href="{{ url()->previous() }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
+        <div class="d-flex">
+            @php
+                $applicationExists = \App\Models\Application::where('servant_id', $data->id)
+                    ->where('employe_id', auth()->user()->id)
+                    ->where('status', 'interview')
+                    ->exists();
+            @endphp
+
+            @if (!$applicationExists)
+                <a href="#" class="btn btn-primary mr-1" data-toggle="modal"
+                    data-target="#hireModal-{{ $data->id }}">Kerjakan</a>
+                @include('cms.servant.modal.hire')
+            @endif
+
+            <a href="{{ url()->previous() }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
+        </div>
     </div>
 
     <div class="row mb-4">
@@ -158,7 +173,10 @@
                             <tr>
                                 <th scope="row">Alamat</th>
                                 <td>:</td>
-                                <td>{{ $data->servantDetails->address }} RT {{ $data->servantDetails->rt }} RW {{ $data->servantDetails->rw }}, {{ $data->servantDetails->village }}, {{ $data->servantDetails->district }}, {{ $data->servantDetails->regency }}, {{ $data->servantDetails->province }}</td>
+                                <td>{{ $data->servantDetails->address }} RT {{ $data->servantDetails->rt }} RW
+                                    {{ $data->servantDetails->rw }}, {{ $data->servantDetails->village }},
+                                    {{ $data->servantDetails->district }}, {{ $data->servantDetails->regency }},
+                                    {{ $data->servantDetails->province }}</td>
                             </tr>
                             <tr>
                                 <th scope="row">Pengalaman Kerja</th>
@@ -177,3 +195,11 @@
         </div>
     </div>
 @endsection
+
+@push('custom-style')
+    <link rel="stylesheet" href="{{ asset('assets/vendor/summernote/summernote-bs4.min.css') }}">
+@endpush
+
+@push('custom-script')
+    <script src="{{ asset('assets/vendor/summernote/summernote-bs4.min.js') }}"></script>
+@endpush

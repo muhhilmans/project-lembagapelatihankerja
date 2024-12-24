@@ -83,7 +83,7 @@
                     tabsize: 2,
                     height: 150,
                     toolbar: [
-                        ['font', ['bold', 'italic', 'underline', 'clear']],
+                        ['font', ['bold', 'italic', 'underline']],
                         ['para', ['ul']],
                     ]
                 });
@@ -93,7 +93,7 @@
                     tabsize: 2,
                     height: 150,
                     toolbar: [
-                        ['font', ['bold', 'italic', 'underline', 'clear']],
+                        ['font', ['bold', 'italic', 'underline']],
                         ['para', ['ul']],
                     ]
                 });
@@ -103,7 +103,7 @@
                     tabsize: 2,
                     height: 150,
                     toolbar: [
-                        ['font', ['bold', 'italic', 'underline', 'clear']],
+                        ['font', ['bold', 'italic', 'underline']],
                         ['para', ['ul']],
                     ]
                 });

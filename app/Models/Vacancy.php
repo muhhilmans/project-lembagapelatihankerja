@@ -28,8 +28,8 @@ class Vacancy extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function applyJobs()
+    public function applications()
     {
-        return $this->hasMany(ApplyJob::class, 'vacancy_id');
+        return $this->hasMany(Application::class, 'vacancy_id');
     }
 }

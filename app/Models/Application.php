@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ApplyJob extends Model
+class Application extends Model
 {
     use HasFactory, HasUuids;
 
@@ -16,6 +16,7 @@ class ApplyJob extends Model
     protected $fillable = [
         'servant_id',
         'vacancy_id',
+        'employe_id',
         'status',
         'notes',
         'interview_date',
@@ -30,5 +31,10 @@ class ApplyJob extends Model
     public function vacancy()
     {
         return $this->belongsTo(Vacancy::class, 'vacancy_id');
+    }
+
+    public function employe()
+    {
+        return $this->belongsTo(User::class, 'employe_id');
     }
 }

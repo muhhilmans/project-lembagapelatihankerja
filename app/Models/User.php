@@ -72,8 +72,13 @@ class User extends Authenticatable
         return $this->hasMany(Vacancy::class, 'user_id');
     }
 
-    public function applyJobs()
+    public function appServant()
     {
-        return $this->hasMany(ApplyJob::class, 'servant_id');
+        return $this->hasMany(Application::class, 'servant_id');
+    }
+
+    public function appEmploye()
+    {
+        return $this->hasMany(Application::class, 'employe_id');
     }
 }
