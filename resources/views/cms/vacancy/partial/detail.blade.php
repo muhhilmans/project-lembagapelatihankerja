@@ -103,7 +103,7 @@
                                             </li>
                                         </ul>
                                         <p class="card-text text-muted">
-                                            {{ $d->servant->servantDetails->description == '-' ? 'Belum ada deskripsi' : \Illuminate\Support\Str::limit($d->servant->servantDetails->description, 100, '...') }}
+                                            {{ \Illuminate\Support\Str::limit(optional($d->servant->servantDetails)->description ?? 'Belum ada deskripsi', 100, '...') }}
                                         </p>
                                     </div>
 
