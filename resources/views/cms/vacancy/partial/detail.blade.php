@@ -76,7 +76,7 @@
                                             </li>
                                             <li class="mb-2">
                                                 <i class="fas fa-praying-hands"></i>
-                                                <strong>Agama:</strong> 
+                                                <strong>Agama:</strong>
                                                 @if (optional($d->servant->servantDetails)->religion)
                                                     {{ $d->servant->servantDetails->religion }}
                                                 @else
@@ -86,15 +86,19 @@
                                             <li class="mb-2">
                                                 <i class="fas fa-user-tie"></i>
                                                 <strong>Profesi:</strong>
-                                                {{ $d->servant->servantDetails->profession->name }}
+                                                @if (optional($d->servant->servantDetails)->profession->name)
+                                                    {{ $d->servant->servantDetails->profession->name }}
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
                                             </li>
                                             <li>
                                                 <i class="fas fa-briefcase"></i>
-                                                <strong>Pengalaman:</strong> 
+                                                <strong>Pengalaman:</strong>
                                                 @if (optional($d->servant->servantDetails)->experience)
                                                     {{ $d->servant->servantDetails->experience }}
                                                 @else
-                                                    <span class="text-muted">-</span>                                                    
+                                                    <span class="text-muted">-</span>
                                                 @endif
                                             </li>
                                         </ul>
