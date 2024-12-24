@@ -39,7 +39,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/profile/{id}', [ProfileController::class, 'profile'])->name('profile');
     Route::get('/profile/{id}/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+
     Route::put('/profile/{id}/update-servant', [ProfileController::class, 'updateServant'])->name('profile-servant.update');
+    Route::post('/profile/{id}/store-skill', [ProfileController::class, 'storeSkill'])->name('profile-servant.store-skill');
+    Route::put('/profile/{id}/update-skill/{skill_id}', [ProfileController::class, 'updateSkill'])->name('profile-servant.update-skill');
+    Route::delete('/profile/{id}/destroy-skill/{skill_id}', [ProfileController::class, 'destroySkill'])->name('profile-servant.destroy-skill');
+    
+    Route::put('/profile/{id}/update-employe', [ProfileController::class, 'updateEmploye'])->name('profile-employe.update');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

@@ -18,8 +18,6 @@
     @if ($data->roles->first()->name === 'pembantu')
         @include('cms.profile.partial.servant')
     @else
-        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Porro, pariatur dolorum. Repudiandae iusto voluptatum
-        maiores commodi earum voluptates amet cumque excepturi, necessitatibus sunt ex, vero velit numquam aliquid ipsa
-        iste.
+        @include('cms.profile.partial.employe')
     @endif
 @endsection

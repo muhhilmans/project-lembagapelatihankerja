@@ -189,9 +189,6 @@
                                 <option value="D3"
                                     {{ $data->servantDetails->last_education == 'D3' ? 'selected' : '' }}>
                                     D3</option>
-                                <option value="D4"
-                                    {{ $data->servantDetails->last_education == 'D4' ? 'selected' : '' }}>
-                                    D4</option>
                                 <option value="S1"
                                     {{ $data->servantDetails->last_education == 'S1' ? 'selected' : '' }}>
                                     S1</option>

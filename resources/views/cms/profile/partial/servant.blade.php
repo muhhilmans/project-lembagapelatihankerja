@@ -44,15 +44,13 @@
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <h1 class="h5 font-weight-bold">Keahlian</h1>
-                    @hasrole('superadmin|admin')
                         <a class="btn btn-primary mb-2 mb-lg-0" href="#" data-toggle="modal"
                             data-target="#createSkillModal-{{ $data->id }}">
                             <i class="fas fa-plus"></i>
                         </a>
-                        @include('cms.data.partials.servant.skill.create', [
+                        @include('cms.profile.partial.skill.create', [
                             'data' => $data,
                         ])
-                    @endhasrole
                 </div>
             </div>
             <div class="card-body">
@@ -64,7 +62,7 @@
                                     data-target="#updateSkillModal-{{ $dataSkill->id }}">
                                     {{ $dataSkill->skill }} ({{ $dataSkill->level }})
                                 </a>
-                                @include('cms.data.partials.servant.skill.edit', [
+                                @include('cms.profile.partial.skill.edit', [
                                     'data' => $data,
                                 ])
                             </li>

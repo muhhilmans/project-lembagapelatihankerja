@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Profession;
+use App\Models\ServantSkill;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -29,7 +31,7 @@ class ProfileController extends Controller
         if ($data->roles->first()->name == 'pembantu') {
             return view('cms.profile.partial.edit-servant', compact(['data', 'professions']));
         } else {
-            return view('cms.profile.partial.edit-employe', compact(['data', 'professions']));
+            return view('cms.profile.partial.edit-employe', compact('data'));
         }
     }
     
@@ -135,5 +137,123 @@ class ProfileController extends Controller
 
             return view('cms.error', compact('data'));
         }
+    }
+
+    public function storeSkill(Request $request, string $id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        
+        $validator = Validator::make($request->all(), [
+            'skill' => ['required', 'string', 'max:255'],
+            'level' => ['required', 'string', 'max:255'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::transaction(function () use ($data, $user) {
+                ServantSkill::create([
+                    'user_id' => $user->id,
+                    'skill' => $data['skill'],
+                    'level' => $data['level'],
+                ]);
+            });
+
+            return redirect()->route('profile', $user->id)->with('success', 'Keahlian berhasil ditambahkan!');
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
+    public function updateSkill(Request $request, string $id, string $skill_id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        $skill = ServantSkill::findOrFail($skill_id);
+        
+        $validator = Validator::make($request->all(), [
+            'skill' => ['required', 'string', 'max:255'],
+            'level' => ['required', 'string', 'max:255'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::transaction(function () use ($data, $skill) {
+                $skill->update([
+                    'skill' => $data['skill'],
+                    'level' => $data['level'],
+                ]);
+            });
+
+            return redirect()->route('profile', $user->id)->with('success', 'Keahlian berhasil diperbarui!');
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
+    public function destroySkill(string $id, string $skill_id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        $skill = ServantSkill::findOrFail($skill_id);
+
+        $skill->delete();
+
+        return redirect()->route('profile', $user->id)->with('success', 'Keahlian berhasil dihapus!');
+    }
+
+    public function updateEmploye(Request $request, string $id)
+    {
+        $user = User::find($id);
+
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['sometimes', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id),],
+            'email' => ['sometimes', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id),],
+            'phone' => ['required', 'string', 'max:255'],
+            'address' => ['required', 'string', 'max:255'],
+        ]);
+        
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $data = $validator->validated();
+
+        $user->update([
+            'name' => $data['name'],
+            'username' => $data['username'],
+            'email' => $data['email'],
+        ]);
+
+        $user->employeDetails()->update([
+            'phone' => $data['phone'],
+            'address' => $data['address']
+        ]);
+
+        return redirect()->route('profile', $user->id)->with('success', 'Profile berhasil diperbarui!');
     }
 }
