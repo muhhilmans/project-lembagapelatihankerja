@@ -86,7 +86,7 @@
                                             <li class="mb-2">
                                                 <i class="fas fa-user-tie"></i>
                                                 <strong>Profesi:</strong>
-                                                @if (optional($d->servant->servantDetails)->profession->name)
+                                                @if (optional($d->servant->servantDetails)->profession && optional($d->servant->servantDetails->profession)->name)
                                                     {{ $d->servant->servantDetails->profession->name }}
                                                 @else
                                                     <span class="text-muted">-</span>
