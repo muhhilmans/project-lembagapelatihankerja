@@ -76,7 +76,12 @@
                                             </li>
                                             <li class="mb-2">
                                                 <i class="fas fa-praying-hands"></i>
-                                                <strong>Agama:</strong> {{ $d->servant->servantDetails->religion }}
+                                                <strong>Agama:</strong> 
+                                                @if (optional($d->servant->servantDetails)->religion)
+                                                    {{ $d->servant->servantDetails->religion }}
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
                                             </li>
                                             <li class="mb-2">
                                                 <i class="fas fa-user-tie"></i>
@@ -85,7 +90,12 @@
                                             </li>
                                             <li>
                                                 <i class="fas fa-briefcase"></i>
-                                                <strong>Pengalaman:</strong> {{ $d->servant->servantDetails->experience }}
+                                                <strong>Pengalaman:</strong> 
+                                                @if (optional($d->servant->servantDetails)->experience)
+                                                    {{ $d->servant->servantDetails->experience }}
+                                                @else
+                                                    <span class="text-muted">-</span>                                                    
+                                                @endif
                                             </li>
                                         </ul>
                                         <p class="card-text text-muted">
