@@ -70,4 +70,32 @@ class UtilityController extends Controller
 
         return view('cms.seek-vacancy.partial.detail', compact(['data', 'dataApplicants']));
     }
+
+    public function hireApplicant()
+    {
+        if (auth()->user()->roles->first()->name == 'majikan') {
+            $datas = Application::where('employe_id', auth()->user()->id)
+            ->whereNotNull('employe_id')
+            ->get();
+        } else {
+            $datas = Application::whereNotNull('employe_id')->get();
+        }
+
+        return view('cms.applicant.hire', compact('datas'));
+    }
+
+    public function indieApplicant()
+    {
+        if (auth()->user()->roles->first()->name == 'majikan') {
+            $datas = Application::whereHas('vacancy', function ($query) {
+                $query->where('employe_id', auth()->user()->id);
+            })
+            ->whereNotNull('vacancy_id')
+            ->get();
+        } else {
+            $datas = Application::whereNotNull('vacancy_id')->get();
+        }
+
+        return view('cms.applicant.independent', compact('datas'));
+    }
 }

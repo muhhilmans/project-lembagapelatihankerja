@@ -14,7 +14,7 @@
 
             @if (!$applicationExists)
                 <a href="#" class="btn btn-primary mr-1" data-toggle="modal"
-                    data-target="#hireModal-{{ $data->id }}">Kerjakan</a>
+                    data-target="#hireModal-{{ $data->id }}">Hire</a>
                 @include('cms.servant.modal.hire')
             @endif
 

@@ -66,9 +66,31 @@
             <i class="fas fa-fw fa-search"></i>
             <span>Cari Lowongan</span></a>
     </li>
+
+    <!-- Nav Item - Lamaran -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseApplication"
+            aria-expanded="true" aria-controls="collapseApplication">
+            <i class="fas fa-fw fa-file-alt"></i>
+            <span>Lamaran</span>
+        </a>
+        <div id="collapseApplication" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" href="#">Hire</a>
+                <a class="collapse-item" href="#">Mandiri</a>
+            </div>
+        </div>
+    </li>
     @endhasrole
 
     @hasrole('superadmin|admin|majikan')
+    <!-- Nav Item - Pembantu -->
+    <li class="nav-item {{ Route::is('all-servant', 'show-servant') ? 'active' : '' }}">
+        <a class="nav-link {{ Route::is('all-servant', 'show-servant') ? 'active' : '' }}" href="{{ route('all-servant') }}">
+            <i class="fas fa-fw fa-search"></i>
+            <span>Cari Pembantu</span></a>
+    </li>
+
     <!-- Nav Item - Lowongan -->
     <li class="nav-item {{ Route::is('vacancies.*') ? 'active' : '' }}">
         <a class="nav-link {{ Route::is('vacancies.*') ? 'active' : '' }}" href="{{ route('vacancies.index') }}">
@@ -76,11 +98,19 @@
             <span>Lowongan</span></a>
     </li>
 
-    <!-- Nav Item - Pembantu -->
-    <li class="nav-item {{ Route::is('all-servant', 'show-servant') ? 'active' : '' }}">
-        <a class="nav-link {{ Route::is('all-servant', 'show-servant') ? 'active' : '' }}" href="{{ route('all-servant') }}">
+    <!-- Nav Item - Pelamar -->
+    <li class="nav-item {{ Route::is('applicant-hire', 'applicant-indie') ? 'active' : '' }}">
+        <a class="nav-link {{ Route::is('applicant-hire', 'applicant-indie') ? '' : 'collapsed' }}" href="#" data-toggle="collapse" data-target="#collapseApplicant"
+            aria-expanded="{{ Route::is('applicant-hire', 'applicant-indie') ? 'true' : 'false' }}" aria-controls="collapseApplicant">
             <i class="fas fa-fw fa-user-tie"></i>
-            <span>Pembantu</span></a>
+            <span>Pelamar</span>
+        </a>
+        <div id="collapseApplicant" class="collapse {{ Route::is('applicant-hire', 'applicant-indie') ? 'show' : '' }}" aria-labelledby="headingApplicant" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item" href="{{ route('applicant-hire') }}">Hire</a>
+                <a class="collapse-item" href="{{ route('applicant-indie') }}">Mandiri</a>
+            </div>
+        </div>
     </li>
     @endhasrole
 

@@ -27,7 +27,7 @@ class ApplicationController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
-        
+
         $data = $validator->validated();
 
         try {
@@ -42,6 +42,76 @@ class ApplicationController extends Controller
             });
 
             Alert::success('Berhasil', 'Pembantu berhasil dipekerjakan!');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
+    public function hireContract(Request $request, string $id)
+    {
+        $request->validate([
+            'file_contract' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        try {
+            $data = Application::findOrFail($id);
+
+            $directory = "contracts/{$data->employe->name}";
+            $fileName = "contract_hire_{$data->servant->name}." . $request->file('file_contract')->getClientOriginalExtension();
+
+            if (!Storage::exists($directory)) {
+                Storage::makeDirectory($directory);
+            }
+
+            if ($data->file_contract && Storage::exists($data->file_contract)) {
+                Storage::delete($data->file_contract);
+            }
+
+            $path = $request->file('file_contract')->storeAs($directory, $fileName);
+
+            $data->update([
+                'status' => 'accepted',
+                'file_contract' => $path,
+            ]);
+
+            Alert::success('Berhasil', 'File kontrak berhasil diunggah.');
+            return redirect()->back();
+        } catch (Exception $e) {
+            return redirect()->back()->with('toast_error', 'Gagal mengunggah file kontrak: ' . $e->getMessage());
+        }
+    }
+
+    public function hireReject(Request $request, string $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => ['required', 'string'],
+            'notes' => ['nullable', 'string'],
+            'interview_date' => ['sometimes', 'date'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
+        }
+
+        $data = $validator->validated();
+
+        $update = Application::findOrFail($id);
+
+        try {
+            DB::transaction(function () use ($update, $data) {
+                $update->update([
+                    'status' => $data['status'],
+                    'notes' => $data['notes'],
+                ]);
+            });
+
+            Alert::success('Berhasil', 'Pelamar berhasil ditolak!');
             return redirect()->back();
         } catch (\Throwable $th) {
             $data = [
@@ -120,8 +190,7 @@ class ApplicationController extends Controller
 
             Alert::success('Berhasil', 'Berhasil memproses pelamar!');
             return redirect()->back();
-        }
-        catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             $data = [
                 'message' => $th->getMessage(),
                 'status' => 400
@@ -162,19 +231,20 @@ class ApplicationController extends Controller
 
             Alert::success('Berhasil', 'File kontrak berhasil diunggah.');
             return redirect()->back();
-
         } catch (Exception $e) {
             return redirect()->back()->with('toast_error', 'Gagal mengunggah file kontrak: ' . $e->getMessage());
         }
     }
 
-    public function downloadContract($applyJobId)
+    public function downloadContract($applicationId)
     {
         try {
-            $applyJob = Application::findOrFail($applyJobId);
+            $data = Application::findOrFail($applicationId);
 
-            if ($applyJob->file_contract && Storage::exists($applyJob->file_contract)) {
-                return Storage::download($applyJob->file_contract);
+            if ($data->file_contract && Storage::exists($data->file_contract)) {
+
+                Alert::success('Berhasil', 'File kontrak berhasil diunduh.');
+                return Storage::download($data->file_contract);
             }
 
             return redirect()->back()->with('toast_error', 'File kontrak tidak ditemukan.');
