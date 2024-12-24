@@ -1,0 +1,584 @@
+@extends('cms.layouts.main', ['title' => 'Edit Pembantu'])
+
+@section('content')
+    <!-- Page Heading -->
+    <div class="d-flex justify-content-between align-items-baseline">
+        <h1 class="h3 mb-4 text-gray-800">Edit Pembantu</h1>
+        <a href="{{ route('profile', $data->id) }}" class="btn btn-secondary"><i
+                class="fas fa-fw fa-arrow-left"></i></a>
+    </div>
+
+    <div class="card shadow">
+        <form action="{{ route('profile-servant.update', $data->id) }}" method="POST" enctype="multipart/form-data"
+            class="needs-validation">
+            @csrf
+            @method('PUT')
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="name">Nama <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                value="{{ old('name', $data->name) }}">
+                            @error('name')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                value="{{ old('email', $data->email) }}">
+                            @error('email')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="username">Username <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="username" name="username"
+                                value="{{ old('username', $data->username) }}">
+                            @error('username')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="place_of_birth">Tempat Lahir <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="place_of_birth" name="place_of_birth"
+                                value="{{ old('place_of_birth', $data->servantDetails->place_of_birth) }}">
+                            @error('place_of_birth')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date_of_birth">Tanggal Lahir <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth"
+                                value="{{ old('date_of_birth', $data->servantDetails->date_of_birth) }}">
+                            @error('date_of_birth')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Jenis Kelamin <span class="text-danger">*</span></label>
+                            <select class="custom-select" id="gender" name="gender" required>
+                                <option selected disabled>Pilih Jenis Kelamin...</option>
+                                <option value="male" {{ $data->servantDetails->gender == 'male' ? 'selected' : '' }}>
+                                    Laki-laki</option>
+                                <option value="female" {{ $data->servantDetails->gender == 'female' ? 'selected' : '' }}>
+                                    Perempuan</option>
+                            </select>
+                            @error('gender')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="religion">Agama <span class="text-danger">*</span></label>
+                            <select class="custom-select" id="religion" name="religion" required>
+                                <option selected disabled>Pilih Agama...</option>
+                                <option value="Islam" {{ $data->servantDetails->religion == 'Islam' ? 'selected' : '' }}>
+                                    Islam</option>
+                                <option value="Kristen"
+                                    {{ $data->servantDetails->religion == 'Kristen' ? 'selected' : '' }}>
+                                    Kristen</option>
+                                <option value="Katolik"
+                                    {{ $data->servantDetails->religion == 'Katolik' ? 'selected' : '' }}>Katolik
+                                </option>
+                                <option value="Hindu" {{ $data->servantDetails->religion == 'Hindu' ? 'selected' : '' }}>
+                                    Hindu</option>
+                                <option value="Buddha" {{ $data->servantDetails->religion == 'Buddha' ? 'selected' : '' }}>
+                                    Buddha
+                                </option>
+                                <option value="Konghucu"
+                                    {{ $data->servantDetails->religion == 'Konghucu' ? 'selected' : '' }}>
+                                    Konghucu</option>
+                                <option value="Lainnya"
+                                    {{ $data->servantDetails->religion == 'Lainnya' ? 'selected' : '' }}>Lainnya
+                                </option>
+                            </select>
+                            @error('religion')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="marital_status">Status Pernikahan <span class="text-danger">*</span></label>
+                            <select class="custom-select" id="marital_status" name="marital_status" required>
+                                <option selected disabled>Pilih Status Pernikahan...</option>
+                                <option value="married"
+                                    {{ $data->servantDetails->marital_status == 'married' ? 'selected' : '' }}>
+                                    Menikah</option>
+                                <option value="single"
+                                    {{ $data->servantDetails->marital_status == 'single' ? 'selected' : '' }}>
+                                    Lajang</option>
+                                <option value="divorced"
+                                    {{ $data->servantDetails->marital_status == 'divorced' ? 'selected' : '' }}>
+                                    Cerai</option>
+                            </select>
+                            @error('marital_status')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="children">Banyak Anak <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="children" name="children"
+                                value="{{ old('children', $data->servantDetails->children) }}">
+                            @error('children')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="profession_id">Profesi <span class="text-danger">*</span></label>
+                            <select class="custom-select" id="profession_id" name="profession_id" required>
+                                <option selected disabled>Pilih Profesi...</option>
+                                @foreach ($professions as $profession)
+                                    <option value="{{ $profession->id }}"
+                                        {{ $data->servantDetails->profession_id == $profession->id ? 'selected' : '' }}>
+                                        {{ $profession->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('profession_id')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="last_education">Pendidikan Terakhir <span class="text-danger">*</span></label>
+                            <select class="custom-select" id="last_education" name="last_education" required>
+                                <option selected disabled>Pilih Pendidikan Terakhir...</option>
+                                <option value="SD"
+                                    {{ $data->servantDetails->last_education == 'SD' ? 'selected' : '' }}>
+                                    SD/Sederajat</option>
+                                <option value="SMP"
+                                    {{ $data->servantDetails->last_education == 'SMP' ? 'selected' : '' }}>
+                                    SMP/Sederajat</option>
+                                <option value="SMA"
+                                    {{ $data->servantDetails->last_education == 'SMA' ? 'selected' : '' }}>
+                                    SMA/Sederajat</option>
+                                <option value="D1"
+                                    {{ $data->servantDetails->last_education == 'D1' ? 'selected' : '' }}>
+                                    D1</option>
+                                <option value="D2"
+                                    {{ $data->servantDetails->last_education == 'D2' ? 'selected' : '' }}>
+                                    D2</option>
+                                <option value="D3"
+                                    {{ $data->servantDetails->last_education == 'D3' ? 'selected' : '' }}>
+                                    D3</option>
+                                <option value="D4"
+                                    {{ $data->servantDetails->last_education == 'D4' ? 'selected' : '' }}>
+                                    D4</option>
+                                <option value="S1"
+                                    {{ $data->servantDetails->last_education == 'S1' ? 'selected' : '' }}>
+                                    S1</option>
+                                <option value="S2"
+                                    {{ $data->servantDetails->last_education == 'S2' ? 'selected' : '' }}>
+                                    S2</option>
+                                <option value="S3"
+                                    {{ $data->servantDetails->last_education == 'S3' ? 'selected' : '' }}>
+                                    S3</option>
+                            </select>
+                            @error('last_education')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Nomor Telepon <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="phone" name="phone"
+                                value="{{ old('phone', $data->servantDetails->phone) }}" required>
+                            @error('phone')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emergency_number">Nomor Darurat <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="emergency_number" name="emergency_number"
+                                value="{{ old('emergency_number', $data->servantDetails->emergency_number) }}" required>
+                            @error('emergency_number')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="address">Alamat <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="address" name="address"
+                                value="{{ old('address', $data->servantDetails->address) }}"
+                                placeholder="Isi dengan nama jalan/kampung sekarang..." required>
+                            @error('address')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-lg-6">
+                                <label for="rt">RT <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="rt" name="rt"
+                                    value="{{ old('rt', $data->servantDetails->rt) }}">
+                                @error('rt')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group col-lg-6">
+                                <label for="rw">RW <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="rw" name="rw"
+                                    value="{{ old('rw', $data->servantDetails->rw) }}">
+                                @error('rw')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-lg-6">
+                                <label for="province">Provinsi <span class="text-danger">*</span></label>
+                                <select name="province" id="province" class="custom-select" required>
+                                    <option selected disabled>Pilih Provinsi...</option>
+                                </select>
+                                @error('province')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group col-lg-6">
+                                <label for="regency">Kota/Kabupaten <span class="text-danger">*</span></label>
+                                <select name="regency" id="regency" class="custom-select" required>
+                                    <option selected disabled>Pilih Kota/Kabupaten...</option>
+                                </select>
+                                @error('regency')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-lg-6">
+                                <label for="district">Kecamatan <span class="text-danger">*</span></label>
+                                <select name="district" id="district" class="custom-select" required>
+                                    <option selected disabled>Pilih Kecamatan...</option>
+                                </select>
+                                @error('district')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group col-lg-6">
+                                <label for="village">Desa/Kelurahan <span class="text-danger">*</span></label>
+                                <select name="village" id="village" class="custom-select" required>
+                                    <option selected disabled>Pilih Desa/Kelurahan...</option>
+                                </select>
+                                @error('village')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="experience">Pengalaman Kerja <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="experience" name="experience"
+                                value="{{ old('experience', $data->servantDetails->experience) }}">
+                            @error('experience')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Deskripsi</label>
+                            <textarea class="form-control" id="description" name="description" rows="5"
+                                placeholder="Isi dengan deskripsi singkat pribadi..">{{ old('description', $data->servantDetails->description) }}</textarea>
+                            @error('description')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="photo">Foto</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="inpoPhoto">Upload</span>
+                                </div>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="photo" name="photo"
+                                        aria-describedby="inpoPhoto" accept="image/*">
+                                    <label class="custom-file-label" for="photo">Choose file</label>
+                                </div>
+                            </div>
+                            <div class="mt-3" id="photoPreviewContainer">
+                                @if (!empty($data->servantDetails->photo))
+                                    <img id="photoPreview"
+                                        src="{{ route('getImage', ['path' => 'photo', 'imageName' => $data->servantDetails->photo]) }}"
+                                        alt="Foto" class="img-fluid rounded" style="max-width: 100px;">
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="identity_card">Kartu Tanda Penduduk</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="inpoIdentityCard">Upload</span>
+                                </div>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="identity_card"
+                                        name="identity_card" aria-describedby="inpoIdentityCard" accept="image/*">
+                                    <label class="custom-file-label" for="identity_card">Choose file</label>
+                                </div>
+                            </div>
+                            <div class="mt-3" id="identityCardPreviewContainer">
+                                @if (!empty($data->servantDetails->identity_card))
+                                    <img id="identityCardPreview"
+                                        src="{{ route('getImage', ['path' => 'identity_card', 'imageName' => $data->servantDetails->identity_card]) }}"
+                                        alt="KTP" class="img-fluid rounded" style="max-width: 100px;">
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="family_card">Kartu Keluarga</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="inpoFamilyCard">Upload</span>
+                                </div>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="family_card" name="family_card"
+                                        aria-describedby="inpoFamilyCard" accept="image/*">
+                                    <label class="custom-file-label" for="family_card">Choose file</label>
+                                </div>
+                            </div>
+                            <div class="mt-3" id="familyCardPreviewContainer">
+                                @if (!empty($data->servantDetails->family_card))
+                                    <img id="familyCardPreview"
+                                        src="{{ route('getImage', ['path' => 'family_card', 'imageName' => $data->servantDetails->family_card]) }}"
+                                        alt="KK" class="img-fluid rounded" style="max-width: 100px;">
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <a href="{{ route('profile', $data->id) }}" class="btn btn-secondary">Batal</a>
+                <button class="btn btn-primary" type="submit">Simpan</button>
+            </div>
+        </form>
+    </div>
+@endsection
+
+@push('custom-script')
+    <script>
+        const dataVillage = "{{ optional($data->servantDetails)->village }}";
+        const dataDistrict = "{{ optional($data->servantDetails)->district }}";
+        const dataRegency = "{{ optional($data->servantDetails)->regency }}";
+        const dataProvince = "{{ optional($data->servantDetails)->province }}";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            function updatePreview(inputId, previewContainerId) {
+                const inputFile = document.getElementById(inputId);
+                const previewContainer = document.getElementById(previewContainerId);
+
+                inputFile.addEventListener('change', function() {
+                    const file = this.files[0];
+
+                    const label = this.nextElementSibling;
+                    label.textContent = file ? file.name : 'Choose file';
+
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            let previewImage = previewContainer.querySelector('img');
+                            if (!previewImage) {
+                                previewImage = document.createElement('img');
+                                previewImage.className = 'img-fluid rounded';
+                                previewImage.style.maxWidth = '100px';
+                                previewContainer.appendChild(previewImage);
+                            }
+                            previewImage.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        previewContainer.innerHTML = '';
+                    }
+                });
+            }
+
+            // Inisialisasi pratinjau gambar untuk setiap input
+            updatePreview('photo', 'photoPreviewContainer');
+            updatePreview('identity_card', 'identityCardPreviewContainer');
+            updatePreview('family_card', 'familyCardPreviewContainer');
+
+            const provinceSelect = document.getElementById('province');
+            const regencySelect = document.getElementById('regency');
+            const districtSelect = document.getElementById('district');
+            const villageSelect = document.getElementById('village');
+
+            // Fetch provinces
+            fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province.name;
+                        option.textContent = province.name;
+                        option.dataset.id = province.id;
+                        if (province.name == dataProvince) {
+                            option.selected = true;
+                        }
+                        provinceSelect.appendChild(option);
+                    });
+                    // Trigger change event to load regencies
+                    handleProvinceChange({
+                        target: {
+                            value: dataProvince
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching provinces:', error));
+
+            // Event listeners
+            provinceSelect.addEventListener('change', handleProvinceChange);
+            regencySelect.addEventListener('change', handleRegencyChange);
+            districtSelect.addEventListener('change', handleDistrictChange);
+
+            // Functions
+            function handleProvinceChange(event) {
+                const selectedProvince = provinceSelect.selectedOptions[0];
+                const provinceId = selectedProvince.dataset.id;
+                regencySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
+                districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                villageSelect.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+
+                if (!provinceId) return;
+
+                fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(regency => {
+                            const option = document.createElement('option');
+                            option.value = regency.name;
+                            option.textContent = regency.name;
+                            option.dataset.id = regency.id;
+                            if (regency.name == dataRegency) {
+                                option.selected = true;
+                            }
+                            regencySelect.appendChild(option);
+                        });
+                        // Trigger change event to load districts
+                        handleRegencyChange({
+                            target: {
+                                value: dataRegency
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error fetching regencies:', error));
+            }
+
+            function handleRegencyChange(event) {
+                const selectedRegency = regencySelect.selectedOptions[0];
+                const regencyId = selectedRegency.dataset.id;
+                districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                villageSelect.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+
+                if (!regencyId) return;
+
+                fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regencyId}.json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(district => {
+                            const option = document.createElement('option');
+                            option.value = district.name;
+                            option.textContent = district.name;
+                            option.dataset.id = district.id;
+                            if (district.name == dataDistrict) {
+                                option.selected = true;
+                            }
+                            districtSelect.appendChild(option);
+                        });
+                        // Trigger change event to load villages
+                        handleDistrictChange({
+                            target: {
+                                value: dataDistrict
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error fetching districts:', error));
+            }
+
+            function handleDistrictChange(event) {
+                const selectedDistrict = districtSelect.selectedOptions[0];
+                const districtId = selectedDistrict.dataset.id;
+                villageSelect.innerHTML = '<option value="">Pilih Desa/Kelurahan</option>';
+
+                if (!districtId) return;
+
+                fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${districtId}.json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(village => {
+                            const option = document.createElement('option');
+                            option.value = village.name;
+                            option.textContent = village.name;
+                            option.dataset.id = village.id;
+                            if (village.name == dataVillage) {
+                                option.selected = true;
+                            }
+                            villageSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching villages:', error));
+            }
+        });
+    </script>
+@endpush

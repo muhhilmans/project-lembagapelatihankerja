@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UtilityController;
 
 /*
@@ -35,6 +36,10 @@ Route::middleware(['auth'])->group(function () {
     require __DIR__.'/role/servant.php';
     
     Route::get('contract/download/{applyJob}', [UtilityController::class, 'downloadContract'])->name('contract.download');
+
+    Route::get('/profile/{id}', [ProfileController::class, 'profile'])->name('profile');
+    Route::get('/profile/{id}/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/{id}/update-servant', [ProfileController::class, 'updateServant'])->name('profile-servant.update');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

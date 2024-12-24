@@ -47,7 +47,7 @@
                             <div class="col-lg-3 mb-3 mb-lg-0">
                                 <div class="card shadow-sm">
                                     <!-- Photo -->
-                                    @if ($d->servant->servantDetails->photo)
+                                    @if (isset($d->servant->servantDetails) && $d->servant->servantDetails->photo)
                                         <img src="{{ route('getImage', ['path' => 'photo', 'imageName' => $d->servant->servantDetails->photo]) }}"
                                             class="card-img-top img-fluid" style="max-height: 150px;"
                                             alt="Pembantu {{ $d->servant->name }}">
