@@ -67,8 +67,12 @@
                                             <li class="mb-2">
                                                 <i class="fas fa-calendar-alt"></i>
                                                 <strong>Usia:</strong>
-                                                {{ \Carbon\Carbon::parse($d->servant->servantDetails->date_of_birth)->age }}
-                                                Tahun
+                                                @if (optional($d->servant->servantDetails)->date_of_birth)
+                                                    {{ \Carbon\Carbon::parse($d->servant->servantDetails->date_of_birth)->age }}
+                                                    Tahun
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
                                             </li>
                                             <li class="mb-2">
                                                 <i class="fas fa-praying-hands"></i>
@@ -106,7 +110,8 @@
                                         @endif
 
                                         @if ($d->status == 'interview')
-                                            <a href="#" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#contractModal-{{ $d->id }}">
+                                            <a href="#" class="btn btn-sm btn-primary" data-toggle="modal"
+                                                data-target="#contractModal-{{ $d->id }}">
                                                 <i class="fas fa-file-contract"></i>
                                             </a>
                                             @include('cms.vacancy.modal.contract', ['data' => $d])
@@ -119,7 +124,8 @@
                                         @endif
 
                                         @if ($d->status == 'accepted')
-                                            <a href="{{ route('contract.download', $d->id) }}" class="btn btn-sm btn-success"><i class="fas fa-file-download"></i></a>
+                                            <a href="{{ route('contract.download', $d->id) }}"
+                                                class="btn btn-sm btn-success"><i class="fas fa-file-download"></i></a>
                                         @endif
 
                                         <a class="btn btn-sm btn-info" href="{{ route('show-servant', $d->servant->id) }}">
