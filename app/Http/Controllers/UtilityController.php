@@ -98,4 +98,30 @@ class UtilityController extends Controller
 
         return view('cms.applicant.independent', compact('datas'));
     }
+
+    public function hireApplication()
+    {
+        if (auth()->user()->roles->first()->name == 'pembantu') {
+            $datas = Application::where('servant_id', auth()->user()->id)
+            ->whereNotNull('employe_id')
+            ->get();
+        } else {
+            $datas = Application::whereNotNull('employe_id')->get();
+        }
+
+        return view('cms.application.hire', compact('datas'));
+    }
+
+    public function indieApplication()
+    {
+        if (auth()->user()->roles->first()->name == 'pembantu') {
+            $datas = Application::where('servant_id', auth()->user()->id)
+            ->whereNotNull('vacancy_id')
+            ->get();
+        } else {
+            $datas = Application::whereNotNull('vacancy_id')->get();
+        }
+
+        return view('cms.application.independent', compact('datas'));
+    }
 }
