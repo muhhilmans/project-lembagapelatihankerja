@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfessionController;
 use App\Http\Controllers\User\AdminController;
 use App\Http\Controllers\User\EmployeController;
 use App\Http\Controllers\User\ServantController;
+use App\Http\Controllers\UtilityController;
 
 Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
     Route::get('/dashboard', function () {
@@ -19,6 +20,8 @@ Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
     Route::delete('users-servant/{user}/skill/{skill}/delete', [ServantController::class, 'destroySkill'])->name('users-servant.destroy.skill');
 
     Route::resource('professions', ProfessionController::class)->except('create', 'show', 'edit');
+
+    Route::post('/vacancy/{id}/recommendation', [UtilityController::class, 'storeRecom'])->name('vacancy.recommendation');
 });
 
 Route::group(['middleware' => ['role:superadmin|owner']], function () {

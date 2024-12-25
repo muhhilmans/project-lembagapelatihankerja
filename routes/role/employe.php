@@ -19,6 +19,8 @@ Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     Route::put('/applicant-hire/{id}/contract', [ApplicationController::class, 'hireContract'])->name('applicant-hire.contract');
     Route::put('/applicant-hire/{id}/reject', [ApplicationController::class, 'hireReject'])->name('applicant-hire.reject');
 
+    Route::post('/vacancies/{vacancy}/{user}/recommendation', [ApplicationController::class, 'applyRecom'])->name('apply.recommendation');
+
     Route::get('/applicant-indie', [UtilityController::class, 'indieApplicant'])->name('applicant-indie');
     Route::put('/applicant-indie/{user}/{vacancy}/change', [ApplicationController::class, 'changeStatus'])->name('applicant-indie.change');
     Route::put('/applicant-indie/{user}/{vacancy}/upload', [ApplicationController::class, 'uploadContract'])->name('applicant-indie.upload');

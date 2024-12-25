@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Models\RecomServant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Validator;
 
 class VacancyController extends Controller
 {
@@ -83,8 +84,12 @@ class VacancyController extends Controller
     public function show(string $id)
     {
         $data = Vacancy::findOrFail($id);
+        $recoms = RecomServant::where('vacancy_id', $id)
+        ->whereHas('servant.servantDetails', function ($query) {
+            $query->where('working_status', false);
+        })->get();
 
-        return view('cms.vacancy.partial.detail', compact('data'));
+        return view('cms.vacancy.partial.detail', compact(['data', 'recoms']));
     }
 
     /**

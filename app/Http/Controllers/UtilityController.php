@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Application;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Models\ApplyJob;
 use App\Models\Profession;
+use App\Models\Application;
+use App\Models\RecomServant;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
+use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Validator;
 
 class UtilityController extends Controller
 {
@@ -58,7 +63,7 @@ class UtilityController extends Controller
 
     public function allVacancy()
     {
-        $datas = Vacancy::where('closing_date', '>=', now())->get();
+        $datas = Vacancy::where('closing_date', '>=', now())->where('status', true)->get();
 
         return view('cms.seek-vacancy.index', compact('datas'));
     }
@@ -66,9 +71,22 @@ class UtilityController extends Controller
     public function showVacancy(string $id)
     {
         $data = Vacancy::findOrFail($id);
-        $dataApplicants = Application::with('servant')->where('vacancy_id', $id)->get();
+        
+        if (auth()->user()->roles->first()->name == 'majikan') {
+            return view('cms.seek-vacancy.partial.detail', compact(['data']));
+        } else {
+            $servants = User::whereHas('roles', function ($query) {
+                $query->where('name', 'pembantu');
+            })
+            ->whereHas('servantDetails', function ($query) {
+                $query->where('working_status', false);
+            })
+            ->whereDoesntHave('recomServants')
+            ->get();
 
-        return view('cms.seek-vacancy.partial.detail', compact(['data', 'dataApplicants']));
+            return view('cms.seek-vacancy.partial.detail', compact(['data', 'servants']));
+        }
+
     }
 
     public function hireApplicant()
@@ -123,5 +141,39 @@ class UtilityController extends Controller
         }
 
         return view('cms.application.independent', compact('datas'));
+    }
+
+    public function storeRecom(Request $request, string $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'servant_id' => ['required', 'exists:users,id'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
+        }
+
+        $data = $validator->validated();
+
+        $vacancy = Vacancy::findOrFail($id);
+
+        try {
+            DB::transaction(function () use ($data, $vacancy) {
+                RecomServant::create([
+                    'servant_id' => $data['servant_id'],
+                    'vacancy_id' => $vacancy->id,
+                ]);
+            });
+
+            Alert::success('Berhasil', 'Berhasil mengirimkan rekomendasi!');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+            
+            return view('cms.error', compact('data'));
+        }
     }
 }

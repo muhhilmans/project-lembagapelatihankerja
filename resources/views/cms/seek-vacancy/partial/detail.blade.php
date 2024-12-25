@@ -5,25 +5,28 @@
     <div class="d-flex justify-content-between align-items-baseline mb-4 mb-lg-0">
         <h1 class="h3 mb-4 text-gray-800">Detail Lowongan Kerja</h1>
         <div class="d-flex flex-column flex-lg-row">
-            @php
-                $hasApplied = $data->applications->contains(function ($job) use ($data) {
-                    return $job->servant_id === auth()->user()->id && $job->vacancy_id === $data->id;
-                });
-            @endphp
+            @if (auth()->user()->hasRole('pembantu'))
+                @php
+                    $hasApplied = $data->applications->contains(function ($job) use ($data) {
+                        return $job->servant_id === auth()->user()->id && $job->vacancy_id === $data->id;
+                    });
+                @endphp
 
-            @if ($hasApplied)
-                <button class="btn btn-secondary mr-0 mr-lg-1 mb-1 mb-lg-0" disabled>
-                    <i class="fas fa-fw fa-check"></i> Sudah Melamar
-                </button>
+                @if ($hasApplied)
+                    <button class="btn btn-secondary mr-0 mr-lg-1 mb-1 mb-lg-0" disabled>
+                        <i class="fas fa-fw fa-check"></i> Sudah Melamar
+                    </button>
+                @else
+                    <a href="#" class="btn btn-primary mr-0 mr-lg-1 mb-1 mb-lg-0" data-toggle="modal"
+                        data-target="#applyModal-{{ $data->id }}">
+                        <i class="fas fa-fw fa-check"></i> Lamar
+                    </a>
+                    @include('cms.seek-vacancy.modal.apply', ['vacancy' => $data])
+                @endif
             @else
-                <a href="#" class="btn btn-primary mr-0 mr-lg-1 mb-1 mb-lg-0" data-toggle="modal"
-                    data-target="#applyModal-{{ $data->id }}">
-                    <i class="fas fa-fw fa-check"></i> Lamar
-                </a>
-                @include('cms.seek-vacancy.modal.apply', ['vacancy' => $data])
+                <a href="#" class="btn btn-primary mr-2" data-toggle="modal" data-target="#recommendModal-{{ $data->id }}">Rekomendasi</a>
+                @include('cms.seek-vacancy.modal.recommend', ['vacancy' => $data])
             @endif
-
-
 
             <a href="{{ route('all-vacancy') }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
         </div>

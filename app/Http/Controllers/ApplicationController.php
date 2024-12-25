@@ -156,6 +156,43 @@ class ApplicationController extends Controller
         }
     }
 
+    public function applyRecom(Request $request, Vacancy $vacancy, User $user)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => ['required', 'string'],
+            'notes' => ['nullable', 'string'],
+            'interview_date' => ['sometimes', 'date'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::transaction(function () use ($data, $vacancy, $user) {
+                Application::create([
+                    'vacancy_id' => $vacancy->id,
+                    'servant_id' => $user->id,
+                    'status' => $data['status'],
+                    'notes' => $data['notes'],
+                    'interview_date' => $data['interview_date'],
+                ]);
+            });
+
+            Alert::success('Berhasil', 'Berhasil menambahkan pelamar!');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
     public function changeStatus(Request $request, Vacancy $vacancy, User $user)
     {
         $validator = Validator::make($request->all(), [

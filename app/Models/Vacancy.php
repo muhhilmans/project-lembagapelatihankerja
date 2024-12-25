@@ -45,4 +45,9 @@ class Vacancy extends Model
             ->where('status', ['pending', 'interview'])
             ->update(['status' => 'rejected']);
     }
+
+    public function recomServants()
+    {
+        return $this->hasMany(RecomServant::class, 'vacancy_id');
+    }
 }

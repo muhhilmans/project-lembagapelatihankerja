@@ -31,7 +31,20 @@
                                 @endhasrole
                                 <td class="text-center">
                                     <span
-                                        class="p-2 badge badge-{{ $data->status == 'accepted' ? 'success' : 'danger' }}">{{ $data->status == 'accepted' ? 'Diterima' : 'Ditolak' }}
+                                        class="p-2 badge badge-{{ match ($data->status) {
+                                            'accepted' => 'success',
+                                            'rejected' => 'danger',
+                                            'pending' => 'warning',
+                                            'interview' => 'info',
+                                            default => 'secondary',
+                                        } }}">
+                                        {{ match ($data->status) {
+                                            'accepted' => 'Diterima',
+                                            'rejected' => 'Ditolak',
+                                            'pending' => 'Pending',
+                                            'interview' => 'Interview',
+                                            default => 'Status Tidak Diketahui',
+                                        } }}
                                     </span>
                                 </td>
                             </tr>
