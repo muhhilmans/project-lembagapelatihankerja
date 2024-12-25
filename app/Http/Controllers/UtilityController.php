@@ -105,8 +105,8 @@ class UtilityController extends Controller
     public function indieApplicant()
     {
         if (auth()->user()->roles->first()->name == 'majikan') {
-            $datas = Application::whereHas('vacancy', function ($query) {
-                $query->where('employe_id', auth()->user()->id);
+            $datas = Application::whereHas('vacancy.user', function ($query) {
+                $query->where('id', auth()->user()->id);
             })
             ->whereNotNull('vacancy_id')
             ->get();

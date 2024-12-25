@@ -86,7 +86,8 @@
                                         'rejected' => 'danger',
                                         'accepted' => 'success',
                                         default => 'secondary',
-                                    } }} p-2">{{ $d->status }}</span>
+                                    } }} p-2">{{ $d->status }}
+                                </span>
 
                                 <div class="row">
                                     @if ($d->status == 'interview')

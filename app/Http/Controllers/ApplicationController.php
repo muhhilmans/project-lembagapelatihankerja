@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Application;
+use App\Models\ServantDetail;
 use App\Models\User;
 use App\Models\Vacancy;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class ApplicationController extends Controller
         $validator = Validator::make($request->all(), [
             'employe_id' => ['required', 'exists:users,id'],
             'interview_date' => ['required', 'date'],
-            'notes' => ['sometimes', 'string'],
+            'notes' => ['sometimes'],
         ]);
 
         if ($validator->fails()) {
@@ -269,18 +270,25 @@ class ApplicationController extends Controller
             ]);
 
             if ($status == 'accepted') {
-                DB::transaction(function () use ($vacancy) {
+                DB::transaction(function () use ($vacancy, $user) {
                     $acceptedCount = Application::where('vacancy_id', $vacancy->id)
                         ->where('status', 'accepted')
                         ->count();
-            
+
+                    $updateUser = ServantDetail::where('user_id', $user->id)->first();
+                    if ($updateUser) {
+                        $updateUser->update([
+                            'working_status' => true,
+                        ]);
+                    }
+
                     if ($acceptedCount >= $vacancy->limit) {
                         Application::where('vacancy_id', $vacancy->id)
                             ->whereIn('status', ['pending', 'interview'])
                             ->update([
                                 'status' => 'rejected'
                             ]);
-            
+
                         $vacancy->update(['status' => false]);
                     }
                 });
