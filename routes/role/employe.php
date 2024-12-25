@@ -11,11 +11,15 @@ Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     Route::post('/show-servant/{id}/hire', [ApplicationController::class, 'hireServant'])->name('hire-servant');
 
     Route::resource('vacancies', VacancyController::class)->except('create', 'edit');
-    Route::put('vacancies/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('vacancies.change');
-    Route::put('vacancies/{vacancy}/{user}/upload', [ApplicationController::class, 'uploadContract'])->name('vacancies.upload');
+    
+    // Route::put('vacancies/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('vacancies.change');
+    // Route::put('vacancies/{vacancy}/{user}/upload', [ApplicationController::class, 'uploadContract'])->name('vacancies.upload');
 
     Route::get('/applicant-hire', [UtilityController::class, 'hireApplicant'])->name('applicant-hire');
     Route::put('/applicant-hire/{id}/contract', [ApplicationController::class, 'hireContract'])->name('applicant-hire.contract');
     Route::put('/applicant-hire/{id}/reject', [ApplicationController::class, 'hireReject'])->name('applicant-hire.reject');
+
     Route::get('/applicant-indie', [UtilityController::class, 'indieApplicant'])->name('applicant-indie');
+    Route::put('/applicant-indie/{user}/{vacancy}/change', [ApplicationController::class, 'changeStatus'])->name('applicant-indie.change');
+    Route::put('/applicant-indie/{user}/{vacancy}/upload', [ApplicationController::class, 'uploadContract'])->name('applicant-indie.upload');
 });

@@ -42,6 +42,11 @@
                     @endhasrole
 
                     <div class="form-group">
+                        <label for="limit">Batas Pelamar <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="limit" name="limit" required>
+                    </div>
+
+                    <div class="form-group">
                         <label for="description">Deskripsi <span class="text-danger">*</span></label>
                         <textarea id="description-editor" name="description" class="form-control" required></textarea>
                     </div>

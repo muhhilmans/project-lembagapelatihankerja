@@ -1,4 +1,4 @@
-<div class="modal fade" id="acceptModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="rejectModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -7,20 +7,15 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('vacancies.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
+            <form method="POST" action="{{ route('applicant-indie.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
-                    <input type="text" name="status" value="interview" hidden>
-
-                    <div class="form-group">
-                        <label for="interview_date">Tanggal Interview <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="interview_date" name="interview_date" required>
-                    </div>
+                    <input type="text" name="status" value="rejected" hidden>
 
                     <div class="form-group">
                         <label for="notes">Catatan</label>
-                        <textarea id="notes-editor" name="notes" class="form-control"></textarea>
+                        <textarea id="reject-notes-editor" name="notes" class="form-control"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -35,8 +30,8 @@
 @push('custom-script')
     <script>
         $(document).ready(function() {
-            $('#acceptModal-{{ $d->id }}').on('shown.bs.modal', function () {
-                $('#notes-editor').summernote({
+            $('#rejectModal-{{ $d->id }}').on('shown.bs.modal', function () {
+                $('#reject-notes-editor').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
                     height: 150,
@@ -47,8 +42,8 @@
                 });
             });
 
-            $('#acceptModal-{{ $d->id }}').on('hidden.bs.modal', function () {
-                $('#notes-editor').summernote('destroy');
+            $('#rejectModal-{{ $d->id }}').on('hidden.bs.modal', function () {
+                $('#reject-notes-editor').summernote('destroy');
             });
         });
     </script>

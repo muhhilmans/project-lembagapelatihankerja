@@ -9,7 +9,7 @@
                 </button>
             </div>
             <form method="POST"
-                action="{{ route('vacancies.upload', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}"
+                action="{{ route('applicant-indie.upload', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}"
                 enctype="multipart/form-data">
                 @csrf
                 @method('PUT')

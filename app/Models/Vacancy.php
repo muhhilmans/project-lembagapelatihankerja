@@ -20,6 +20,7 @@ class Vacancy extends Model
         'requirements',
         'benefits',
         'closing_date',
+        'limit',
         'status',
     ];
 
@@ -31,5 +32,17 @@ class Vacancy extends Model
     public function applications()
     {
         return $this->hasMany(Application::class, 'vacancy_id');
+    }
+
+    public function isLimitReached()
+    {
+        return $this->applications()->where('status', 'accepted')->count() >= $this->limit;
+    }
+
+    public function rejectRemainingApplicants()
+    {
+        Application::where('vacancy_id', $this->id)
+            ->where('status', ['pending', 'interview'])
+            ->update(['status' => 'rejected']);
     }
 }

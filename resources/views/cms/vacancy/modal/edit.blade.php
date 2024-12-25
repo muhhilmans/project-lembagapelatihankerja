@@ -48,6 +48,11 @@
                     @endhasrole
 
                     <div class="form-group">
+                        <label for="limit">Batas Pelamar <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="limit" name="limit" value="{{ $data->limit }}" required>
+                    </div>
+
+                    <div class="form-group">
                         <label for="description-editor-{{ $data->id }}">Deskripsi <span
                                 class="text-danger">*</span></label>
                         <textarea id="description-editor-{{ $data->id }}" name="description" class="form-control" required>{{ $data->description }}</textarea>

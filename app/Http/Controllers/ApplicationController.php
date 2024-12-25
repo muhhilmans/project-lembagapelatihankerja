@@ -173,7 +173,7 @@ class ApplicationController extends Controller
         $update = Application::where('vacancy_id', $vacancy->id)->where('servant_id', $user->id)->first();
 
         try {
-            DB::transaction(function () use ($update, $data) {
+            DB::transaction(function () use ($update, $data, $vacancy) {
                 if ($data['status'] == 'interview') {
                     $update->update([
                         'status' => $data['status'],
@@ -224,10 +224,30 @@ class ApplicationController extends Controller
 
             $path = $request->file('file_contract')->storeAs($directory, $fileName);
 
+            $status = 'accepted';
+
             $applyJob->update([
-                'status' => 'accepted',
+                'status' => $status,
                 'file_contract' => $path,
             ]);
+
+            if ($status == 'accepted') {
+                DB::transaction(function () use ($vacancy) {
+                    $acceptedCount = Application::where('vacancy_id', $vacancy->id)
+                        ->where('status', 'accepted')
+                        ->count();
+            
+                    if ($acceptedCount >= $vacancy->limit) {
+                        Application::where('vacancy_id', $vacancy->id)
+                            ->whereIn('status', ['pending', 'interview'])
+                            ->update([
+                                'status' => 'rejected'
+                            ]);
+            
+                        $vacancy->update(['status' => false]);
+                    }
+                });
+            }
 
             Alert::success('Berhasil', 'File kontrak berhasil diunggah.');
             return redirect()->back();

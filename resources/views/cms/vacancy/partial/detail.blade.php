@@ -25,7 +25,21 @@
                 <!-- Tab: Detail -->
                 <div class="tab-pane fade show active" id="detail" role="tabpanel" aria-labelledby="detail-tab">
                     <h5 class="card-title"><strong>{{ $data->title }}</strong></h5>
-                    <p class="card-text"><strong>Batas Lamaran:</strong> {{ $data->closing_date }}</p>
+                    <p class="card-text"><strong>Batas Lamaran:</strong>
+                        {{ \Carbon\Carbon::parse($data->closing_date)->format('d F Y') }} (
+                        @php
+                            $closingDate = \Carbon\Carbon::parse($data->closing_date);
+                            $daysRemaining = $closingDate->diffInDays(now());
+
+                            if ($closingDate->isPast()) {
+                                echo 'Lamaran telah ditutup.';
+                            } else {
+                                echo $daysRemaining . ' hari lagi';
+                            }
+                        @endphp
+                        )
+                    </p>
+                    <p class="card-text"><strong>Dibutuhkan:</strong> {{ $data->limit }} Orang</p>
                     <p class="card-text"><strong>Deskripsi:</strong> {!! $data->description !!}</p>
                     <p class="card-text"><strong>Spesifikasi:</strong> {!! $data->requirements !!}</p>
                     @if ($data->benefits != null)
@@ -36,7 +50,7 @@
                 <!-- Tab: Link -->
                 <div class="tab-pane fade" id="applicant" role="tabpanel" aria-labelledby="applicant-tab">
                     <div class="row row-cols-1 row-cols-md-4 g-3">
-                        @foreach ($data->applyJobs as $d)
+                        @foreach ($data->applications as $d)
                             <div class="col-lg-3 mb-3 mb-lg-0">
                                 <div class="card shadow-sm">
                                     <!-- Photo -->

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('requirements');
             $table->text('benefits')->nullable();
             $table->date('closing_date');
+            $table->unsignedInteger('limit')->default(1);
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

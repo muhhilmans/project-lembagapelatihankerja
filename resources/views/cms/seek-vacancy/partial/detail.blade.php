@@ -6,7 +6,7 @@
         <h1 class="h3 mb-4 text-gray-800">Detail Lowongan Kerja</h1>
         <div class="d-flex flex-column flex-lg-row">
             @php
-                $hasApplied = $data->applyJobs->contains(function ($job) use ($data) {
+                $hasApplied = $data->applications->contains(function ($job) use ($data) {
                     return $job->servant_id === auth()->user()->id && $job->vacancy_id === $data->id;
                 });
             @endphp
@@ -28,14 +28,6 @@
             <a href="{{ route('all-vacancy') }}" class="btn btn-secondary"><i class="fas fa-fw fa-arrow-left"></i></a>
         </div>
     </div>
-
-    @if (session('error'))
-        <h5 class="text-danger">{{ session('error') }}</h5>
-    @endif
-
-    @if (session('success'))
-        <h5 class="text-success">{{ session('success') }}</h5>
-    @endif
 
     <div class="card shadow mb-3 p-3">
         <div class="card-body">
