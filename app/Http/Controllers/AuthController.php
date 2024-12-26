@@ -2,10 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Profession;
 use Illuminate\Http\Request;
+use App\Models\EmployeDetail;
+use App\Models\ServantDetail;
+use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -23,7 +31,7 @@ class AuthController extends Controller
             }
         }
 
-        return view('login');
+        return view('auth.login');
     }
 
     public function authenticate(Request $request): RedirectResponse
@@ -44,24 +52,145 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
-            if ($user->is_active == 1) {
-                if ($user->roles->first()->name == 'pembantu') {
-                    return redirect()->intended('/dashboard-servant');
-                } elseif ($user->roles->first()->name == 'majikan') {
-                    return redirect()->intended('/dashboard-employe');
-                } else {
-                    return redirect()->intended('/dashboard');
-                }
-            } else {
+            if ($user->email_verified_at == null) {
                 Auth::logout();
 
-                Alert::error('Akun belum aktif!', 'Silahkan hubungi Admin..');
+                Alert::error('Email belum diverifikasi!', 'Silahkan verifikasi email terlebih dahulu..');
                 return redirect()->back();
+            } else {
+                if ($user->is_active == 1) {
+                    if ($user->roles->first()->name == 'pembantu') {
+                        return redirect()->intended('/dashboard-servant');
+                    } elseif ($user->roles->first()->name == 'majikan') {
+                        return redirect()->intended('/dashboard-employe');
+                    } else {
+                        return redirect()->intended('/dashboard');
+                    }
+                } else {
+                    Auth::logout();
+
+                    Alert::error('Akun belum aktif!', 'Silahkan hubungi Admin..');
+                    return redirect()->back();
+                }
             }
         }
 
         Alert::error('Gagal!', 'Akun yang dimasukkan salah!');
         return redirect()->back();
+    }
+
+    public function selectRegister()
+    {
+        return view('auth.select-register');
+    }
+
+    public function employeRegister()
+    {
+        return view('auth.register-employe');
+    }
+
+    public function storeEmployeRegister(Request $request): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', 'unique:users,username'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', Rules\Password::defaults()],
+            'phone' => ['required', 'string', 'max:255'],
+            'address' => ['required', 'string', 'max:255'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
+        }
+
+        try {
+            DB::transaction(function () use ($request, &$store) {
+                $store = User::create([
+                    'name' => $request->name,
+                    'username' => $request->username,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'is_active' => false,
+                ]);
+
+                $store->assignRole('majikan');
+
+                EmployeDetail::create([
+                    'user_id' => $store->id,
+                    'phone' => $request->phone,
+                    'address' => $request->address
+                ]);
+            });
+
+            if ($store) {
+                Alert::success('Berhasil!', 'Silahkan verifikasi email terlebih dahulu!');
+                return redirect()->route('login');
+            } else {
+                return back()->with('toast_error', 'Registrasi majikan gagal!');
+            }
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('error', compact('data'));
+        }
+    }
+
+    public function servantRegister()
+    {
+        $professions = Profession::all();
+
+        return view('auth.register-servant', compact('professions'));
+    }
+
+    public function storeServantRegister(Request $request): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255', 'unique:users,username'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', Rules\Password::defaults()],
+            'profession_id' => ['required', 'exists:professions,id'],
+        ]);
+
+        if ($validator->fails()) {
+            return back()->with('toast_error', $validator->messages()->all()[0])->withInput();
+        }
+
+        try {
+            DB::transaction(function () use ($request, &$store) {
+                $store = User::create([
+                    'name' => $request->name,
+                    'username' => $request->username,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'is_active' => false,
+                ]);
+
+                $store->assignRole('pembantu');
+
+                ServantDetail::create([
+                    'user_id' => $store->id,
+                    'profession_id' => $request->profession_id
+                ]);
+            });
+            if ($store) {
+                Alert::success('Berhasil!', 'Silahkan verifikasi email terlebih dahulu!');
+                return redirect()->route('login');
+            } else {
+                return back()->with('toast_error', 'Registrasi pembantu gagal!');
+            }
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
     }
 
     public function logout(Request $request)

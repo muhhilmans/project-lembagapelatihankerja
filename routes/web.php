@@ -21,6 +21,12 @@ Route::get('/', [AuthController::class, 'login'])->name('login');
 
 Route::post('/authenticate', [AuthController::class, 'authenticate'])->name('authenticate');
 
+Route::get('/select-register', [AuthController::class, 'selectRegister'])->name('select-register');
+Route::get('/select-register/employe', [AuthController::class, 'employeRegister'])->name('register-employe');
+Route::post('/select-register/employe/store', [AuthController::class, 'storeEmployeRegister'])->name('store-employe-register');
+Route::get('/select-register/servant', [AuthController::class, 'servantRegister'])->name('register-servant');
+Route::post('/select-register/servant/store', [AuthController::class, 'storeServantRegister'])->name('store-servant-register');
+
 Route::get('storage/img/{path}/{imageName}', [UtilityController::class, 'displayImage'])->name('getImage');
 
 Route::middleware(['auth'])->group(function () {
