@@ -89,7 +89,7 @@ class VacancyController extends Controller
         ->whereHas('servant.servantDetails', function ($query) {
             $query->where('working_status', false);
         })->get();
-        $applications = Application::where('vacancy_id', $id)->get();
+        $applications = Application::where('vacancy_id', $id)->where('status', '!=', 'accepted')->get();
 
         return view('cms.vacancy.partial.detail', compact(['data', 'recoms', 'applications']));
     }
@@ -119,6 +119,12 @@ class VacancyController extends Controller
 
         try {
             DB::transaction(function () use ($data, $dataUpdate) {
+                if ($dataUpdate->limit < $data['limit']) {
+                    $status = true;
+                } else {
+                    $status = false;
+                }
+
                 $dataUpdate->update([
                     'title' => $data['title'],
                     'closing_date' => $data['closing_date'],
@@ -127,6 +133,7 @@ class VacancyController extends Controller
                     'description' => $data['description'],
                     'requirements' => $data['requirements'],
                     'benefits' => $data['benefits'],
+                    'status' => $status
                 ]);
             });
 

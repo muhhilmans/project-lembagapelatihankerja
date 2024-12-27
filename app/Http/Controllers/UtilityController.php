@@ -112,6 +112,7 @@ class UtilityController extends Controller
                 $query->where('id', auth()->user()->id);
             })
             ->whereNotNull('vacancy_id')
+            ->where('status', 'accepted')
             ->get();
         } else {
             $datas = Application::whereNotNull('vacancy_id')->where('status', 'accepted')->get();

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Application extends Model
+class Complaint extends Model
 {
     use HasFactory, HasUuids;
 
@@ -14,23 +14,17 @@ class Application extends Model
     public $incrementing = false;
 
     protected $fillable = [
+        'application_id',
         'servant_id',
-        'vacancy_id',
         'employe_id',
+        'message',
         'status',
-        'notes',
-        'interview_date',
-        'file_contract',
+        'file',
     ];
 
-    public function servant()
+    public function application()
     {
-        return $this->belongsTo(User::class, 'servant_id');
-    }
-
-    public function vacancy()
-    {
-        return $this->belongsTo(Vacancy::class, 'vacancy_id');
+        return $this->belongsTo(Application::class, 'application_id');
     }
 
     public function employe()
@@ -38,8 +32,8 @@ class Application extends Model
         return $this->belongsTo(User::class, 'employe_id');
     }
 
-    public function complaint()
+    public function servant()
     {
-        return $this->hasMany(Complaint::class, 'application_id');
+        return $this->belongsTo(User::class, 'servant_id');
     }
 }

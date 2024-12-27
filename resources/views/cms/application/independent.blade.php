@@ -17,6 +17,7 @@
                             @hasrole('superadmin|admin')
                                 <th>Nama Pelamar</th>
                             @endhasrole
+                            <th>Tanggal Interview</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -29,6 +30,7 @@
                                 @hasrole('superadmin|admin')
                                     <td>{{ $data->servant->name }}</td>
                                 @endhasrole
+                                <td class="text-center">{{ \Carbon\Carbon::parse($data->interview_date ? $data->interview_date : '')->format('d-M-Y') }}</td>
                                 <td class="text-center">
                                     <span
                                         class="p-2 badge badge-{{ match ($data->status) {
