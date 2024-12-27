@@ -114,7 +114,7 @@ class UtilityController extends Controller
             ->whereNotNull('vacancy_id')
             ->get();
         } else {
-            $datas = Application::whereNotNull('vacancy_id')->get();
+            $datas = Application::whereNotNull('vacancy_id')->where('status', 'accepted')->get();
         }
 
         return view('cms.applicant.independent', compact('datas'));

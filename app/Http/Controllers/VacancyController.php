@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Models\Application;
 use App\Models\RecomServant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -88,8 +89,9 @@ class VacancyController extends Controller
         ->whereHas('servant.servantDetails', function ($query) {
             $query->where('working_status', false);
         })->get();
+        $applications = Application::where('vacancy_id', $id)->get();
 
-        return view('cms.vacancy.partial.detail', compact(['data', 'recoms']));
+        return view('cms.vacancy.partial.detail', compact(['data', 'recoms', 'applications']));
     }
 
     /**
