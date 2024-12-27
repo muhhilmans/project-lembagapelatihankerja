@@ -13,6 +13,7 @@ Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
     })->name('dashboard');
 
     Route::resource('users-employe', EmployeController::class);
+    Route::put('users-employe/{user}/change', [EmployeController::class, 'changeStatus'])->name('users-employe.change');
     Route::resource('users-servant', ServantController::class);
     Route::put('users-servant/{user}/change', [ServantController::class, 'changeStatus'])->name('users-servant.change');
     Route::post('users-servant/{user}/skill/store', [ServantController::class, 'storeSkill'])->name('users-servant.store.skill');

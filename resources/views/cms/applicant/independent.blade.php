@@ -29,6 +29,10 @@
                                 <p class="card-text"><strong>Lowongan Pekerjaan:</strong> {{ $d->vacancy->title }}</p>
                                 <p class="card-text"><strong>Melamar ke:</strong> {{ $d->vacancy->user->name }}</p>
                             @endhasrole
+                            @if ($d->interview_date != null)
+                                <p class="card-text"><strong>Tanggal Interview:</strong>
+                                    {{ \Carbon\Carbon::parse($d->interview_date)->format('d-m-Y') }}</p>
+                            @endif
 
                             <ul class="list-unstyled mb-3">
                                 <li class="mb-2">
@@ -140,9 +144,10 @@
                                             class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
                                     @endif
 
-                                    <a class="btn btn-sm btn-info" href="{{ route('show-servant', $d->servant->id) }}">
+                                    <a class="btn btn-sm btn-info" href="#" data-toggle="modal" data-target="#servantDetailsModal-{{ $d->id }}">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    @include('cms.vacancy.modal.servant-detail', ['data' => $d])
                                 </div>
                             </div>
                         </div>

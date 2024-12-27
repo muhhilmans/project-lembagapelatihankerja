@@ -21,4 +21,9 @@ class Profession extends Model
     {
         return $this->hasOne(ServantDetail::class, 'profession_id');
     }
+
+    public function vacancy()
+    {
+        return $this->hasOne(Vacancy::class, 'profession_id');
+    }
 }

@@ -18,7 +18,10 @@ class Application extends Model
         'vacancy_id',
         'employe_id',
         'status',
-        'notes',
+        'notes_interview',
+        'notes_verify',
+        'notes_accepted',
+        'notes_rejected',
         'interview_date',
         'file_contract',
     ];

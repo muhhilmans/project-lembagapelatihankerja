@@ -47,6 +47,18 @@
                                             class="fas fa-fw fa-eye"></i></a>
 
                                     @hasrole('superadmin|admin')
+                                        <a class="btn btn-secondary mb-2 mb-lg-0" href="#" data-toggle="modal"
+                                            data-target="#changeModal-{{ $user->id }}">
+                                            @if ($user->is_active == 1)
+                                                <i class="fas fa-fw fa-toggle-off"></i>
+                                            @else
+                                                <i class="fas fa-fw fa-toggle-on"></i>
+                                            @endif
+                                        </a>
+                                        @include('cms.user.partials.employe.change-employe', [
+                                            'user' => $user,
+                                        ])
+
                                         <a class="btn btn-warning mb-2 mb-lg-0" href="#" data-toggle="modal"
                                             data-target="#editModal-{{ $user->id }}"><i
                                                 class="fas fa-fw fa-user-edit"></i></a>

@@ -2,7 +2,7 @@
 
 @section('content')
     <!-- Page Heading -->
-    <h1 class="h3 mb-4 text-gray-800">Pelamar - Hire</h1>
+    <h1 class="h3 mb-4 text-gray-800">Semua Pelamar</h1>
 
     <div class="row">
         @if ($datas->isEmpty())
@@ -26,7 +26,12 @@
                         <!-- Card Content -->
                         <div class="card-body">
                             @hasrole('superadmin|admin')
-                                <p class="card-text"><strong>Dihire oleh:</strong> {{ $d->employe->name }}</p>
+                                @if ($d->employe_id != null)
+                                    <p class="card-text"><strong>Dihire oleh:</strong> {{ $d->employe->name }}</p>
+                                @else
+                                    <p class="card-text"><strong>Lowongan Pekerjaan:</strong> {{ $d->vacancy->title }}</p>
+                                    <p class="card-text"><strong>Melamar ke:</strong> {{ $d->vacancy->user->name }}</p>
+                                @endif
                             @endhasrole
                             @if ($d->interview_date != null)
                                 <p class="card-text"><strong>Tanggal Interview:</strong>
@@ -82,7 +87,7 @@
                         </div>
 
                         <!-- Card Footer -->
-                        <div class="card-footer">
+                        <div class="card-footer text-right">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span
                                     class="badge badge-{{ match ($d->status) {
@@ -96,57 +101,51 @@
                                 <div class="row">
                                     @if ($d->status == 'pending')
                                         <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                            data-target="#interviewModal-{{ $d->id }}">
+                                            data-target="#acceptModal-{{ $d->id }}">
                                             <i class="fas fa-check"></i>
                                         </a>
-                                        @include('cms.applicant.modal.status.interview', [
-                                            'data' => $d,
-                                        ])
-                                    @endif
+                                        @include('cms.applicant.modal.accept', ['data' => $d])
 
-                                    @if ($d->status == 'interview')
-                                        <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                            data-target="#passedModal-{{ $d->id }}">
-                                            <i class="fas fa-check"></i>
-                                        </a>
-                                        @include('cms.applicant.modal.status.passed', [
-                                            'data' => $d,
-                                        ])
-                                    @endif
-
-                                    @if ($d->status == 'choose')
-                                        <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                            data-target="#chooseModal-{{ $d->id }}">
-                                            <i class="fas fa-check-double"></i>
-                                        </a>
-                                        @include('cms.applicant.modal.status.choose', [
-                                            'data' => $d,
-                                        ])
-                                    @endif
-
-                                    @if ($d->status == 'verify')
-                                        <a href="#" class="btn btn-sm btn-primary mr-1" data-toggle="modal"
-                                            data-target="#contractModal-{{ $d->id }}">
-                                            <i class="fas fa-file-contract"></i>
-                                        </a>
-                                        @include('cms.applicant.modal.status.contract', [
-                                            'data' => $d,
-                                        ])
-                                    @endif
-
-                                    @if ($d->status == 'accepted')
-                                        <a href="{{ route('contract.download', $d->id) }}"
-                                            class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
-                                    @endif
-
-                                    @if ($d->status != 'rejected')
                                         <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                                             data-target="#rejectModal-{{ $d->id }}">
                                             <i class="fas fa-times"></i>
                                         </a>
-                                        @include('cms.applicant.modal.status.reject', [
-                                            'data' => $d,
-                                        ])
+                                        @include('cms.applicant.modal.reject', ['data' => $d])
+                                    @endif
+
+                                    @if ($d->status == 'interview')
+                                        <a href="#" class="btn btn-sm btn-primary mr-1" data-toggle="modal"
+                                            data-target="#contractModal-{{ $d->id }}">
+                                            <i class="fas fa-file-contract"></i>
+                                        </a>
+                                        @include('cms.applicant.modal.contract', ['data' => $d])
+
+                                        <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                            data-target="#rejectModal-{{ $d->id }}">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                        @include('cms.applicant.modal.reject', ['data' => $d])
+                                    @endif
+
+                                    @if ($d->status == 'accepted')
+                                        @php
+                                            $hasComplaintWithSameServant = $d->complaint->contains(function (
+                                                $complaint,
+                                            ) use ($d) {
+                                                return $complaint->servant_id == $d->servant_id;
+                                            });
+                                        @endphp
+
+                                        @if (!$hasComplaintWithSameServant)
+                                            <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                                data-target="#complaintModal-{{ $d->id }}">
+                                                <i class="fas fa-bullhorn"></i>
+                                            </a>
+                                            @include('cms.applicant.modal.complaint', ['data' => $d])
+                                        @endif
+
+                                        <a href="{{ route('contract.download', $d->id) }}"
+                                            class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
                                     @endif
 
                                     <a class="btn btn-sm btn-info" href="#" data-toggle="modal"

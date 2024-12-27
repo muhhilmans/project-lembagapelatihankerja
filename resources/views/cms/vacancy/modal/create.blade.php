@@ -20,7 +20,8 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="closing_date">Batas Lamaran <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="closing_date" name="closing_date" required>
+                                <input type="date" class="form-control" id="closing_date" name="closing_date"
+                                    required>
                             </div>
                         </div>
                     </div>
@@ -42,8 +43,18 @@
                     @endhasrole
 
                     <div class="form-group">
-                        <label for="limit">Batas Pelamar <span class="text-danger">*</span></label>
+                        <label for="limit">Dibutuhkan Pekerja <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="limit" name="limit" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profession_id">Kategori Profesi <span class="text-danger">*</span></label>
+                        <select class="form-control" id="profession_id" name="profession_id" required>
+                            <option selected disabled>Pilih Profesi...</option>
+                            @foreach ($professions as $profession)
+                                <option value="{{ $profession->id }}">{{ $profession->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="form-group">
@@ -72,8 +83,24 @@
 
 @push('custom-script')
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const closingDateInput = document.getElementById('closing_date');
+            const today = new Date();
+
+            // Konversi ke timezone Indonesia (UTC+7)
+            const utcOffset = 7 * 60 * 60 * 1000;
+            const indonesiaTime = new Date(today.getTime() + (today.getTimezoneOffset() * 60 * 1000) + utcOffset);
+
+            const year = indonesiaTime.getFullYear();
+            const month = String(indonesiaTime.getMonth() + 1).padStart(2, '0');
+            const date = String(indonesiaTime.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${date}`;
+
+            closingDateInput.setAttribute('min', formattedDate);
+        });
+
         $(document).ready(function() {
-            $('#createModal').on('shown.bs.modal', function () {
+            $('#createModal').on('shown.bs.modal', function() {
                 $('#description-editor').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
@@ -105,7 +132,7 @@
                 });
             });
 
-            $('#createModal').on('hidden.bs.modal', function () {
+            $('#createModal').on('hidden.bs.modal', function() {
                 $('#description-editor').summernote('destroy');
                 $('#requirements-editor').summernote('destroy');
                 $('#benefits-editor').summernote('destroy');

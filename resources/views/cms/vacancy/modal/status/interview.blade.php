@@ -1,13 +1,13 @@
-<div class="modal fade" id="acceptModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="interviewModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Proses Pelamar</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Jadwalkan Interview</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('applicant-indie.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
+            <form method="POST" action="{{ route('vacancies.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
@@ -49,9 +49,9 @@
 
             closingDateInput.setAttribute('min', formattedDate);
         });
-
+        
         $(document).ready(function() {
-            $('#acceptModal-{{ $d->id }}').on('shown.bs.modal', function () {
+            $('#interviewModal-{{ $d->id }}').on('shown.bs.modal', function () {
                 $('#notes-editor').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
@@ -63,7 +63,7 @@
                 });
             });
 
-            $('#acceptModal-{{ $d->id }}').on('hidden.bs.modal', function () {
+            $('#interviewModal-{{ $d->id }}').on('hidden.bs.modal', function () {
                 $('#notes-editor').summernote('destroy');
             });
         });

@@ -19,6 +19,9 @@
                             @endhasrole
                             <th>Tanggal Interview</th>
                             <th>Status</th>
+                            @if ($datas->contains(fn($data) => $data->status === 'passed'))
+                                <th>Aksi</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -30,13 +33,16 @@
                                 @hasrole('superadmin|admin')
                                     <td>{{ $data->servant->name }}</td>
                                 @endhasrole
-                                <td class="text-center">{{ \Carbon\Carbon::parse($data->interview_date ? $data->interview_date : '')->format('d-M-Y') }}</td>
+                                <td class="text-center">
+                                    {{ \Carbon\Carbon::parse($data->interview_date ? $data->interview_date : '')->format('d-M-Y') }}
+                                </td>
                                 <td class="text-center">
                                     <span
                                         class="p-2 badge badge-{{ match ($data->status) {
                                             'accepted' => 'success',
                                             'rejected' => 'danger',
                                             'pending' => 'warning',
+                                            'verify' => 'warning',
                                             'interview' => 'info',
                                             default => 'secondary',
                                         } }}">
@@ -45,10 +51,23 @@
                                             'rejected' => 'Ditolak',
                                             'pending' => 'Pending',
                                             'interview' => 'Interview',
+                                            'passed' => 'Lolos Interview',
+                                            'choose' => 'Pending Verifikasi',
+                                            'verify' => 'Verifikasi',
                                             default => 'Status Tidak Diketahui',
                                         } }}
                                     </span>
                                 </td>
+                                @if ($data->status === 'passed')
+                                    <td class="text-center">
+                                        <a href="#" class="btn btn-sm btn-success" data-toggle="modal"
+                                            data-target="#passedModal-{{ $data->id }}"><i
+                                                class="fas fa-building"></i></a>
+                                        @include('cms.application.modal.passed', [
+                                            'data' => $data,
+                                        ])
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>

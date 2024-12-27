@@ -21,8 +21,8 @@ class ApplicationController extends Controller
 
         $validator = Validator::make($request->all(), [
             'employe_id' => ['required', 'exists:users,id'],
-            'interview_date' => ['required', 'date'],
-            'notes' => ['sometimes'],
+            // 'interview_date' => ['required', 'date'],
+            // 'notes' => ['sometimes'],
         ]);
 
         if ($validator->fails()) {
@@ -36,13 +36,67 @@ class ApplicationController extends Controller
                 Application::create([
                     'servant_id' => $servant->id,
                     'employe_id' => $data['employe_id'],
-                    'status' => 'interview',
-                    'interview_date' => $data['interview_date'],
-                    'notes' => $data['notes'],
+                    'status' => 'pending',
+                    // 'interview_date' => $data['interview_date'],
+                    // 'notes' => $data['notes'],
                 ]);
             });
 
             Alert::success('Berhasil', 'Pembantu berhasil dipekerjakan!');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
+
+    public function changeStatusHire(Request $request, string $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => ['required', 'string'],
+            'notes' => ['nullable', 'string'],
+            'interview_date' => ['sometimes', 'date'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
+        }
+
+        $data = $validator->validated();
+
+        $update = Application::findOrFail($id);
+
+        try {
+            DB::transaction(function () use ($update, $data) {
+                if ($data['status'] == 'interview') {
+                    $update->update([
+                        'status' => $data['status'],
+                        'notes_interview' => $data['notes'],
+                        'interview_date' => $data['interview_date'],
+                    ]);
+                } elseif ($data['status'] == 'verify') {
+                    $update->update([
+                        'status' => $data['status'],
+                        'notes_verify' => $data['notes'],
+                    ]);
+                } elseif ($data['status'] == 'passed') {
+                    $update->update([
+                        'status' => $data['status'],
+                    ]);
+                } else {
+                    $update->update([
+                        'status' => $data['status'],
+                        'notes_rejected' => $data['notes'],
+                    ]);
+                }
+            });
+
+            Alert::success('Berhasil', 'Berhasil memproses pelamar!');
             return redirect()->back();
         } catch (\Throwable $th) {
             $data = [
@@ -177,7 +231,7 @@ class ApplicationController extends Controller
                     'vacancy_id' => $vacancy->id,
                     'servant_id' => $user->id,
                     'status' => $data['status'],
-                    'notes' => $data['notes'],
+                    'notes_interview' => $data['notes'],
                     'interview_date' => $data['interview_date'],
                 ]);
             });
@@ -215,13 +269,22 @@ class ApplicationController extends Controller
                 if ($data['status'] == 'interview') {
                     $update->update([
                         'status' => $data['status'],
-                        'notes' => $data['notes'],
+                        'notes_interview' => $data['notes'],
                         'interview_date' => $data['interview_date'],
+                    ]);
+                } elseif ($data['status'] == 'verify') {
+                    $update->update([
+                        'status' => $data['status'],
+                        'notes_verify' => $data['notes'],
+                    ]);
+                } elseif ($data['status'] == 'passed') {
+                    $update->update([
+                        'status' => $data['status'],
                     ]);
                 } else {
                     $update->update([
                         'status' => $data['status'],
-                        'notes' => $data['notes'],
+                        'notes_rejected' => $data['notes'],
                     ]);
                 }
             });
@@ -281,6 +344,11 @@ class ApplicationController extends Controller
                             'working_status' => true,
                         ]);
                     }
+
+                    Application::where('servant_id', $user->id)->where('status', '!=', 'accepted')->update([
+                        'status' => 'rejected',
+                        'notes_rejected' => 'Telah diterima oleh ' . $vacancy->user->name,
+                    ]);
 
                     if ($acceptedCount >= $vacancy->limit) {
                         Application::where('vacancy_id', $vacancy->id)

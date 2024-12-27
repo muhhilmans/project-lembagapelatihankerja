@@ -5,7 +5,7 @@
         <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard') }}">
             {{-- <div class="sidebar-brand-icon rotate-n-15">
         </div> --}}
-            <img src="{{ asset('assets/img/undraw_rocket.svg') }}" class="img-fluid" alt="" style="max-width: 30px;">
+            <img src="{{ asset('assets/img/logo.png') }}" class="img-fluid" alt="" style="max-width: 30px;">
             <div class="sidebar-brand-text mx-3">SIPEMBANTU</div>
         </a>
     @endhasrole
@@ -13,7 +13,7 @@
     <!-- Sidebar - Brand -->
     @hasrole('majikan')
         <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard-employe') }}">
-            <img src="{{ asset('assets/img/undraw_rocket.svg') }}" class="img-fluid" alt=""
+            <img src="{{ asset('assets/img/logo.png') }}" class="img-fluid" alt=""
                 style="max-width: 30px;">
             <div class="sidebar-brand-text mx-3">SIPEMBANTU</div>
         </a>
@@ -22,7 +22,7 @@
     <!-- Sidebar - Brand -->
     @hasrole('pembantu')
         <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard-servant') }}">
-            <img src="{{ asset('assets/img/undraw_rocket.svg') }}" class="img-fluid" alt=""
+            <img src="{{ asset('assets/img/logo.png') }}" class="img-fluid" alt=""
                 style="max-width: 30px;">
             <div class="sidebar-brand-text mx-3">SIPEMBANTU</div>
         </a>
@@ -117,9 +117,11 @@
                     <span>Pelamar</span>
                 </a>
                 <div id="collapseApplicant"
-                    class="collapse {{ Route::is('applicant-hire', 'applicant-indie') ? 'show' : '' }}"
+                    class="collapse {{ Route::is('applicant-all', 'applicant-hire', 'applicant-indie') ? 'show' : '' }}"
                     aria-labelledby="headingApplicant" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item {{ Route::is('applicant-all') ? 'active' : '' }}"
+                            href="{{ route('applicant-all') }}">Semua</a>
                         <a class="collapse-item {{ Route::is('applicant-hire') ? 'active' : '' }}"
                             href="{{ route('applicant-hire') }}">Hire</a>
                         <a class="collapse-item {{ Route::is('applicant-indie') ? 'active' : '' }}"

@@ -14,6 +14,7 @@
                     <input type="text" name="status" value="interview" hidden>
 
                     @if (auth()->user()->hasRole('majikan'))
+                        Apakah anda yakin untuk memilih pembantu <b>{{ $data->name }}</b> ini?
                         <input type="text" name="employe_id" value="{{ auth()->user()->id }}" hidden>
                     @else
                         <div class="form-group">
@@ -35,7 +36,7 @@
                         </div>
                     @endif
 
-                    <div class="form-group">
+                    {{-- <div class="form-group">
                         <label for="interview_date">Tanggal Interview <span class="text-danger">*</span></label>
                         <input type="date" class="form-control" id="interview_date" name="interview_date" required>
                     </div>
@@ -43,7 +44,7 @@
                     <div class="form-group">
                         <label for="notes">Catatan</label>
                         <textarea id="notes-editor" name="notes" class="form-control"></textarea>
-                    </div>
+                    </div> --}}
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>

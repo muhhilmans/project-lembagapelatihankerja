@@ -171,6 +171,19 @@ class EmployeController extends Controller
         return view('cms.user.partials.employe.detail', compact('data'));
     }
 
+    public function changeStatus(Request $request)
+    {
+        $user = User::findOrFail($request->user_id);
+
+        $user->is_active = ($user->is_active == 1 ? 0 : 1);
+        $user->save();
+
+        $statusMessage = $user->is_active == 1 ? 'Diaktifkan' : 'Dinonaktifkan';
+
+        Alert::success('Berhasil!', 'Majikan berhasil ' . $statusMessage);
+        return redirect()->route('users-employe.index');
+    }
+
     /**
      * Remove the specified resource from storage.
      */

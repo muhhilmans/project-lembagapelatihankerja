@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Models\Profession;
 use App\Models\Application;
 use App\Models\RecomServant;
 use Illuminate\Http\Request;
@@ -18,6 +19,8 @@ class VacancyController extends Controller
      */
     public function index()
     {
+        $professions = Profession::all();
+
         if (auth()->user()->roles->first()->name == 'majikan') {
             $users = auth()->user();
             $datas = Vacancy::where('user_id', $users->id)->get();
@@ -29,7 +32,7 @@ class VacancyController extends Controller
             })->get();
         }
 
-        return view('cms.vacancy.index', compact(['datas', 'users']));
+        return view('cms.vacancy.index', compact(['datas', 'users', 'professions']));
     }
 
     /**
@@ -39,6 +42,7 @@ class VacancyController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => ['required', 'string', 'max:255'],
+            'profession_id' => ['required', 'exists:professions,id'],
             'closing_date' => ['required', 'date'],
             'user_id' => ['required', 'exists:users,id'],
             'limit' => ['required', 'integer'],
@@ -57,6 +61,7 @@ class VacancyController extends Controller
             DB::transaction(function () use ($data) {
                 Vacancy::create([
                     'title' => $data['title'],
+                    'profession_id' => $data['profession_id'],
                     'closing_date' => $data['closing_date'],
                     'user_id' => $data['user_id'],
                     'limit' => $data['limit'],
@@ -103,6 +108,7 @@ class VacancyController extends Controller
 
         $validator = Validator::make($request->all(), [
             'title' => ['required', 'string', 'max:255'],
+            'profession_id' => ['required', 'exists:professions,id'],
             'closing_date' => ['required', 'date'],
             'user_id' => ['required', 'exists:users,id'],
             'limit' => ['required', 'integer'],
@@ -119,7 +125,7 @@ class VacancyController extends Controller
 
         try {
             DB::transaction(function () use ($data, $dataUpdate) {
-                if ($dataUpdate->limit < $data['limit']) {
+                if ($dataUpdate->limit <= $data['limit']) {
                     $status = true;
                 } else {
                     $status = false;
@@ -128,6 +134,7 @@ class VacancyController extends Controller
                 $dataUpdate->update([
                     'title' => $data['title'],
                     'closing_date' => $data['closing_date'],
+                    'profession_id' => $data['profession_id'],
                     'user_id' => $data['user_id'],
                     'limit' => $data['limit'],
                     'description' => $data['description'],
@@ -156,7 +163,7 @@ class VacancyController extends Controller
     {
         $data = Vacancy::findOrFail($id);
 
-        if ($data->applyJobs->count() > 0) {
+        if ($data->applications->count() > 0) {
             return redirect()->route('vacancies.index')->with('toast_error', 'Lowongan masih digunakan oleh pelamar!');
         }
 

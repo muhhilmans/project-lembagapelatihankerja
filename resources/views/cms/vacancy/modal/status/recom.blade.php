@@ -1,8 +1,8 @@
-<div class="modal fade" id="acceptModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="recomModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Proses Pelamar</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Jadwalkan Interview</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -33,8 +33,24 @@
 
 @push('custom-script')
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const closingDateInput = document.getElementById('interview_date');
+            const today = new Date();
+
+            // Konversi ke timezone Indonesia (UTC+7)
+            const utcOffset = 7 * 60 * 60 * 1000;
+            const indonesiaTime = new Date(today.getTime() + (today.getTimezoneOffset() * 60 * 1000) + utcOffset);
+
+            const year = indonesiaTime.getFullYear();
+            const month = String(indonesiaTime.getMonth() + 1).padStart(2, '0');
+            const date = String(indonesiaTime.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${date}`;
+
+            closingDateInput.setAttribute('min', formattedDate);
+        });
+        
         $(document).ready(function() {
-            $('#acceptModal-{{ $d->id }}').on('shown.bs.modal', function () {
+            $('#interviewModal-{{ $d->id }}').on('shown.bs.modal', function () {
                 $('#notes-editor').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
@@ -46,7 +62,7 @@
                 });
             });
 
-            $('#acceptModal-{{ $d->id }}').on('hidden.bs.modal', function () {
+            $('#interviewModal-{{ $d->id }}').on('hidden.bs.modal', function () {
                 $('#notes-editor').summernote('destroy');
             });
         });

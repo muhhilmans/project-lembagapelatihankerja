@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('title');
+            $table->foreignUuid('profession_id')->references('id')->on('professions')->onDelete('cascade');
             $table->text('description');
             $table->text('requirements');
             $table->text('benefits')->nullable();

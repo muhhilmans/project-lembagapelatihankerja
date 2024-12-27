@@ -92,6 +92,19 @@ class UtilityController extends Controller
 
     }
 
+    public function allApplicant()
+    {
+        if (auth()->user()->roles->first()->name == 'majikan') {
+            $datas = Application::where('employe_id', auth()->user()->id)
+            ->where('status', 'accepted')
+            ->get();
+        } else {
+            $datas = Application::all();
+        }
+
+        return view('cms.applicant.all', compact('datas'));
+    }
+
     public function hireApplicant()
     {
         if (auth()->user()->roles->first()->name == 'majikan') {
@@ -112,7 +125,7 @@ class UtilityController extends Controller
                 $query->where('id', auth()->user()->id);
             })
             ->whereNotNull('vacancy_id')
-            ->where('status', 'accepted')
+            ->where('status', ['accepted', 'passed'])
             ->get();
         } else {
             $datas = Application::whereNotNull('vacancy_id')->where('status', 'accepted')->get();
