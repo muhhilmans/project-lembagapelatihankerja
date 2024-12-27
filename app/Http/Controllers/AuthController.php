@@ -11,6 +11,7 @@ use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\RedirectResponse;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
@@ -53,10 +54,10 @@ class AuthController extends Controller
             $user = Auth::user();
 
             if ($user->email_verified_at == null) {
-                Auth::logout();
+                $this->sendVerificationEmail($user);
 
                 Alert::error('Email belum diverifikasi!', 'Silahkan verifikasi email terlebih dahulu..');
-                return redirect()->back();
+                return redirect()->route('verification.notice');;
             } else {
                 if ($user->is_active == 1) {
                     if ($user->roles->first()->name == 'pembantu') {
@@ -67,10 +68,15 @@ class AuthController extends Controller
                         return redirect()->intended('/dashboard');
                     }
                 } else {
-                    Auth::logout();
-
-                    Alert::error('Akun belum aktif!', 'Silahkan hubungi Admin..');
-                    return redirect()->back();
+                    Alert::error('Update Profil!', 'Silahkan update profil terlebih dahulu..');
+                    
+                    if ($user->roles->first()->name == 'pembantu') {
+                        return redirect()->intended('/dashboard-servant');
+                    } elseif ($user->roles->first()->name == 'majikan') {
+                        return redirect()->intended('/dashboard-employe');
+                    } else {
+                        return redirect()->intended('/dashboard');
+                    }
                 }
             }
         }
@@ -121,6 +127,8 @@ class AuthController extends Controller
                     'phone' => $request->phone,
                     'address' => $request->address
                 ]);
+
+                $this->sendVerificationEmail($store);
             });
 
             if ($store) {
@@ -176,6 +184,8 @@ class AuthController extends Controller
                     'user_id' => $store->id,
                     'profession_id' => $request->profession_id
                 ]);
+
+                $this->sendVerificationEmail($store);
             });
             if ($store) {
                 Alert::success('Berhasil!', 'Silahkan verifikasi email terlebih dahulu!');
@@ -191,6 +201,46 @@ class AuthController extends Controller
 
             return view('cms.error', compact('data'));
         }
+    }
+
+    protected function sendVerificationEmail($user)
+    {
+        $verificationLink = route('verification.verify', [
+            'id' => $user->id,
+            'hash' => sha1($user->email),
+        ]);
+
+        Mail::send('auth.verify', ['link' => $verificationLink], function ($message) use ($user) {
+            $message->to($user->email)->subject('Verifikasi Email Anda');
+        });
+    }
+
+    // Verifikasi email
+    public function verifyEmail($id, $hash)
+    {
+        $user = User::find($id);
+
+        if (!$user || sha1($user->email) !== $hash) {
+            return redirect()->route('login')->with('error', 'Tautan verifikasi tidak valid.');
+        }
+
+        $user->update(['email_verified_at' => now()]);
+
+        return redirect()->route('login')->with('success', 'Email berhasil diverifikasi.');
+    }
+
+    public function resendVerificationEmail(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->email_verified_at) {
+            return redirect()->route('dashboard')->with('success', 'Email sudah diverifikasi.');
+        }
+
+        $this->sendVerificationEmail($user);
+
+        Alert::success('Email Verifikasi Dikirim', 'Silakan cek email Anda.');
+        return redirect()->route('verification.notice');
     }
 
     public function logout(Request $request)

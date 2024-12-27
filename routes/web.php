@@ -26,6 +26,13 @@ Route::get('/select-register/employe', [AuthController::class, 'employeRegister'
 Route::post('/select-register/employe/store', [AuthController::class, 'storeEmployeRegister'])->name('store-employe-register');
 Route::get('/select-register/servant', [AuthController::class, 'servantRegister'])->name('register-servant');
 Route::post('/select-register/servant/store', [AuthController::class, 'storeServantRegister'])->name('store-servant-register');
+Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+Route::get('/email/verify', function () {
+    return view('auth.verify-notice');
+})->middleware('auth')->name('verification.notice');
+Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
+    ->middleware('auth')
+    ->name('verification.resend');
 
 Route::get('storage/img/{path}/{imageName}', [UtilityController::class, 'displayImage'])->name('getImage');
 
