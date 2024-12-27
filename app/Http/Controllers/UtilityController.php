@@ -78,13 +78,16 @@ class UtilityController extends Controller
             $servants = User::whereHas('roles', function ($query) {
                 $query->where('name', 'pembantu');
             })
+            ->where('is_active', true)
             ->whereHas('servantDetails', function ($query) {
                 $query->where('working_status', false);
             })
             ->whereDoesntHave('recomServants')
             ->get();
 
-            return view('cms.seek-vacancy.partial.detail', compact(['data', 'servants']));
+            $professions = Profession::all();
+
+            return view('cms.seek-vacancy.partial.detail', compact(['data', 'servants', 'professions']));
         }
 
     }

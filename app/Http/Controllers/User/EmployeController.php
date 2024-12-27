@@ -12,8 +12,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Validator;
 
 class EmployeController extends Controller
 {
@@ -31,14 +32,6 @@ class EmployeController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request): RedirectResponse
@@ -50,19 +43,35 @@ class EmployeController extends Controller
             'password' => ['required', Rules\Password::defaults()],
             'phone' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
+            'bank_name' => ['required', 'string', 'max:255'],
+            'account_number' => ['required', 'string', 'max:255'],
+            'identity_card' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
+        $data = $validator->validated();
+
         try {
-            DB::transaction(function () use ($request, &$store) {
+            DB::transaction(function () use ($data, &$store) {
+                $filesToUpdate = ['identity_card'];
+
+                foreach ($filesToUpdate as $fileKey) {
+                    if (isset($data[$fileKey]) && $data[$fileKey]->isValid()) {
+                        $newFile = $data[$fileKey];
+                        $newFileName = "{$fileKey}_{$data['username']}." . $newFile->getClientOriginalExtension();
+                        Storage::putFileAs("public/img/$fileKey", $newFile, $newFileName);
+                        $data[$fileKey] = $newFileName;
+                    }
+                }
+
                 $store = User::create([
-                    'name' => $request->name,
-                    'username' => $request->username,
-                    'email' => $request->email,
-                    'password' => Hash::make($request->password),
+                    'name' => $data['name'],
+                    'username' => $data['username'],
+                    'email' => $data['email'],
+                    'password' => Hash::make($data['password']),
                     'email_verified_at' => now(),
                     'is_active' => true,
                 ]);
@@ -71,8 +80,11 @@ class EmployeController extends Controller
 
                 EmployeDetail::create([
                     'user_id' => $store->id,
-                    'phone' => $request->phone,
-                    'address' => $request->address
+                    'phone' => $data['phone'],
+                    'address' => $data['address'],
+                    'bank_name' => $data['bank_name'],
+                    'account_number' => $data['account_number'],
+                    'identity_card' => $data['identity_card'],
                 ]);
             });
             if ($store) {
@@ -104,13 +116,35 @@ class EmployeController extends Controller
             'email' => ['sometimes', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id),],
             'phone' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
+            'bank_name' => ['required', 'string', 'max:255'],
+            'account_number' => ['required', 'string', 'max:255'],
+            'identity_card' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
+
+        $filesToUpdate = ['identity_card'];
+
+        foreach ($filesToUpdate as $fileKey) {
+            if (isset($data[$fileKey])) {
+                $oldFile = $user->employeDetails->$fileKey;
+
+                if ($oldFile && Storage::exists("public/img/$fileKey/$oldFile")) {
+                    Storage::delete("public/img/$fileKey/$oldFile");
+                }
+
+                $newFile = $data[$fileKey];
+                $newFileName = "{$fileKey}_{$user->username}." . $newFile->getClientOriginalExtension();
+                Storage::putFileAs("public/img/$fileKey", $newFile, $newFileName);
+                $data[$fileKey] = $newFileName;
+            } else {
+                $data[$fileKey] = $user->employeDetails->$fileKey;
+            }
+        }
 
         $user->update([
             'name' => $data['name'],
@@ -120,11 +154,21 @@ class EmployeController extends Controller
 
         $user->employeDetails()->update([
             'phone' => $data['phone'],
-            'address' => $data['address']
+            'address' => $data['address'],
+            'bank_name' => $data['bank_name'],
+            'account_number' => $data['account_number'],
+            'identity_card' => $data['identity_card'],
         ]);
 
         Alert::success('Berhasil!', 'Majikan berhasil diperbarui!');
         return redirect()->route('users-employe.index');
+    }
+
+    public function show(string $id)
+    {
+        $data = User::find($id);
+
+        return view('cms.user.partials.employe.detail', compact('data'));
     }
 
     /**

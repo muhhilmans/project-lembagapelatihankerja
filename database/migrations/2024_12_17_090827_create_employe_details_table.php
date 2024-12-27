@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignUuid('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->text('address')->nullable();
             $table->string('phone')->default('-');
+            $table->string('bank_name')->default('-');
+            $table->string('account_number')->default('-');
+            $table->string('identity_card')->nullable();
             $table->timestamps();
         });
     }

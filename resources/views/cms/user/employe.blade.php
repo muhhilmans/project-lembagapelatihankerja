@@ -23,9 +23,8 @@
                             <th>No</th>
                             <th>Nama</th>
                             <th>Email</th>
-                            <th>Username</th>
-                            <th>Alamat</th>
                             <th>No Telepon</th>
+                            <th>Status</th>
                             @hasrole('superadmin|admin')
                                 <th>Aksi</th>
                             @endhasrole
@@ -37,25 +36,32 @@
                                 <td class="text-center">{{ $loop->iteration }}</td>
                                 <td>{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
-                                <td>{{ $user->username }}</td>
-                                <td>{{ $user->employeDetails->address ?? 'Belum diisi' }}</td>
                                 <td>{{ $user->employeDetails->phone == '-' ? 'Belum diisi' : $user->employeDetails->phone ?? 'Belum diisi' }}
                                 </td>
-                                @hasrole('superadmin|admin')
-                                    <td class="text-center">
+                                <td class="text-center"><span
+                                        class="p-2 badge badge-{{ $user->is_active == 1 ? 'success' : 'danger' }}">{{ $user->is_active == 1 ? 'Aktif' : 'Tidak Aktif' }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <a class="btn btn-info mb-2 mb-lg-0"
+                                        href="{{ route('users-employe.show', $user->id) }}"><i
+                                            class="fas fa-fw fa-eye"></i></a>
+
+                                    @hasrole('superadmin|admin')
                                         <a class="btn btn-warning mb-2 mb-lg-0" href="#" data-toggle="modal"
-                                            data-target="#editModal-{{ $user->id }}"><i class="fas fa-fw fa-user-edit"></i></a>
+                                            data-target="#editModal-{{ $user->id }}"><i
+                                                class="fas fa-fw fa-user-edit"></i></a>
                                         @include('cms.user.partials.employe.edit-employe', [
                                             'user' => $user,
                                         ])
 
                                         <a class="btn btn-danger" href="#" data-toggle="modal"
-                                            data-target="#deleteModal-{{ $user->id }}"><i class="fas fa-fw fa-trash"></i></a>
+                                            data-target="#deleteModal-{{ $user->id }}"><i
+                                                class="fas fa-fw fa-trash"></i></a>
                                         @include('cms.user.partials.employe.delete-employe', [
                                             'user' => $user,
                                         ])
-                                    </td>
-                                @endhasrole
+                                    @endhasrole
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

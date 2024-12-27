@@ -16,7 +16,10 @@ class EmployeDetail extends Model
     protected $fillable = [
         'user_id',
         'address',
-        'phone'
+        'phone',
+        'bank_name',
+        'account_number',
+        'identity_card',
     ];
 
     public function user()
