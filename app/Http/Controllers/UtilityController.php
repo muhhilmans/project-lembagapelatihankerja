@@ -65,7 +65,9 @@ class UtilityController extends Controller
     {
         $datas = Vacancy::where('closing_date', '>=', now())->where('status', true)->get();
 
-        return view('cms.seek-vacancy.index', compact('datas'));
+        $professions = Profession::all();
+
+        return view('cms.seek-vacancy.index', compact(['datas', 'professions']));
     }
 
     public function showVacancy(string $id)
