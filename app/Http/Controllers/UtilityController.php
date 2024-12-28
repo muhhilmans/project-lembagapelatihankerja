@@ -113,11 +113,11 @@ class UtilityController extends Controller
             $datas = Application::where('employe_id', auth()->user()->id)
             ->whereNotNull('employe_id')
             ->get();
+            return view('cms.applicant.hire', compact('datas'));
         } else {
             $datas = Application::whereNotNull('employe_id')->get();
+            return view('cms.applicant.hire', compact('datas'));
         }
-
-        return view('cms.applicant.hire', compact('datas'));
     }
 
     public function indieApplicant()

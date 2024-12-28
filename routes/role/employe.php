@@ -14,7 +14,6 @@ Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     Route::resource('vacancies', VacancyController::class)->except('create', 'edit');
     Route::post('/vacancies/{vacancy}/{user}/recommendation', [ApplicationController::class, 'applyRecom'])->name('apply.recommendation');
     
-    // Route::put('vacancies/{vacancy}/{user}/upload', [ApplicationController::class, 'uploadContract'])->name('vacancies.upload');
     Route::get('/applicant-all', [UtilityController::class, 'allApplicant'])->name('applicant-all');
 
     Route::get('/applicant-hire', [UtilityController::class, 'hireApplicant'])->name('applicant-hire');
