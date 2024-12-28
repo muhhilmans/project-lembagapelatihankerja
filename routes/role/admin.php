@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ComplaintController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfessionController;
 use App\Http\Controllers\User\AdminController;
@@ -23,6 +24,8 @@ Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
     Route::resource('professions', ProfessionController::class)->except('create', 'show', 'edit');
 
     Route::post('/vacancy/{id}/recommendation', [UtilityController::class, 'storeRecom'])->name('vacancy.recommendation');
+
+    Route::put('complaints/{id}/change', [ComplaintController::class, 'changeStatus'])->name('complaints.change');
 });
 
 Route::group(['middleware' => ['role:superadmin|owner']], function () {

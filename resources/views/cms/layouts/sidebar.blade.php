@@ -129,6 +129,14 @@
                     </div>
                 </div>
             </li>
+
+            <!-- Nav Item - Profesi -->
+            <li class="nav-item {{ Route::is('complaints.*') ? 'active' : '' }}">
+                <a class="nav-link {{ Route::is('complaints.*') ? 'active' : '' }}"
+                    href="{{ route('complaints.index') }}">
+                    <i class="fas fa-fw fa-bullhorn"></i>
+                    <span>Pengaduan</span></a>
+            </li>
         @endhasrole
     @endif
 

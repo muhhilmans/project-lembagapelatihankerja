@@ -135,11 +135,27 @@
                                     @endif
 
                                     @if ($d->status == 'accepted')
+                                        @php
+                                            $hasComplaintWithSameServant = $d->complaint->contains(function (
+                                                $complaint,
+                                            ) use ($d) {
+                                                return $complaint->servant_id == $d->servant_id;
+                                            });
+                                        @endphp
+
+                                        @if (!$hasComplaintWithSameServant)
+                                            <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                                data-target="#complaintModal-{{ $d->id }}">
+                                                <i class="fas fa-bullhorn"></i>
+                                            </a>
+                                            @include('cms.applicant.modal.complaint', ['data' => $d])
+                                        @endif
+
                                         <a href="{{ route('contract.download', $d->id) }}"
                                             class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
                                     @endif
 
-                                    @if ($d->status != 'rejected')
+                                    @if ($d->status != 'rejected' && $d->status != 'accepted')
                                         <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                                             data-target="#rejectModal-{{ $d->id }}">
                                             <i class="fas fa-times"></i>

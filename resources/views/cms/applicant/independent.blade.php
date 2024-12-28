@@ -101,12 +101,6 @@
                                             <i class="fas fa-check"></i>
                                         </a>
                                         @include('cms.applicant.modal.accept', ['data' => $d])
-
-                                        <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
-                                            data-target="#rejectModal-{{ $d->id }}">
-                                            <i class="fas fa-times"></i>
-                                        </a>
-                                        @include('cms.applicant.modal.reject', ['data' => $d])
                                     @endif
 
                                     @if ($d->status == 'interview')
@@ -115,12 +109,6 @@
                                             <i class="fas fa-file-contract"></i>
                                         </a>
                                         @include('cms.applicant.modal.contract', ['data' => $d])
-
-                                        <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
-                                            data-target="#rejectModal-{{ $d->id }}">
-                                            <i class="fas fa-times"></i>
-                                        </a>
-                                        @include('cms.applicant.modal.reject', ['data' => $d])
                                     @endif
 
                                     @if ($d->status == 'accepted')
@@ -142,6 +130,16 @@
 
                                         <a href="{{ route('contract.download', $d->id) }}"
                                             class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
+                                    @endif
+
+                                    @if ($d->status != 'rejected' && $d->status != 'accepted')
+                                        <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                            data-target="#rejectModal-{{ $d->id }}">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                        @include('cms.applicant.modal.status.reject', [
+                                            'data' => $d,
+                                        ])
                                     @endif
 
                                     <a class="btn btn-sm btn-info" href="#" data-toggle="modal" data-target="#servantDetailsModal-{{ $d->id }}">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Complaint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,15 +16,63 @@ class ComplaintController extends Controller
      */
     public function index()
     {
-        //
+        $datas = Complaint::all();
+
+        return view('cms.complaint.index', compact('datas'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function changeStatus(Request $request, string $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'status' => ['required'],
+            'file' => 'sometimes|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
+        }
+
+        $data = $validator->validated();
+
+        $update = Complaint::findOrFail($id);
+
+        try {
+            DB::transaction(function () use ($data, $update, $request) {
+                if ($data['status'] == 'accepted') {
+                    $directory = "complaints/vacancy_{$update->servant->name}";
+                    $fileName = "memorandum_{$update->servant->name}." . $request->file('file')->getClientOriginalExtension();
+
+                    if (!Storage::exists($directory)) {
+                        Storage::makeDirectory($directory);
+                    }
+
+                    if ($update->file && Storage::exists($update->file)) {
+                        Storage::delete($update->file);
+                    }
+
+                    $path = $request->file('file')->storeAs($directory, $fileName);
+
+                    $update->update([
+                        'status' => $data['status'],
+                        'file' => $path,
+                    ]);
+                } else {
+                    $update->update([
+                        'status' => $data['status'],
+                    ]);
+                }
+            });
+
+            Alert::success('Berhasil', 'Status keluhan berhasil diubah!');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return redirect()->back()->with('toast_error', $data);
+        }
     }
 
     /**
