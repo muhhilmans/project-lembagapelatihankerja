@@ -108,7 +108,7 @@
                                 </span>
 
                                 <div class="row">
-                                    @hasrole('superadmin|admin')
+                                    {{-- @hasrole('superadmin|admin')
                                         @if ($d->status === 'passed')
                                             <td class="text-center">
                                                 <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
@@ -138,7 +138,7 @@
                                             <i class="fas fa-file-contract"></i>
                                         </a>
                                         @include('cms.applicant.modal.contract', ['data' => $d])
-                                    @endif
+                                    @endif --}}
 
                                     @if ($d->status == 'accepted')
                                         @php
@@ -161,7 +161,7 @@
                                             class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
                                     @endif
 
-                                    @if ($d->status != 'rejected' && $d->status != 'accepted')
+                                    {{-- @if ($d->status != 'rejected' && $d->status != 'accepted')
                                         <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                                             data-target="#rejectModal-{{ $d->id }}">
                                             <i class="fas fa-times"></i>
@@ -169,7 +169,7 @@
                                         @include('cms.applicant.modal.status.reject', [
                                             'data' => $d,
                                         ])
-                                    @endif
+                                    @endif --}}
 
                                     <a class="btn btn-sm btn-info" href="#" data-toggle="modal"
                                         data-target="#servantDetailsModal-{{ $d->id }}">

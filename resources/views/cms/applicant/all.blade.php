@@ -112,7 +112,7 @@
                                 </span>
 
                                 <div class="row">
-                                    @if ($d->status == 'pending')
+                                    {{-- @if ($d->status == 'pending')
                                         <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                                             data-target="#acceptModal-{{ $d->id }}">
                                             <i class="fas fa-check"></i>
@@ -138,7 +138,7 @@
                                             <i class="fas fa-times"></i>
                                         </a>
                                         @include('cms.applicant.modal.reject', ['data' => $d])
-                                    @endif
+                                    @endif --}}
 
                                     @if ($d->status == 'accepted')
                                         @php

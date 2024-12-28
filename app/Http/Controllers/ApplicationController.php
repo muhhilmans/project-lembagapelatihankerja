@@ -117,47 +117,45 @@ class ApplicationController extends Controller
         try {
             $application = Application::findOrFail($id);
             $employe = User::findOrFail($application->employe_id);
-            $applyJob = Application::where('employe_id', $employe->id)
-                ->where('servant_id', $application->servant->id)
-                ->first();
+            $servant = User::findOrFail($application->servant_id);
 
             $directory = "contracts/hire_{$employe->name}";
-            $fileName = "contract_{$application->servant->name}." . $request->file('file_contract')->getClientOriginalExtension();
+            $fileName = "contract_{$servant->name}." . $request->file('file_contract')->getClientOriginalExtension();
 
+            // Buat direktori jika belum ada
             if (!Storage::exists($directory)) {
                 Storage::makeDirectory($directory);
             }
 
-            if ($applyJob->file_contract && Storage::exists($applyJob->file_contract)) {
-                Storage::delete($applyJob->file_contract);
+            // Hapus kontrak lama jika ada
+            if ($application->file_contract && Storage::exists($application->file_contract)) {
+                Storage::delete($application->file_contract);
             }
 
+            // Simpan file kontrak baru
             $path = $request->file('file_contract')->storeAs($directory, $fileName);
 
-            $status = 'accepted';
+            DB::transaction(function () use ($application, $servant, $employe, $path) {
+                // Perbarui status lamaran yang di-accept
+                $application->update([
+                    'status' => 'accepted',
+                    'file_contract' => $path,
+                ]);
 
-            $applyJob->update([
-                'status' => $status,
-                'file_contract' => $path,
-            ]);
+                // Perbarui working status pelamar
+                $servantDetail = ServantDetail::where('user_id', $servant->id)->first();
+                if ($servantDetail) {
+                    $servantDetail->update(['working_status' => true]);
+                }
 
-            $user = User::findOrFail($application->servant_id);
-
-            if ($status == 'accepted') {
-                DB::transaction(function () use ($user, $employe) {
-                    $updateUser = ServantDetail::where('user_id', $user->id)->first();
-                    if ($updateUser) {
-                        $updateUser->update([
-                            'working_status' => true,
-                        ]);
-                    }
-
-                    Application::where('servant_id', $user->id)->where('status', '!=', 'accepted')->update([
+                // Perbarui status lamaran lain menjadi rejected
+                Application::where('servant_id', $servant->id)
+                    ->where('id', '!=', $application->id) // Pastikan lamaran ini bukan yang di-accept
+                    ->update([
                         'status' => 'rejected',
                         'notes_rejected' => 'Telah diterima oleh ' . $employe->name,
                     ]);
-                });
-            }
+            });
 
             Alert::success('Berhasil', 'File kontrak berhasil diunggah.');
             return redirect()->back();
@@ -165,6 +163,8 @@ class ApplicationController extends Controller
             return redirect()->back()->with('toast_error', 'Gagal mengunggah file kontrak: ' . $e->getMessage());
         }
     }
+
+
 
     public function hireReject(Request $request, string $id)
     {
