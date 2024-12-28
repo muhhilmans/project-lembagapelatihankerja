@@ -11,7 +11,7 @@
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
-                    <input type="text" name="status" value="verify" hidden>
+                    <input type="text" name="status" value="choose" hidden>
                     <input type="text" name="notes" value="" hidden>
 
                     Apakah anda yakin untuk memilih bekerja di <b>{{ $d->vacancy->user->name }}</b> ini?
