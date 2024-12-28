@@ -118,15 +118,14 @@
                                 @endif
 
                                 @hasrole('superadmin|admin')
-                                    @if ($d->status === 'choose')
-                                        <td class="text-center">
-                                            <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                                data-target="#chooseModal-{{ $d->id }}"><i
-                                                    class="fas fa-check-double"></i></a>
-                                            @include('cms.vacancy.modal.status.choose', [
-                                                'data' => $d,
-                                            ])
-                                        </td>
+                                    @if ($d->status == 'passed')
+                                        <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
+                                            data-target="#chooseModal-{{ $d->id }}">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        @include('cms.vacancy.modal.status.choose', [
+                                            'data' => $d,
+                                        ])
                                     @endif
 
                                     @if ($d->status === 'verify')
