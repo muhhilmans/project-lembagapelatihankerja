@@ -136,6 +136,14 @@
                                                 @include('cms.applicant.modal.status.choose', [
                                                     'data' => $d,
                                                 ])
+
+                                                <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                                    data-target="#rejectModal-{{ $d->id }}">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                                @include('cms.applicant.modal.status.reject', [
+                                                    'data' => $d,
+                                                ])
                                             </td>
                                         @endif
 
@@ -145,6 +153,14 @@
                                                     data-target="#verifyModal-{{ $d->id }}"><i
                                                         class="fas fa-check-double"></i></a>
                                                 @include('cms.applicant.modal.status.verify', [
+                                                    'data' => $d,
+                                                ])
+
+                                                <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                                    data-target="#rejectModal-{{ $d->id }}">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                                @include('cms.applicant.modal.status.reject', [
                                                     'data' => $d,
                                                 ])
                                             </td>
@@ -158,17 +174,15 @@
                                                 @include('cms.applicant.modal.status.agree', [
                                                     'data' => $d,
                                                 ])
-                                            </td>
-                                        @endif
 
-                                        @if ($d->status != 'pending' && $d->status != 'interview' && $d->status != 'contract')
-                                            <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
-                                                data-target="#rejectModal-{{ $d->id }}">
-                                                <i class="fas fa-times"></i>
-                                            </a>
-                                            @include('cms.applicant.modal.status.reject', [
-                                                'data' => $d,
-                                            ])
+                                                <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                                    data-target="#rejectModal-{{ $d->id }}">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                                @include('cms.applicant.modal.status.reject', [
+                                                    'data' => $d,
+                                                ])
+                                            </td>
                                         @endif
                                     @endhasrole
 

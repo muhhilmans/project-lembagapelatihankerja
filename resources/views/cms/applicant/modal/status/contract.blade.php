@@ -9,7 +9,7 @@
                 </button>
             </div>
             <form method="POST"
-                action="#"
+                action="{{ route('applicant-hire.contract', $d->id)}}"
                 enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
