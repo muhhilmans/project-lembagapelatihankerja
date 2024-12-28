@@ -25,7 +25,7 @@
                                     @php
                                         $applicationExists = \App\Models\Application::where('servant_id', $data->id)
                                             ->where('employe_id', $employe->id)
-                                            ->where('status', 'interview')
+                                            ->whereIn('status', ['interview', 'verify', 'passed', 'choose', 'accepted', 'rejected', 'pending'])
                                             ->exists();
                                     @endphp
                                     @if (!$applicationExists)

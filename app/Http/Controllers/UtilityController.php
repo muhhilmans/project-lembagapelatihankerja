@@ -125,10 +125,10 @@ class UtilityController extends Controller
                 $query->where('id', auth()->user()->id);
             })
             ->whereNotNull('vacancy_id')
-            ->where('status', ['accepted', 'passed'])
+            ->whereIn('status', ['accepted', 'passed', 'contract', 'verify'])
             ->get();
         } else {
-            $datas = Application::whereNotNull('vacancy_id')->where('status', 'accepted')->get();
+            $datas = Application::whereNotNull('vacancy_id')->whereIn('status', ['accepted', 'passed', 'contract', 'verify'])->get();
         }
 
         return view('cms.applicant.independent', compact('datas'));

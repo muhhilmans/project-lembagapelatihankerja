@@ -48,6 +48,10 @@ Route::middleware(['auth'])->group(function () {
     require __DIR__.'/role/admin.php';
     require __DIR__.'/role/employe.php';
     require __DIR__.'/role/servant.php';
+    Route::put('/applicant-hire/{id}/change', [ApplicationController::class, 'changeStatusHire'])->name('applicant-hire.change');
+    Route::put('/applicant-hire/{id}/contract', [ApplicationController::class, 'hireContract'])->name('applicant-hire.contract');
+    Route::put('/applicant-hire/{id}/reject', [ApplicationController::class, 'hireReject'])->name('applicant-hire.reject');
+    Route::put('vacancies/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('vacancies.change');
     
     Route::get('contract/download/{applyJob}', [ApplicationController::class, 'downloadContract'])->name('contract.download');
 

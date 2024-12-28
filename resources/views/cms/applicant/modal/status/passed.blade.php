@@ -12,6 +12,7 @@
                 @method('PUT')
                 <div class="modal-body text-left">
                     <input type="text" name="status" value="passed" hidden>
+                    <input type="text" name="notes" value="" hidden>
 
                     Apakah anda yakin untuk meloloskan <b>{{ $d->servant->name }}</b> ini?
                 </div>

@@ -1,4 +1,4 @@
-<div class="modal fade" id="passedModal-{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="verifyModal-{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -7,14 +7,14 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('applicant-hire.change', $data->id) }}">
+            <form method="POST" action="{{ route('vacancies.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
-                    <input type="text" name="status" value="choose" hidden>
+                    <input type="text" name="status" value="contract" hidden>
                     <input type="text" name="notes" value="" hidden>
 
-                    Apakah anda yakin untuk memilih bekerja di <b>{{ $data->employe->name }}</b> ini?
+                    Apakah anda yakin untuk memperkerjakan <b>{{ $d->servant->name }}</b> di <b>{{ $d->vacancy->user->name }}</b> ini?
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>

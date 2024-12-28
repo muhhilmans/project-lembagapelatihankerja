@@ -54,6 +54,7 @@
                                             'passed' => 'Lolos Interview',
                                             'choose' => 'Pending Verifikasi',
                                             'verify' => 'Verifikasi',
+                                            'contract' => 'Perjanjian',
                                             default => 'Status Tidak Diketahui',
                                         } }}
                                     </span>

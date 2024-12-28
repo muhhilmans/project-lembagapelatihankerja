@@ -90,12 +90,24 @@
                         <div class="card-footer text-right">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span
-                                    class="badge badge-{{ match ($d->status) {
-                                        'interview' => 'warning',
-                                        'rejected' => 'danger',
+                                    class="p-2 badge badge-{{ match ($d->status) {
                                         'accepted' => 'success',
+                                        'rejected' => 'danger',
+                                        'pending' => 'warning',
+                                        'verify' => 'warning',
+                                        'interview' => 'info',
                                         default => 'secondary',
-                                    } }} p-2">{{ $d->status }}
+                                    } }}">
+                                    {{ match ($d->status) {
+                                        'accepted' => 'Diterima',
+                                        'rejected' => 'Ditolak',
+                                        'pending' => 'Pending',
+                                        'interview' => 'Interview',
+                                        'passed' => 'Lolos Interview',
+                                        'choose' => 'Pending Verifikasi',
+                                        'verify' => 'Verifikasi',
+                                        default => 'Status Tidak Diketahui',
+                                    } }}
                                 </span>
 
                                 <div class="row">

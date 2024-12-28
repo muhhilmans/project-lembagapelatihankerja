@@ -85,12 +85,25 @@
                         <div class="card-footer">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span
-                                    class="badge badge-{{ match ($d->status) {
-                                        'interview' => 'warning',
-                                        'rejected' => 'danger',
+                                    class="p-2 badge badge-{{ match ($d->status) {
                                         'accepted' => 'success',
+                                        'rejected' => 'danger',
+                                        'pending' => 'warning',
+                                        'verify' => 'warning',
+                                        'interview' => 'info',
                                         default => 'secondary',
-                                    } }} p-2">{{ $d->status }}
+                                    } }}">
+                                    {{ match ($d->status) {
+                                        'accepted' => 'Diterima',
+                                        'rejected' => 'Ditolak',
+                                        'pending' => 'Pending',
+                                        'interview' => 'Interview',
+                                        'passed' => 'Lolos Interview',
+                                        'choose' => 'Pending Verifikasi',
+                                        'verify' => 'Verifikasi',
+                                        'contract' => 'Perjanjian',
+                                        default => 'Status Tidak Diketahui',
+                                    } }}
                                 </span>
 
                                 <div class="row">
@@ -114,17 +127,31 @@
                                         ])
                                     @endif
 
-                                    @if ($d->status == 'choose')
-                                        <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                            data-target="#chooseModal-{{ $d->id }}">
-                                            <i class="fas fa-check-double"></i>
-                                        </a>
-                                        @include('cms.applicant.modal.status.choose', [
-                                            'data' => $d,
-                                        ])
-                                    @endif
+                                    @hasrole('superadmin|admin')
+                                        @if ($d->status === 'passed')
+                                            <td class="text-center">
+                                                <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
+                                                    data-target="#chooseModal-{{ $d->id }}"><i
+                                                        class="fas fa-check-double"></i></a>
+                                                @include('cms.applicant.modal.status.choose', [
+                                                    'data' => $d,
+                                                ])
+                                            </td>
+                                        @endif
 
-                                    @if ($d->status == 'verify')
+                                        @if ($d->status === 'verify')
+                                            <td class="text-center">
+                                                <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
+                                                    data-target="#verifyModal-{{ $d->id }}"><i
+                                                        class="fas fa-check-double"></i></a>
+                                                @include('cms.applicant.modal.status.verify', [
+                                                    'data' => $d,
+                                                ])
+                                            </td>
+                                        @endif
+                                    @endhasrole
+
+                                    @if ($d->status == 'contract')
                                         <a href="#" class="btn btn-sm btn-primary mr-1" data-toggle="modal"
                                             data-target="#contractModal-{{ $d->id }}">
                                             <i class="fas fa-file-contract"></i>

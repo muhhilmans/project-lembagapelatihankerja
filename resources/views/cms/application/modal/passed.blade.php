@@ -11,9 +11,10 @@
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
-                    <input type="text" name="status" value="verify" hidden>
+                    <input type="text" name="status" value="choose" hidden>
+                    <input type="text" name="notes" value="" hidden>
 
-                    Apakah anda yakin untuk memilih bekerja di <b>{{ $data->employe->name }}</b> ini?
+                    Apakah anda yakin untuk memilih bekerja di <b>{{ $data->vacancy->user->name }}</b> ini?
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>

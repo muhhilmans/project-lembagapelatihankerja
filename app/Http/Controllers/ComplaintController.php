@@ -16,7 +16,11 @@ class ComplaintController extends Controller
      */
     public function index()
     {
-        $datas = Complaint::all();
+        if (auth()->user()->roles->first()->name == 'majikan') {
+            $datas = Complaint::where('employe_id', auth()->user()->id)->get();
+        } else {
+            $datas = Complaint::all();
+        }
 
         return view('cms.complaint.index', compact('datas'));
     }

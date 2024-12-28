@@ -115,25 +115,49 @@ class ApplicationController extends Controller
         ]);
 
         try {
-            $data = Application::findOrFail($id);
+            $application = Application::findOrFail($id);
+            $employe = User::findOrFail($application->employe_id);
+            $applyJob = Application::where('employe_id', $employe->id)
+                ->where('servant_id', $application->servant->id)
+                ->first();
 
-            $directory = "contracts/{$data->employe->name}";
-            $fileName = "contract_hire_{$data->servant->name}." . $request->file('file_contract')->getClientOriginalExtension();
+            $directory = "contracts/hire_{$employe->name}";
+            $fileName = "contract_{$application->servant->name}." . $request->file('file_contract')->getClientOriginalExtension();
 
             if (!Storage::exists($directory)) {
                 Storage::makeDirectory($directory);
             }
 
-            if ($data->file_contract && Storage::exists($data->file_contract)) {
-                Storage::delete($data->file_contract);
+            if ($applyJob->file_contract && Storage::exists($applyJob->file_contract)) {
+                Storage::delete($applyJob->file_contract);
             }
 
             $path = $request->file('file_contract')->storeAs($directory, $fileName);
 
-            $data->update([
-                'status' => 'accepted',
+            $status = 'accepted';
+
+            $applyJob->update([
+                'status' => $status,
                 'file_contract' => $path,
             ]);
+
+            $user = User::findOrFail($application->servant_id);
+
+            if ($status == 'accepted') {
+                DB::transaction(function () use ($user, $employe) {
+                    $updateUser = ServantDetail::where('user_id', $user->id)->first();
+                    if ($updateUser) {
+                        $updateUser->update([
+                            'working_status' => true,
+                        ]);
+                    }
+
+                    Application::where('servant_id', $user->id)->where('status', '!=', 'accepted')->update([
+                        'status' => 'rejected',
+                        'notes_rejected' => 'Telah diterima oleh ' . $employe->name,
+                    ]);
+                });
+            }
 
             Alert::success('Berhasil', 'File kontrak berhasil diunggah.');
             return redirect()->back();

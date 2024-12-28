@@ -89,8 +89,9 @@
                                     'pending' => 'Pending',
                                     'interview' => 'Interview',
                                     'passed' => 'Lolos Interview',
-                                    'choose' => 'Pending Verifikasi',
+                                    'choose' => 'Pending Verif',
                                     'verify' => 'Verifikasi',
+                                    'contract' => 'Perjanjian',
                                     default => 'Status Tidak Diketahui',
                                 } }}
                             </span>
@@ -116,17 +117,31 @@
                                     ])
                                 @endif
 
-                                @if ($d->status == 'passed')
-                                    <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                        data-target="#chooseModal-{{ $d->id }}">
-                                        <i class="fas fa-check-double"></i>
-                                    </a>
-                                    @include('cms.vacancy.modal.status.choose', [
-                                        'data' => $d,
-                                    ])
-                                @endif
+                                @hasrole('superadmin|admin')
+                                    @if ($d->status === 'choose')
+                                        <td class="text-center">
+                                            <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
+                                                data-target="#chooseModal-{{ $d->id }}"><i
+                                                    class="fas fa-check-double"></i></a>
+                                            @include('cms.vacancy.modal.status.choose', [
+                                                'data' => $d,
+                                            ])
+                                        </td>
+                                    @endif
 
-                                @if ($d->status == 'verify')
+                                    @if ($d->status === 'verify')
+                                        <td class="text-center">
+                                            <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
+                                                data-target="#verifyModal-{{ $d->id }}"><i
+                                                    class="fas fa-check-double"></i></a>
+                                            @include('cms.vacancy.modal.status.verify', [
+                                                'data' => $d,
+                                            ])
+                                        </td>
+                                    @endif
+                                @endhasrole
+
+                                @if ($d->status == 'contract')
                                     <a href="#" class="btn btn-sm btn-primary mr-1" data-toggle="modal"
                                         data-target="#contractModal-{{ $d->id }}">
                                         <i class="fas fa-file-contract"></i>
@@ -151,7 +166,8 @@
                                     ])
                                 @endif
 
-                                <a class="btn btn-sm btn-info" href="#" data-toggle="modal" data-target="#servantDetailsModal-{{ $d->id }}">
+                                <a class="btn btn-sm btn-info" href="#" data-toggle="modal"
+                                    data-target="#servantDetailsModal-{{ $d->id }}">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @include('cms.vacancy.modal.servant-detail', ['data' => $d])
