@@ -6,7 +6,7 @@
 
         <div class="row text-center">
             <div class="col-lg-6">
-                <a href="{{ route('register-employe') }}" class="text-secondary">
+                <a href="{{ route('register-tc-employe') }}" class="text-secondary">
                     <div class="card o-hidden border-0 shadow-lg mb-3 mb-lg-0">
                         <div class="card-body">
                             <h1 class="display-1 card-title"><i class="fas fa-fw fa-building"></i></h1>
@@ -16,7 +16,7 @@
                 </a>
             </div>
             <div class="col-lg-6">
-                <a href="{{ route('register-servant') }}" class="text-secondary">
+                <a href="{{ route('register-tc-servant') }}" class="text-secondary">
                     <div class="card o-hidden border-0 shadow-lg">
                         <div class="card-body">
                             <h1 class="display-1 card-title"><i class="fas fa-fw fa-user-tie"></i></h1>

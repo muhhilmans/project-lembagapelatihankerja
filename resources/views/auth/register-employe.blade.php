@@ -2,27 +2,15 @@
 
 @section('main')
     <div class="col-lg-8 text-right">
-        <a href="{{ route('select-register') }}" class="btn btn-secondary mb-3 shadow"><i
+        <a href="{{ route('register-tc-employe') }}" class="btn btn-secondary mb-3 shadow"><i
                 class="fas fa-fw fa-arrow-left"></i></a>
 
         <div class="row text-center">
             <div class="col-lg-12">
                 <div class="card o-hidden border-0 shadow-lg mb-3 mb-lg-0 p-3">
-                    <div class="card-title">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="defaultCheck1" required>
-                            <label class="form-check-label" for="defaultCheck1">
-                                Saya telah membaca dan menyetujui <a href="#" data-toggle="modal"
-                                    data-target="#termEmployeModal">Syarat</a> dan <a href="#" data-toggle="modal"
-                                    data-target="#conditionEmployeModal">Ketentuan</a>
-                            </label>
-                            @include('auth.modal.employe-term')
-                            @include('auth.modal.employe-condition')
-                        </div>
-                    </div>
+                    <h3 class="card-title font-weight-bold">Registrasi Akun</h3>
                     <div class="card-body text-start">
-                        <form action="{{ route('store-employe-register') }}" method="POST" id="registerForm"
-                            style="display: none;">
+                        <form action="{{ route('store-employe-register') }}" method="POST">
                             @csrf
                             <div class="mb-2 text-left">
                                 <div class="form-row">
@@ -65,12 +53,3 @@
         </div>
     </div>
 @endsection
-
-@push('custom-script')
-    <script>
-        document.getElementById('defaultCheck1').addEventListener('change', function() {
-            const registerForm = document.getElementById('registerForm');
-            registerForm.style.display = this.checked ? 'block' : 'none';
-        });
-    </script>
-@endpush

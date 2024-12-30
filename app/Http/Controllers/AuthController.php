@@ -90,6 +90,11 @@ class AuthController extends Controller
         return view('auth.select-register');
     }
 
+    public function tcEmployeRegister()
+    {
+        return view('auth.tc-register-employe');
+    }
+
     public function employeRegister()
     {
         return view('auth.register-employe');
@@ -145,6 +150,11 @@ class AuthController extends Controller
 
             return view('error', compact('data'));
         }
+    }
+
+    public function tcServantRegister()
+    {
+        return view('auth.tc-register-servant');
     }
 
     public function servantRegister()
