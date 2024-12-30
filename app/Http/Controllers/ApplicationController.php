@@ -73,20 +73,25 @@ class ApplicationController extends Controller
 
         try {
             DB::transaction(function () use ($update, $data) {
-                if ($data['status'] == 'interview') {
+                if ($data['status'] == 'schedule') {
                     $update->update([
                         'status' => $data['status'],
                         'notes_interview' => $data['notes'],
                         'interview_date' => $data['interview_date'],
                     ]);
-                } elseif ($data['status'] == 'verify') {
+                } elseif ($data['status'] == 'interview') {
                     $update->update([
                         'status' => $data['status'],
-                        'notes_verify' => $data['notes'],
+                        'notes_interview' => $data['notes'],
                     ]);
                 } elseif ($data['status'] == 'passed') {
                     $update->update([
                         'status' => $data['status'],
+                    ]);
+                } elseif ($data['status'] == 'verify') {
+                    $update->update([
+                        'status' => $data['status'],
+                        'notes_verify' => $data['notes'],
                     ]);
                 } else {
                     $update->update([
@@ -111,6 +116,7 @@ class ApplicationController extends Controller
     public function hireContract(Request $request, string $id)
     {
         $request->validate([
+            'work_start_date' => 'required|date',
             'file_contract' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
@@ -135,22 +141,20 @@ class ApplicationController extends Controller
             // Simpan file kontrak baru
             $path = $request->file('file_contract')->storeAs($directory, $fileName);
 
-            DB::transaction(function () use ($application, $servant, $employe, $path) {
-                // Perbarui status lamaran yang di-accept
+            DB::transaction(function () use ($application, $servant, $employe, $path, $request) {
                 $application->update([
                     'status' => 'accepted',
+                    'work_start_date' => $request->input('work_start_date'),
                     'file_contract' => $path,
                 ]);
 
-                // Perbarui working status pelamar
                 $servantDetail = ServantDetail::where('user_id', $servant->id)->first();
                 if ($servantDetail) {
                     $servantDetail->update(['working_status' => true]);
                 }
 
-                // Perbarui status lamaran lain menjadi rejected
                 Application::where('servant_id', $servant->id)
-                    ->where('id', '!=', $application->id) // Pastikan lamaran ini bukan yang di-accept
+                    ->where('id', '!=', $application->id)
                     ->update([
                         'status' => 'rejected',
                         'notes_rejected' => 'Telah diterima oleh ' . $employe->name,

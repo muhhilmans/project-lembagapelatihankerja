@@ -14,13 +14,8 @@
                     <input type="text" name="status" value="interview" hidden>
 
                     <div class="form-group">
-                        <label for="interview_date">Tanggal Interview <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="interview_date" name="interview_date" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="notes">Catatan</label>
-                        <textarea id="notes-editor" name="notes" class="form-control"></textarea>
+                        <label for="notes">Catatan <span class="text-danger">*Berikan waktu pasti interview</span></label>
+                        <textarea id="notes-editor" name="notes" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

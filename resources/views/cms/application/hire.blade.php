@@ -16,7 +16,8 @@
                             @hasrole('superadmin|admin')
                                 <th>Nama Pelamar</th>
                             @endhasrole
-                            <th>Tanggal Interview</th>
+                            <th>Tanggal</th>
+                            <th>Keterangan</th>
                             <th>Status</th>
                             @if ($datas->contains(fn($data) => $data->status === 'passed'))
                                 <th>Aksi</th>
@@ -31,25 +32,49 @@
                                 @hasrole('superadmin|admin')
                                     <td>{{ $data->servant->name }}</td>
                                 @endhasrole
-                                <td class="text-center">{{ \Carbon\Carbon::parse($data->interview_date ? $data->interview_date : '')->format('d-M-Y') }}</td>
+                                <td class="text-center">
+                                    @if ($data->status === 'schedule' || $data->status === 'interview')
+                                        {{ \Carbon\Carbon::parse($data->interview_date ? $data->interview_date : '')->format('d-M-Y') }}
+                                    @elseif ($data->status === 'accepted')
+                                        {{ \Carbon\Carbon::parse($data->work_start_date ? $data->work_start_date : '')->format('d-M-Y') }}
+                                    @elseif ($data->status === 'rejected' || $data->status === 'laidoff')
+                                        {{ \Carbon\Carbon::parse($data->updated_at ? $data->updated_at : '')->format('d-M-Y') }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                @if ($data->status === 'interview')
+                                    <td class="text-center">{!! $data->notes_interview !!}</td>
+                                @elseif ($data->status === 'verify')
+                                    <td class="text-center">{!! $data->notes_verify !!}</td>
+                                @elseif ($data->status === 'rejected' || $data->status === 'laidoff')
+                                    <td class="text-center">{!! $data->notes_rejected !!}</td>
+                                @else
+                                    <td class="text-center">-</td>
+                                @endif
                                 <td class="text-center">
                                     <span
-                                        class="p-2 badge badge-{{ match ($data->status) {
+                                        class="p-2 badge badge-{{ match ($d->status) {
                                             'accepted' => 'success',
                                             'rejected' => 'danger',
+                                            'laidoff' => 'danger',
                                             'pending' => 'warning',
-                                            'verify' => 'warning',
                                             'interview' => 'info',
+                                            'schedule' => 'info',
+                                            'verify' => 'success',
+                                            'contract' => 'success',
                                             default => 'secondary',
                                         } }}">
-                                        {{ match ($data->status) {
+                                        {{ match ($d->status) {
                                             'accepted' => 'Diterima',
                                             'rejected' => 'Ditolak',
+                                            'laidoff' => 'Diberhentikan',
                                             'pending' => 'Pending',
+                                            'schedule' => 'Penjadwalan',
                                             'interview' => 'Interview',
                                             'passed' => 'Lolos Interview',
-                                            'choose' => 'Pending Verifikasi',
-                                            'verify' => 'Verifikasi',
+                                            'choose' => 'Verifikasi',
+                                            'verify' => 'Persiapan Kerja',
                                             'contract' => 'Perjanjian',
                                             default => 'Status Tidak Diketahui',
                                         } }}

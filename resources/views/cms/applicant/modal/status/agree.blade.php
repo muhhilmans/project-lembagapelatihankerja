@@ -2,7 +2,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Apakah Anda Yakin</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Persiapan Kerja</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -14,11 +14,11 @@
                     <input type="text" name="status" value="contract" hidden>
                     <input type="text" name="notes" value="" hidden>
 
-                    Apakah anda yakin untuk memverifikasi <b>{{ $data->servant->name }}</b> sehingga dapat bekerja di <b>{{ $data->employe->name }}</b> ini?
+                    Apakah <b>{{ $data->servant->name }}</b> sudah selesai persiapan kerja? Dan siap untuk bekerja di <b>{{ $data->employe->name }}</b> ?
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-primary" type="submit">Yakin</button>
+                    <button class="btn btn-primary" type="submit">Simpan</button>
                 </div>
             </form>
         </div>

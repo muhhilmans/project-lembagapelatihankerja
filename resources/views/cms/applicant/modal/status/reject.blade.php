@@ -2,7 +2,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Proses Pelamar</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Batalkan Pelamar</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -14,8 +14,8 @@
                     <input type="text" name="status" value="rejected" hidden>
 
                     <div class="form-group">
-                        <label for="notes">Catatan</label>
-                        <textarea id="reject-notes-editor" name="notes" class="form-control"></textarea>
+                        <label for="notes">Catatan <span class="text-danger">*Isi dengan alasan dibatalkan</span></label>
+                        <textarea id="reject-notes-editor" name="notes" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

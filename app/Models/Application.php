@@ -23,6 +23,8 @@ class Application extends Model
         'notes_accepted',
         'notes_rejected',
         'interview_date',
+        'work_start_date',
+        'work_end_date',
         'file_contract',
     ];
 

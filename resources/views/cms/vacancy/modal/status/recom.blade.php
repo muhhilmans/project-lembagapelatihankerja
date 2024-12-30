@@ -10,7 +10,7 @@
             <form method="POST" action="{{ route('apply.recommendation', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
                 @csrf
                 <div class="modal-body text-left">
-                    <input type="text" name="status" value="interview" hidden>
+                    <input type="text" name="status" value="schedule" hidden>
 
                     <div class="form-group">
                         <label for="interview_date">Tanggal Interview <span class="text-danger">*</span></label>
@@ -18,8 +18,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="notes">Catatan</label>
-                        <textarea id="notes-editor" name="notes" class="form-control"></textarea>
+                        <label for="notes">Catatan <span class="text-danger">*Berikan rentang waktu</span></label>
+                        <textarea id="notes-editor" name="notes" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -50,7 +50,7 @@
         });
         
         $(document).ready(function() {
-            $('#interviewModal-{{ $d->id }}').on('shown.bs.modal', function () {
+            $('#recomModal-{{ $d->id }}').on('shown.bs.modal', function () {
                 $('#notes-editor').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
@@ -62,7 +62,7 @@
                 });
             });
 
-            $('#interviewModal-{{ $d->id }}').on('hidden.bs.modal', function () {
+            $('#recomModal-{{ $d->id }}').on('hidden.bs.modal', function () {
                 $('#notes-editor').summernote('destroy');
             });
         });

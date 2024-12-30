@@ -31,6 +31,12 @@ return new class extends Migration
             $table->string('district')->nullable();
             $table->string('regency')->nullable();
             $table->string('province')->nullable();
+            $table->boolean('is_bank')->default(false);
+            $table->string('bank_name')->default('-');
+            $table->string('account_number')->default('-');
+            $table->boolean('is_bpjs')->default(false);
+            $table->string('type_bpjs')->default('-');
+            $table->string('number_bpjs')->default('-');
             $table->string('photo')->nullable();
             $table->string('identity_card')->nullable();
             $table->string('family_card')->nullable();

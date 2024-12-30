@@ -81,12 +81,16 @@
                                     'rejected' => 'danger',
                                     'pending' => 'warning',
                                     'interview' => 'info',
+                                    'schedule' => 'info',
+                                    'verify' => 'success',
+                                    'contract' => 'success',
                                     default => 'secondary',
                                 } }}">
                                 {{ match ($d->status) {
                                     'accepted' => 'Diterima',
                                     'rejected' => 'Ditolak',
                                     'pending' => 'Pending',
+                                    'schedule' => 'Penjadwalan',
                                     'interview' => 'Interview',
                                     'passed' => 'Lolos Interview',
                                     'choose' => 'Pending Verif',
@@ -99,10 +103,10 @@
                             <div class="row">
                                 @if ($d->status == 'pending')
                                     <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                        data-target="#interviewModal-{{ $d->id }}">
+                                        data-target="#scheduleModal-{{ $d->id }}">
                                         <i class="fas fa-check"></i>
                                     </a>
-                                    @include('cms.vacancy.modal.status.interview', [
+                                    @include('cms.vacancy.modal.status.schedule', [
                                         'data' => $d,
                                     ])
                                 @endif
@@ -118,6 +122,16 @@
                                 @endif
 
                                 @hasrole('superadmin|admin')
+                                    @if ($d->status == 'schedule')
+                                        <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
+                                            data-target="#interviewModal-{{ $d->id }}">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        @include('cms.vacancy.modal.status.interview', [
+                                            'data' => $d,
+                                        ])
+                                    @endif
+
                                     @if ($d->status == 'passed')
                                         <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                                             data-target="#chooseModal-{{ $d->id }}">
@@ -151,14 +165,14 @@
                                     @endif
 
                                     @if ($d->status != 'pending' && $d->status != 'interview')
-                                    <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
-                                        data-target="#rejectModal-{{ $d->id }}">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                    @include('cms.vacancy.modal.status.reject', [
-                                        'data' => $d,
-                                    ])
-                                @endif
+                                        <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                            data-target="#rejectModal-{{ $d->id }}">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                        @include('cms.vacancy.modal.status.reject', [
+                                            'data' => $d,
+                                        ])
+                                    @endif
                                 @endhasrole
 
                                 @if ($d->status == 'contract')
