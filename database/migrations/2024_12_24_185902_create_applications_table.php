@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignUuid('employe_id')->nullable()->references('id')->on('users')->onDelete('cascade');
             $table->enum('status', ['pending', 'schedule', 'interview', 'passed', 'choose', 'verify', 'contract', 'accepted', 'rejected', 'review', 'laidoff'])->default('pending');
             $table->text('notes_interview')->nullable();
+            $table->double('salary')->nullable();
             $table->text('notes_verify')->nullable();
             $table->text('notes_accepted')->nullable();
             $table->text('notes_rejected')->nullable();

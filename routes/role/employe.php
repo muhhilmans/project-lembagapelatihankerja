@@ -20,4 +20,6 @@ Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     Route::get('/applicant-indie', [UtilityController::class, 'indieApplicant'])->name('applicant-indie');
     Route::put('/applicant-indie/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('applicant-indie.change');
     Route::put('/applicant-indie/{vacancy}/{user}/upload', [ApplicationController::class, 'uploadContract'])->name('applicant-indie.upload');
+    
+    Route::get('/worker-all', [UtilityController::class, 'allWorker'])->name('worker-all');
 });

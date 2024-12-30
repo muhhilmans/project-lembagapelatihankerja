@@ -138,7 +138,7 @@
             <span>Pengaduan</span></a>
     </li>
 
-    @hasrole('superadmin|admin|owner')
+    @hasrole('superadmin|admin|owner|majikan')
     <!-- Nav Item - Pekerja -->
     <li class="nav-item {{ Route::is('worker-all') ? 'active' : '' }}">
         <a class="nav-link {{ Route::is('worker-all') ? 'active' : '' }}"
