@@ -87,3 +87,11 @@
         </div>
     </div>
 @endsection
+
+@push('custom-style')
+    <link rel="stylesheet" href="{{ asset('assets/vendor/summernote/summernote-bs4.min.css') }}">
+@endpush
+
+@push('custom-script')
+    <script src="{{ asset('assets/vendor/summernote/summernote-bs4.min.js') }}"></script>
+@endpush

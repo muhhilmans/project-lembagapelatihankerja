@@ -30,6 +30,7 @@ class ComplaintController extends Controller
         $validator = Validator::make($request->all(), [
             'status' => ['required'],
             'file' => 'sometimes|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'notes' => ['nullable', 'string'],
         ]);
 
         if ($validator->fails()) {
@@ -64,6 +65,7 @@ class ComplaintController extends Controller
                 } else {
                     $update->update([
                         'status' => $data['status'],
+                        'notes_rejected' => $data['notes'],
                     ]);
                 }
             });

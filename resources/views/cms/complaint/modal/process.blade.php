@@ -12,6 +12,7 @@
                 @method('PUT')
                 <div class="modal-body text-left">
                     <input type="text" name="status" value="process" hidden>
+                    <input type="text" name="notes" value="" hidden>
 
                     Apakah anda yakin untuk memverifikasi aduan dari <b>{{ $data->employe->name }}</b> ini?
                 </div>
