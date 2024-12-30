@@ -227,6 +227,66 @@
                                 </div>
                             @enderror
                         </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="1" id="is_bank"
+                                        name="is_bank"
+                                        {{ old('is_bank', $user->servantDetails->is_bank) == 1 ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="is_bank">
+                                        Memiliki Rekening
+                                    </label>
+                                </div>
+
+                                <div id="bank-details"
+                                    class="{{ old('is_bank', $user->servantDetails->is_bank) == 1 ? '' : 'd-none' }}">
+                                    <div class="form-group">
+                                        <label for="bank_name">Nama Bank <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="bank_name" name="bank_name"
+                                            value="{{ old('bank_name', $user->servantDetails->bank_name) }}"
+                                            placeholder="Isi dengan nama bank...">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="account_number">Nomor Rekening <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="account_number"
+                                            name="account_number"
+                                            value="{{ old('account_number', $user->servantDetails->account_number) }}"
+                                            placeholder="Isi dengan nomor rekening...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="1" id="is_bpjs"
+                                        name="is_bpjs"
+                                        {{ old('is_bpjs', $user->servantDetails->is_bpjs) == 1 ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="is_bpjs">
+                                        Memiliki BPJS
+                                    </label>
+                                </div>
+
+                                <div id="bpjs-details"
+                                    class="{{ old('is_bpjs', $user->servantDetails->is_bpjs) == 1 ? '' : 'd-none' }}">
+                                    <div class="form-group">
+                                        <label for="type_bpjs">Jenis BPJS <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="type_bpjs" name="type_bpjs"
+                                            value="{{ old('type_bpjs', $user->servantDetails->type_bpjs) }}"
+                                            placeholder="Isi dengan jenis BPJS...">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="number_bpjs">Nomor BPJS <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="number_bpjs" name="number_bpjs"
+                                            value="{{ old('number_bpjs', $user->servantDetails->number_bpjs) }}"
+                                            placeholder="Isi dengan nomor BPJS...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-lg-6">
@@ -359,14 +419,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="photo">Foto</label>
+                            <label for="photo">Foto <span class="text-danger">*(Kosongkan jika tidak ingin diubah)</span></label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="inpoPhoto">Upload</span>
                                 </div>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" id="photo" name="photo"
-                                        aria-describedby="inpoPhoto" accept="image/*">
+                                        aria-describedby="inpoPhoto" accept="image/*" {{ $user->servantDetails->photo ? null : 'required' }}>
                                     <label class="custom-file-label" for="photo">Choose file</label>
                                 </div>
                             </div>
@@ -380,14 +440,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="identity_card">Kartu Tanda Penduduk</label>
+                            <label for="identity_card">Kartu Tanda Penduduk <span class="text-danger">*(Kosongkan jika tidak ingin diubah)</span></label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="inpoIdentityCard">Upload</span>
                                 </div>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" id="identity_card"
-                                        name="identity_card" aria-describedby="inpoIdentityCard" accept="image/*">
+                                        name="identity_card" aria-describedby="inpoIdentityCard" accept="image/*" {{ $user->servantDetails->identity_card ? null : 'required' }}>
                                     <label class="custom-file-label" for="identity_card">Choose file</label>
                                 </div>
                             </div>
@@ -440,6 +500,26 @@
         const dataProvince = "{{ optional($user->servantDetails)->province }}";
 
         document.addEventListener('DOMContentLoaded', () => {
+            const isBankCheckbox = document.getElementById('is_bank');
+            const bankDetails = document.getElementById('bank-details');
+            isBankCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    bankDetails.classList.remove('d-none');
+                } else {
+                    bankDetails.classList.add('d-none');
+                }
+            });
+            
+            const isBpjsCheckbox = document.getElementById('is_bpjs');
+            const bpjsDetails = document.getElementById('bpjs-details');
+            isBpjsCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    bpjsDetails.classList.remove('d-none');
+                } else {
+                    bpjsDetails.classList.add('d-none');
+                }
+            });
+
             function updatePreview(inputId, previewContainerId) {
                 const inputFile = document.getElementById(inputId);
                 const previewContainer = document.getElementById(previewContainerId);

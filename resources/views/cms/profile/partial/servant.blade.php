@@ -149,6 +149,28 @@
                             </td>
                         </tr>
                         <tr>
+                            <th scope="row">Rekening</th>
+                            <td>:</td>
+                            <td>
+                                @if ($data->servantDetails->is_bank == 1)
+                                    {{ $data->servantDetails->account_number }} ({{ $data->servantDetails->bank_name }})
+                                @else
+                                    Belum memiliki rekening
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">BPJS</th>
+                            <td>:</td>
+                            <td>
+                                @if ($data->servantDetails->is_bpjs == 1)
+                                    {{ $data->servantDetails->number_bpjs }} ({{ $data->servantDetails->type_bpjs }})
+                                @else
+                                    Belum memiliki BPJS
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
                             <th scope="row">Nomor Telepon</th>
                             <td>:</td>
                             <td>{{ $data->servantDetails->phone ?? '-' }}</td>

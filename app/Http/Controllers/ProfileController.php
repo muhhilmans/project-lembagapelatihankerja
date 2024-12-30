@@ -54,6 +54,12 @@ class ProfileController extends Controller
             'last_education' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:255'],
             'emergency_number' => ['required', 'string', 'max:255'],
+            'is_bank' => ['sometimes', 'boolean'],
+            'bank_name' => ['required_if:is_bank,1', 'string', 'max:255'],
+            'account_number' => ['required_if:is_bank,1', 'string', 'max:255'],
+            'is_bpjs' => ['sometimes', 'boolean'],
+            'type_bpjs' => ['required_if:is_bpjs,1', 'string', 'max:255'],
+            'number_bpjs' => ['required_if:is_bpjs,1', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
             'rt' => ['required', 'string', 'max:255'],
             'rw' => ['required', 'string', 'max:255'],
@@ -73,6 +79,9 @@ class ProfileController extends Controller
         }
 
         $data = $validator->validated();
+        
+        $data['is_bank'] = $request->has('is_bank') ? $request->boolean('is_bank') : false;
+        $data['is_bpjs'] = $request->has('is_bpjs') ? $request->boolean('is_bpjs') : false;
 
         try {
             DB::transaction(function () use ($data, $user) {
@@ -119,6 +128,12 @@ class ProfileController extends Controller
                     'regency' => $data['regency'],
                     'district' => $data['district'],
                     'village' => $data['village'],
+                    'is_bank' => $data['is_bank'],
+                    'bank_name' => $data['bank_name'],
+                    'account_number' => $data['account_number'],
+                    'is_bpjs' => $data['is_bpjs'],
+                    'type_bpjs' => $data['type_bpjs'],
+                    'number_bpjs' => $data['number_bpjs'],
                     'experience' => $data['experience'],
                     'description' => $data['description'],
                     'photo' => $data['photo'],
