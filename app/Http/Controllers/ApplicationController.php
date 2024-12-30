@@ -61,14 +61,16 @@ class ApplicationController extends Controller
             'status' => ['required', 'string'],
             'notes' => ['nullable', 'string'],
             'interview_date' => ['sometimes', 'date'],
+            'salary' => ['nullable', 'numeric'],
         ]);
 
+        
         if ($validator->fails()) {
             return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
-
+        
         $data = $validator->validated();
-
+        
         $update = Application::findOrFail($id);
 
         try {
@@ -87,6 +89,7 @@ class ApplicationController extends Controller
                 } elseif ($data['status'] == 'passed') {
                     $update->update([
                         'status' => $data['status'],
+                        'salary' => $data['salary'],
                     ]);
                 } elseif ($data['status'] == 'verify') {
                     $update->update([
@@ -281,6 +284,7 @@ class ApplicationController extends Controller
             'status' => ['required', 'string'],
             'notes' => ['nullable', 'string'],
             'interview_date' => ['sometimes', 'date'],
+            'salary' => ['nullable', 'numeric'],
         ]);
 
         if ($validator->fails()) {
@@ -307,6 +311,7 @@ class ApplicationController extends Controller
                 } elseif ($data['status'] == 'passed') {
                     $update->update([
                         'status' => $data['status'],
+                        'salary' => $data['salary'],
                     ]);
                 } elseif ($data['status'] == 'verify') {
                     $update->update([

@@ -12,8 +12,12 @@
                 @method('PUT')
                 <div class="modal-body text-left">
                     <input type="text" name="status" value="passed" hidden>
+                    <input type="text" name="notes" value="" hidden>
 
-                    Apakah anda yakin untuk meloloskan <b>{{ $d->servant->name }}</b> ini?
+                    <div class="form-group">
+                        <label for="salary">Nominal Gaji <span class="text-danger">*Isikan hanya angka</span></label>
+                        <input type="number" id="salary" name="salary" class="form-control" required>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>

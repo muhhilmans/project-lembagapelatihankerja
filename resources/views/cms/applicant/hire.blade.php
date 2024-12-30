@@ -32,15 +32,27 @@
                                         <li class="mb-1"><strong>Tanggal Interview:</strong>
                                             {{ \Carbon\Carbon::parse($d->interview_date)->format('d-m-Y') }}</li>
                                         <li><strong>Catatan:</strong> {!! $d->notes_interview !!}</li>
-                                        <li class="mb-1"><strong>No Majikan:</strong> {{ $d->employe->employeDetails->phone }}</li>
-                                        <li class="mb-1"><strong>No Pembantu:</strong> {{ $d->servant->servantDetails->phone }}</li>
-                                        <li class="mb-1"><strong>No Darurat Pembantu:</strong> {{ $d->servant->servantDetails->emergency_number }}</li>
+                                        <li class="mb-1"><strong>No Majikan:</strong> {{ $d->employe->employeDetails->phone }}
+                                        </li>
+                                        <li class="mb-1"><strong>No Pembantu:</strong>
+                                            {{ $d->servant->servantDetails->phone }}</li>
+                                        <li class="mb-1"><strong>No Darurat Pembantu:</strong>
+                                            {{ $d->servant->servantDetails->emergency_number }}</li>
                                     @endif
                                 @endhasrole
                                 @if ($d->status == 'interview')
                                     <li class="mb-1"><strong>Tanggal Interview:</strong>
                                         {{ \Carbon\Carbon::parse($d->interview_date)->format('d-m-Y') }}</li>
                                     <li class="mb-1"><strong>Catatan:</strong> {!! $d->notes_interview !!}</li>
+                                @endif
+                                @if ($d->salary != null)
+                                    @php
+                                        $salary = $d->salary;
+                                        $service = $salary * 0.025;
+                                        $gaji = $salary - $service;
+                                    @endphp
+
+                                    <li><strong>Gaji:</strong> Rp. {{ number_format($gaji, 0, ',', '.') }}</li>
                                 @endif
                             </ul>
 

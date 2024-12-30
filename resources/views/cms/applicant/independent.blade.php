@@ -45,6 +45,15 @@
                                         {{ \Carbon\Carbon::parse($d->interview_date)->format('d-m-Y') }}</li>
                                     <li class="mb-1"><strong>Catatan:</strong> {!! $d->notes_interview !!}</li>
                                 @endif
+                                @if ($d->salary != null)
+                                    @php
+                                        $salary = $d->salary;
+                                        $service = $salary * 0.025;
+                                        $gaji = $salary - $service;
+                                    @endphp
+
+                                    <li><strong>Gaji:</strong> Rp. {{ number_format($gaji, 0, ',', '.') }}</li>
+                                @endif
                             </ul>
 
                             <ul class="list-unstyled mb-3">

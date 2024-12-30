@@ -19,6 +19,7 @@ class Application extends Model
         'employe_id',
         'status',
         'notes_interview',
+        'salary',
         'notes_verify',
         'notes_accepted',
         'notes_rejected',
