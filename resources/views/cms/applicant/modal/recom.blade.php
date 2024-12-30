@@ -1,17 +1,16 @@
-<div class="modal fade" id="acceptModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="recomModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Proses Pelamar</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Jadwalkan Interview</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('applicant-indie.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
+            <form method="POST" action="{{ route('apply.recommendation', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
                 @csrf
-                @method('PUT')
                 <div class="modal-body text-left">
-                    <input type="text" name="status" value="interview" hidden>
+                    <input type="text" name="status" value="schedule" hidden>
 
                     <div class="form-group">
                         <label for="interview_date">Tanggal Interview <span class="text-danger">*</span></label>
@@ -19,8 +18,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="notes">Catatan</label>
-                        <textarea id="notes-editor" name="notes" class="form-control"></textarea>
+                        <label for="notes">Catatan <span class="text-danger">*Berikan rentang waktu</span></label>
+                        <textarea id="notes-editor" name="notes" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -49,9 +48,9 @@
 
             closingDateInput.setAttribute('min', formattedDate);
         });
-
+        
         $(document).ready(function() {
-            $('#acceptModal-{{ $d->id }}').on('shown.bs.modal', function () {
+            $('#recomModal-{{ $d->id }}').on('shown.bs.modal', function () {
                 $('#notes-editor').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
@@ -63,7 +62,7 @@
                 });
             });
 
-            $('#acceptModal-{{ $d->id }}').on('hidden.bs.modal', function () {
+            $('#recomModal-{{ $d->id }}').on('hidden.bs.modal', function () {
                 $('#notes-editor').summernote('destroy');
             });
         });

@@ -25,14 +25,27 @@
 
                         <!-- Card Content -->
                         <div class="card-body">
-                            @hasrole('superadmin|admin')
-                                <p class="card-text"><strong>Lowongan Pekerjaan:</strong> {{ $d->vacancy->title }}</p>
-                                <p class="card-text"><strong>Melamar ke:</strong> {{ $d->vacancy->user->name }}</p>
-                            @endhasrole
-                            @if ($d->interview_date != null)
-                                <p class="card-text"><strong>Tanggal Interview:</strong>
-                                    {{ \Carbon\Carbon::parse($d->interview_date)->format('d-m-Y') }}</p>
-                            @endif
+                            <ul class="list-unstyled mb-3">
+                                <li class="mb-1"><strong>Lowongan Pekerjaan:</strong> {{ $d->vacancy->title }}</li>
+                                @hasrole('superadmin|admin')
+                                    @if ($d->status == 'schedule')
+                                        <li class="mb-1"><strong>Tanggal Interview:</strong>
+                                            {{ \Carbon\Carbon::parse($d->interview_date)->format('d-m-Y') }}</li>
+                                        <li><strong>Catatan:</strong> {!! $d->notes_interview !!}</li>
+                                        <li class="mb-1"><strong>No Majikan:</strong>
+                                            {{ $d->vacancy->user->employeDetails->phone }}</li>
+                                        <li class="mb-1"><strong>No Pembantu:</strong>
+                                            {{ $d->servant->servantDetails->phone }}</li>
+                                        <li class="mb-1"><strong>No Darurat Pembantu:</strong>
+                                            {{ $d->servant->servantDetails->emergency_number }}</li>
+                                    @endif
+                                @endhasrole
+                                @if ($d->status == 'interview')
+                                    <li class="mb-1"><strong>Tanggal Interview:</strong>
+                                        {{ \Carbon\Carbon::parse($d->interview_date)->format('d-m-Y') }}</li>
+                                    <li class="mb-1"><strong>Catatan:</strong> {!! $d->notes_interview !!}</li>
+                                @endif
+                            </ul>
 
                             <ul class="list-unstyled mb-3">
                                 <li class="mb-2">
@@ -84,100 +97,7 @@
 
                         <!-- Card Footer -->
                         <div class="card-footer text-right">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span
-                                    class="p-2 badge badge-{{ match ($d->status) {
-                                        'accepted' => 'success',
-                                        'rejected' => 'danger',
-                                        'pending' => 'warning',
-                                        'verify' => 'warning',
-                                        'interview' => 'info',
-                                        default => 'secondary',
-                                    } }}">
-                                    {{ match ($d->status) {
-                                        'accepted' => 'Diterima',
-                                        'rejected' => 'Ditolak',
-                                        'pending' => 'Pending',
-                                        'interview' => 'Interview',
-                                        'passed' => 'Lolos Interview',
-                                        'choose' => 'Pending Verifikasi',
-                                        'verify' => 'Verifikasi',
-                                        'contract' => 'Perjanjian',
-                                        default => 'Status Tidak Diketahui',
-                                    } }}
-                                </span>
-
-                                <div class="row">
-                                    {{-- @hasrole('superadmin|admin')
-                                        @if ($d->status === 'passed')
-                                            <td class="text-center">
-                                                <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                                    data-target="#chooseModal-{{ $d->id }}"><i
-                                                        class="fas fa-check-double"></i></a>
-                                                @include('cms.applicant.modal.status.choose', [
-                                                    'data' => $d,
-                                                ])
-                                            </td>
-                                        @endif
-
-                                        @if ($d->status === 'verify')
-                                            <td class="text-center">
-                                                <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                                    data-target="#verifyModal-{{ $d->id }}"><i
-                                                        class="fas fa-check-double"></i></a>
-                                                @include('cms.applicant.modal.status.verify', [
-                                                    'data' => $d,
-                                                ])
-                                            </td>
-                                        @endif
-                                    @endhasrole
-
-                                    @if ($d->status == 'contract')
-                                        <a href="#" class="btn btn-sm btn-primary mr-1" data-toggle="modal"
-                                            data-target="#contractModal-{{ $d->id }}">
-                                            <i class="fas fa-file-contract"></i>
-                                        </a>
-                                        @include('cms.applicant.modal.contract', ['data' => $d])
-                                    @endif --}}
-
-                                    @if ($d->status == 'accepted')
-                                        @php
-                                            $hasComplaintWithSameServant = $d->complaint->contains(function (
-                                                $complaint,
-                                            ) use ($d) {
-                                                return $complaint->servant_id == $d->servant_id;
-                                            });
-                                        @endphp
-
-                                        @if (!$hasComplaintWithSameServant)
-                                            <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
-                                                data-target="#complaintModal-{{ $d->id }}">
-                                                <i class="fas fa-bullhorn"></i>
-                                            </a>
-                                            @include('cms.applicant.modal.complaint', ['data' => $d])
-                                        @endif
-
-                                        <a href="{{ route('contract.download', $d->id) }}"
-                                            class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
-                                    @endif
-
-                                    {{-- @if ($d->status != 'rejected' && $d->status != 'accepted')
-                                        <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
-                                            data-target="#rejectModal-{{ $d->id }}">
-                                            <i class="fas fa-times"></i>
-                                        </a>
-                                        @include('cms.applicant.modal.status.reject', [
-                                            'data' => $d,
-                                        ])
-                                    @endif --}}
-
-                                    <a class="btn btn-sm btn-info" href="#" data-toggle="modal"
-                                        data-target="#servantDetailsModal-{{ $d->id }}">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    @include('cms.vacancy.modal.servant-detail', ['data' => $d])
-                                </div>
-                            </div>
+                            @include('cms.applicant.partial.indie-footer', ['d' => $d])
                         </div>
                     </div>
                 </div>

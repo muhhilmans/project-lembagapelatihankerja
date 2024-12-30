@@ -29,7 +29,7 @@
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="file_contract_{{ $d->id }}"
                                     name="file_contract" aria-describedby="file_contract_label_{{ $d->id }}"
-                                    accept="image/*, application/pdf">
+                                    accept="image/*, application/pdf" required>
                                 <label class="custom-file-label" for="file_contract_{{ $d->id }}">Choose
                                     file</label>
                             </div>

@@ -15,7 +15,12 @@
                 @method('PUT')
                 <div class="modal-body text-left">
                     <div class="form-group">
-                        <label for="file_contract_{{ $d->id }}">Berkas Kontrak</label>
+                        <label for="work_start_date">Tanggal Mulai Bekerja <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="work_start_date" name="work_start_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="file_contract_{{ $d->id }}">Berkas Kontrak <span
+                                class="text-danger">*</span></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"
@@ -24,7 +29,7 @@
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="file_contract_{{ $d->id }}"
                                     name="file_contract" aria-describedby="file_contract_label_{{ $d->id }}"
-                                    accept="image/*, application/pdf">
+                                    accept="image/*, application/pdf" required>
                                 <label class="custom-file-label" for="file_contract_{{ $d->id }}">Choose
                                     file</label>
                             </div>
@@ -43,6 +48,22 @@
 
 @push('custom-script')
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const closingDateInput = document.getElementById('work_start_date');
+            const today = new Date();
+
+            // Konversi ke timezone Indonesia (UTC+7)
+            const utcOffset = 7 * 60 * 60 * 1000;
+            const indonesiaTime = new Date(today.getTime() + (today.getTimezoneOffset() * 60 * 1000) + utcOffset);
+
+            const year = indonesiaTime.getFullYear();
+            const month = String(indonesiaTime.getMonth() + 1).padStart(2, '0');
+            const date = String(indonesiaTime.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${date}`;
+
+            closingDateInput.setAttribute('min', formattedDate);
+        });
+
         document.querySelectorAll('[id^="file_contract_"]').forEach(input => {
             input.addEventListener('change', function(event) {
                 const modalId = this.id.split('_')[2];

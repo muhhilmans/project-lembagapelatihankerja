@@ -168,8 +168,6 @@ class ApplicationController extends Controller
         }
     }
 
-
-
     public function hireReject(Request $request, string $id)
     {
         $validator = Validator::make($request->all(), [
@@ -294,20 +292,25 @@ class ApplicationController extends Controller
 
         try {
             DB::transaction(function () use ($update, $data, $vacancy) {
-                if ($data['status'] == 'interview') {
+                if ($data['status'] == 'schedule') {
                     $update->update([
                         'status' => $data['status'],
                         'notes_interview' => $data['notes'],
                         'interview_date' => $data['interview_date'],
                     ]);
-                } elseif ($data['status'] == 'verify') {
+                } elseif ($data['status'] == 'interview') {
                     $update->update([
                         'status' => $data['status'],
-                        'notes_verify' => $data['notes'],
+                        'notes_interview' => $data['notes'],
                     ]);
                 } elseif ($data['status'] == 'passed') {
                     $update->update([
                         'status' => $data['status'],
+                    ]);
+                } elseif ($data['status'] == 'verify') {
+                    $update->update([
+                        'status' => $data['status'],
+                        'notes_verify' => $data['notes'],
                     ]);
                 } else {
                     $update->update([
@@ -332,6 +335,7 @@ class ApplicationController extends Controller
     public function uploadContract(Request $request, Vacancy $vacancy, User $user)
     {
         $request->validate([
+            'work_start_date' => 'required|date',
             'file_contract' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
@@ -357,6 +361,7 @@ class ApplicationController extends Controller
 
             $applyJob->update([
                 'status' => $status,
+                'work_start_date' => $request->input('work_start_date'),
                 'file_contract' => $path,
             ]);
 

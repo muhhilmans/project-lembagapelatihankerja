@@ -17,7 +17,8 @@
                             @hasrole('superadmin|admin')
                                 <th>Nama Pelamar</th>
                             @endhasrole
-                            <th>Tanggal Interview</th>
+                            <th>Tanggal</th>
+                            <th>Keterangan</th>
                             <th>Status</th>
                             @if ($datas->contains(fn($data) => $data->status === 'passed'))
                                 <th>Aksi</th>
@@ -34,29 +35,51 @@
                                     <td>{{ $data->servant->name }}</td>
                                 @endhasrole
                                 <td class="text-center">
-                                    {{ \Carbon\Carbon::parse($data->interview_date ? $data->interview_date : '')->format('d-M-Y') }}
+                                    @if ($data->status === 'schedule' || $data->status === 'interview')
+                                        {{ \Carbon\Carbon::parse($data->interview_date ? $data->interview_date : '')->format('d-M-Y') }}
+                                    @elseif ($data->status === 'accepted')
+                                        {{ \Carbon\Carbon::parse($data->work_start_date ? $data->work_start_date : '')->format('d-M-Y') }}
+                                    @elseif ($data->status === 'rejected' || $data->status === 'laidoff')
+                                        {{ \Carbon\Carbon::parse($data->updated_at ? $data->updated_at : '')->format('d-M-Y') }}
+                                    @else
+                                        -
+                                    @endif
                                 </td>
+                                @if ($data->status === 'interview')
+                                    <td class="text-center">{!! $data->notes_interview !!}</td>
+                                @elseif ($data->status === 'verify')
+                                    <td class="text-center">{!! $data->notes_verify !!}</td>
+                                @elseif ($data->status === 'rejected' || $data->status === 'laidoff')
+                                    <td class="text-center">{!! $data->notes_rejected !!}</td>
+                                @else
+                                    <td class="text-center">-</td>
+                                @endif
                                 <td class="text-center">
                                     <span
-                                        class="p-2 badge badge-{{ match ($data->status) {
-                                            'accepted' => 'success',
-                                            'rejected' => 'danger',
-                                            'pending' => 'warning',
-                                            'verify' => 'warning',
-                                            'interview' => 'info',
-                                            default => 'secondary',
-                                        } }}">
-                                        {{ match ($data->status) {
-                                            'accepted' => 'Diterima',
-                                            'rejected' => 'Ditolak',
-                                            'pending' => 'Pending',
-                                            'interview' => 'Interview',
-                                            'passed' => 'Lolos Interview',
-                                            'choose' => 'Pending Verifikasi',
-                                            'verify' => 'Verifikasi',
-                                            'contract' => 'Perjanjian',
-                                            default => 'Status Tidak Diketahui',
-                                        } }}
+                                    class="p-2 badge badge-{{ match ($data->status) {
+                                        'accepted' => 'success',
+                                        'rejected' => 'danger',
+                                        'laidoff' => 'danger',
+                                        'pending' => 'warning',
+                                        'interview' => 'info',
+                                        'schedule' => 'info',
+                                        'verify' => 'success',
+                                        'contract' => 'success',
+                                        default => 'secondary',
+                                    } }}">
+                                    {{ match ($data->status) {
+                                        'accepted' => 'Diterima',
+                                        'rejected' => 'Ditolak',
+                                        'laidoff' => 'Diberhentikan',
+                                        'pending' => 'Pending',
+                                        'schedule' => 'Penjadwalan',
+                                        'interview' => 'Interview',
+                                        'passed' => 'Lolos Interview',
+                                        'choose' => 'Verifikasi',
+                                        'verify' => 'Persiapan Kerja',
+                                        'contract' => 'Perjanjian',
+                                        default => 'Status Tidak Diketahui',
+                                    } }}
                                     </span>
                                 </td>
                                 @if ($data->status === 'passed')

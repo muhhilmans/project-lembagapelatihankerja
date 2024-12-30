@@ -1,26 +1,25 @@
-<div class="modal fade" id="hireRejectModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="verifyModal-{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Tolak Pelamar</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Verifikasi Pembantu</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('applicant-hire.reject', $d->id) }}">
+            <form method="POST" action="{{ route('vacancies.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
-                    <input type="text" name="status" value="rejected" hidden>
-
+                    <input type="text" name="status" value="verify" hidden>
                     <div class="form-group">
-                        <label for="notes">Catatan</label>
-                        <textarea id="hire-reject-notes-editor" name="notes" class="form-control"></textarea>
+                        <label for="notes">Catatan Verifikasi <span class="text-danger">*</span></label>
+                        <textarea id="verify-notes-editor" name="notes" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-primary" type="submit">Simpan</button>
+                    <button class="btn btn-primary" type="submit">Yakin</button>
                 </div>
             </form>
         </div>
@@ -30,8 +29,8 @@
 @push('custom-script')
     <script>
         $(document).ready(function() {
-            $('#hireRejectModal-{{ $d->id }}').on('shown.bs.modal', function () {
-                $('#hire-reject-notes-editor').summernote({
+            $('#verifyModal-{{ $d->id }}').on('shown.bs.modal', function () {
+                $('#verify-notes-editor').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
                     height: 150,
@@ -42,8 +41,8 @@
                 });
             });
 
-            $('#hireRejectModal-{{ $d->id }}').on('hidden.bs.modal', function () {
-                $('#hire-reject-notes-editor').summernote('destroy');
+            $('#verifyModal-{{ $d->id }}').on('hidden.bs.modal', function () {
+                $('#verify-notes-editor').summernote('destroy');
             });
         });
     </script>

@@ -54,7 +54,7 @@
                                 @endif
                                 <td class="text-center">
                                     <span
-                                        class="p-2 badge badge-{{ match ($d->status) {
+                                        class="p-2 badge badge-{{ match ($data->status) {
                                             'accepted' => 'success',
                                             'rejected' => 'danger',
                                             'laidoff' => 'danger',
@@ -65,7 +65,7 @@
                                             'contract' => 'success',
                                             default => 'secondary',
                                         } }}">
-                                        {{ match ($d->status) {
+                                        {{ match ($data->status) {
                                             'accepted' => 'Diterima',
                                             'rejected' => 'Ditolak',
                                             'laidoff' => 'Diberhentikan',
