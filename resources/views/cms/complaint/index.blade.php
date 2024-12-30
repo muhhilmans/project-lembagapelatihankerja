@@ -1,8 +1,8 @@
-@extends('cms.layouts.main', ['title' => 'Pengaduan Pembantu'])
+@extends('cms.layouts.main', ['title' => 'Pengaduan'])
 
 @section('content')
     <!-- Page Heading -->
-    <h1 class="h3 mb-4 text-gray-800">Kelola Pengaduan Pembantu</h1>
+    <h1 class="h3 mb-4 text-gray-800">Kelola Pengaduan</h1>
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
@@ -12,8 +12,12 @@
                     <thead>
                         <tr class="text-center">
                             <th>No</th>
-                            <th>Nama Majikan</th>
-                            <th>Nama Pelamar</th>
+                            @hasrole('superadmin|admin|owner|pembantu')
+                                <th>Nama Majikan</th>
+                            @endhasrole
+                            @hasrole('superadmin|admin|owner|majikan')
+                                <th>Nama Pembantu</th>
+                            @endhasrole
                             <th>Pesan Pengaduan</th>
                             <th>Status</th>
                             @hasrole('superadmin|admin')
@@ -25,8 +29,12 @@
                         @foreach ($datas as $data)
                             <tr>
                                 <td class="text-center">{{ $loop->iteration }}</td>
-                                <td>{{ $data->employe->name }}</td>
-                                <td>{{ $data->servant->name }}</td>
+                                @hasrole('superadmin|admin|owner|pembantu')
+                                    <td>{{ $data->employe->name }}</td>
+                                @endhasrole
+                                @hasrole('superadmin|admin|owner|majikan')
+                                    <td>{{ $data->servant->name }}</td>
+                                @endhasrole
                                 <td>{!! $data->message !!}</td>
                                 <td class="text-center">
                                     <span
@@ -56,13 +64,15 @@
                                         @endif
                                         @if ($data->status == 'process')
                                             <a href="#" class="btn btn-sm btn-success" data-toggle="modal"
-                                                data-target="#acceptModal-{{ $data->id }}"><i class="fas fa-check-double"></i></a>
+                                                data-target="#acceptModal-{{ $data->id }}"><i
+                                                    class="fas fa-check-double"></i></a>
                                             @include('cms.complaint.modal.accept', [
                                                 'data' => $data,
                                             ])
 
                                             <a href="#" class="btn btn-sm btn-danger" data-toggle="modal"
-                                                data-target="#rejectedModal-{{ $data->id }}"><i class="fas fa-times"></i></a>
+                                                data-target="#rejectedModal-{{ $data->id }}"><i
+                                                    class="fas fa-times"></i></a>
                                             @include('cms.complaint.modal.rejected', [
                                                 'data' => $data,
                                             ])

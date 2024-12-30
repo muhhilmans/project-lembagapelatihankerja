@@ -120,8 +120,6 @@
                     class="collapse {{ Route::is('applicant-all', 'applicant-hire', 'applicant-indie') ? 'show' : '' }}"
                     aria-labelledby="headingApplicant" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item {{ Route::is('applicant-all') ? 'active' : '' }}"
-                            href="{{ route('applicant-all') }}">Semua</a>
                         <a class="collapse-item {{ Route::is('applicant-hire') ? 'active' : '' }}"
                             href="{{ route('applicant-hire') }}">Hire</a>
                         <a class="collapse-item {{ Route::is('applicant-indie') ? 'active' : '' }}"
@@ -129,16 +127,26 @@
                     </div>
                 </div>
             </li>
-
-            <!-- Nav Item - Profesi -->
-            <li class="nav-item {{ Route::is('complaints.*') ? 'active' : '' }}">
-                <a class="nav-link {{ Route::is('complaints.*') ? 'active' : '' }}"
-                    href="{{ route('complaints.index') }}">
-                    <i class="fas fa-fw fa-bullhorn"></i>
-                    <span>Pengaduan</span></a>
-            </li>
         @endhasrole
     @endif
+
+    <!-- Nav Item - Pengaduan -->
+    <li class="nav-item {{ Route::is('complaints.*') ? 'active' : '' }}">
+        <a class="nav-link {{ Route::is('complaints.*') ? 'active' : '' }}"
+            href="{{ route('complaints.index') }}">
+            <i class="fas fa-fw fa-bullhorn"></i>
+            <span>Pengaduan</span></a>
+    </li>
+
+    @hasrole('superadmin|admin|owner')
+    <!-- Nav Item - Pekerja -->
+    <li class="nav-item {{ Route::is('worker-all') ? 'active' : '' }}">
+        <a class="nav-link {{ Route::is('worker-all') ? 'active' : '' }}"
+            href="{{ route('worker-all') }}">
+            <i class="fas fa-fw fa-id-badge"></i>
+            <span>Pekerja</span></a>
+    </li>
+    @endhasrole
 
     @hasrole('majikan|pembantu')
         <li class="nav-item {{ Route::is('profile') ? 'active' : '' }}">

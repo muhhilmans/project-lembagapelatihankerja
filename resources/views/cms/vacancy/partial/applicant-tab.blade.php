@@ -227,7 +227,7 @@
                                             data-target="#complaintModal-{{ $d->id }}">
                                             <i class="fas fa-bullhorn"></i>
                                         </a>
-                                        @include('cms.vacancy.modal.complaint', ['data' => $d])
+                                        @include('cms.applicant.modal.complaint', ['data' => $d])
                                     @endif
 
                                     <a href="{{ route('contract.download', $d->id) }}"

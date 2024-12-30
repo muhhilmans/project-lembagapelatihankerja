@@ -23,6 +23,9 @@
                             @if ($datas->contains(fn($data) => $data->status === 'passed'))
                                 <th>Aksi</th>
                             @endif
+                            @if ($datas->contains(fn($data) => $data->status === 'accepted'))
+                                <th>Aksi</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -56,30 +59,30 @@
                                 @endif
                                 <td class="text-center">
                                     <span
-                                    class="p-2 badge badge-{{ match ($data->status) {
-                                        'accepted' => 'success',
-                                        'rejected' => 'danger',
-                                        'laidoff' => 'danger',
-                                        'pending' => 'warning',
-                                        'interview' => 'info',
-                                        'schedule' => 'info',
-                                        'verify' => 'success',
-                                        'contract' => 'success',
-                                        default => 'secondary',
-                                    } }}">
-                                    {{ match ($data->status) {
-                                        'accepted' => 'Diterima',
-                                        'rejected' => 'Ditolak',
-                                        'laidoff' => 'Diberhentikan',
-                                        'pending' => 'Pending',
-                                        'schedule' => 'Penjadwalan',
-                                        'interview' => 'Interview',
-                                        'passed' => 'Lolos Interview',
-                                        'choose' => 'Verifikasi',
-                                        'verify' => 'Persiapan Kerja',
-                                        'contract' => 'Perjanjian',
-                                        default => 'Status Tidak Diketahui',
-                                    } }}
+                                        class="p-2 badge badge-{{ match ($data->status) {
+                                            'accepted' => 'success',
+                                            'rejected' => 'danger',
+                                            'laidoff' => 'danger',
+                                            'pending' => 'warning',
+                                            'interview' => 'info',
+                                            'schedule' => 'info',
+                                            'verify' => 'success',
+                                            'contract' => 'success',
+                                            default => 'secondary',
+                                        } }}">
+                                        {{ match ($data->status) {
+                                            'accepted' => 'Diterima',
+                                            'rejected' => 'Ditolak',
+                                            'laidoff' => 'Diberhentikan',
+                                            'pending' => 'Pending',
+                                            'schedule' => 'Penjadwalan',
+                                            'interview' => 'Interview',
+                                            'passed' => 'Lolos Interview',
+                                            'choose' => 'Verifikasi',
+                                            'verify' => 'Persiapan Kerja',
+                                            'contract' => 'Perjanjian',
+                                            default => 'Status Tidak Diketahui',
+                                        } }}
                                     </span>
                                 </td>
                                 @if ($data->status === 'passed')
@@ -92,6 +95,26 @@
                                         ])
                                     </td>
                                 @endif
+
+                                @if ($data->status === 'accepted')
+                                    <td class="text-center">
+                                        @php
+                                            $hasComplaintWithSameServant = $data->complaint->contains(function (
+                                                $complaint,
+                                            ) use ($data) {
+                                                return $complaint->servant_id == $data->servant_id;
+                                            });
+                                        @endphp
+
+                                        @if (!$hasComplaintWithSameServant)
+                                            <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                                data-target="#complaintModal-{{ $data->id }}">
+                                                <i class="fas fa-bullhorn"></i>
+                                            </a>
+                                            @include('cms.application.modal.complaint', ['data' => $data])
+                                        @endif
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>
@@ -100,3 +123,11 @@
         </div>
     </div>
 @endsection
+
+@push('custom-style')
+    <link rel="stylesheet" href="{{ asset('assets/vendor/summernote/summernote-bs4.min.css') }}">
+@endpush
+
+@push('custom-script')
+    <script src="{{ asset('assets/vendor/summernote/summernote-bs4.min.js') }}"></script>
+@endpush

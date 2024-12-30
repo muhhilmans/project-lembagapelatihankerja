@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ApplicationController;
-use App\Http\Controllers\ComplaintController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UtilityController;
 use App\Http\Controllers\VacancyController;
@@ -21,6 +20,4 @@ Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     Route::get('/applicant-indie', [UtilityController::class, 'indieApplicant'])->name('applicant-indie');
     Route::put('/applicant-indie/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('applicant-indie.change');
     Route::put('/applicant-indie/{vacancy}/{user}/upload', [ApplicationController::class, 'uploadContract'])->name('applicant-indie.upload');
-
-    Route::resource('complaints', ComplaintController::class);
 });

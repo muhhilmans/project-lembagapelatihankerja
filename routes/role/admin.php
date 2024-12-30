@@ -26,6 +26,9 @@ Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
     Route::post('/vacancy/{id}/recommendation', [UtilityController::class, 'storeRecom'])->name('vacancy.recommendation');
 
     Route::put('complaints/{id}/change', [ComplaintController::class, 'changeStatus'])->name('complaints.change');
+
+    Route::get('/worker-all', [UtilityController::class, 'allWorker'])->name('worker-all');
+    Route::post('worker-all/download', [UtilityController::class, 'downloadPdf'])->name('worker.download');
 });
 
 Route::group(['middleware' => ['role:superadmin|owner']], function () {

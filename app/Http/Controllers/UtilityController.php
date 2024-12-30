@@ -9,6 +9,7 @@ use App\Models\Profession;
 use App\Models\Application;
 use App\Models\RecomServant;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
@@ -31,6 +32,57 @@ class UtilityController extends Controller
         $respose->header('Content-Type', $type);
 
         return $respose;
+    }
+
+    public function allWorker()
+    {
+        $datas = Application::where('status', 'accepted')->get();
+
+        return view('cms.servant.worker', compact('datas'));
+    }
+
+    public function downloadPdf(Request $request)
+    {
+        $request->validate([
+            'select_data' => 'required|string',
+        ]);
+
+        $filter = $request->input('select_data');
+        $query = Application::where('status', 'accepted');
+
+        if ($filter === 'not_have_bank') {
+            $query->whereHas('servant.servantDetails', function ($q) {
+                $q->where('is_bank', 0);
+            });
+        } elseif ($filter === 'not_have_bpjs') {
+            $query->whereHas('servant.servantDetails', function ($q) {
+                $q->where('is_bpjs', 0);
+            });
+        } elseif ($filter === 'not_have_account') {
+            $query->whereHas('servant.servantDetails', function ($q) {
+                $q->where('is_bank', 0)->where('is_bpjs', 0);
+            });
+        }
+
+        $datas = $query->get();
+
+        if ($filter === 'not_have_bank') {
+            $pdf = Pdf::loadView('cms.servant.pdf.export-bank', compact('datas'))
+                ->setPaper('a4', 'potrait');
+            return $pdf->download('data_pekerja_tidak_memiliki_rekening_' . date('d-M-Y') . '.pdf');
+        } elseif ($filter === 'not_have_bpjs') {
+            $pdf = Pdf::loadView('cms.servant.pdf.export-bpjs', compact('datas'))
+                ->setPaper('a4', 'potrait');
+            return $pdf->download('data_pekerja_tidak_memiliki_bpjs' . date('d-M-Y') . '.pdf');
+        } elseif ($filter === 'not_have_account') {
+            $pdf = Pdf::loadView('cms.servant.pdf.export', compact('datas'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->download('data_pekerja_tidak_memiliki_rekening_dan_bpjs' . date('d-M-Y') . '.pdf');
+        } else {
+            $pdf = Pdf::loadView('cms.servant.pdf.export', compact('datas'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->download('data_pekerja_' . date('d-M-Y') . '.pdf');
+        }
     }
 
     public function allServant()
@@ -73,33 +125,32 @@ class UtilityController extends Controller
     public function showVacancy(string $id)
     {
         $data = Vacancy::findOrFail($id);
-        
+
         if (auth()->user()->roles->first()->name == 'majikan') {
             return view('cms.seek-vacancy.partial.detail', compact(['data']));
         } else {
             $servants = User::whereHas('roles', function ($query) {
                 $query->where('name', 'pembantu');
             })
-            ->where('is_active', true)
-            ->whereHas('servantDetails', function ($query) {
-                $query->where('working_status', false);
-            })
-            ->whereDoesntHave('recomServants')
-            ->get();
+                ->where('is_active', true)
+                ->whereHas('servantDetails', function ($query) {
+                    $query->where('working_status', false);
+                })
+                ->whereDoesntHave('recomServants')
+                ->get();
 
             $professions = Profession::all();
 
             return view('cms.seek-vacancy.partial.detail', compact(['data', 'servants', 'professions']));
         }
-
     }
 
     public function allApplicant()
     {
         if (auth()->user()->roles->first()->name == 'majikan') {
             $datas = Application::where('employe_id', auth()->user()->id)
-            ->where('status', 'accepted')
-            ->get();
+                ->where('status', 'accepted')
+                ->get();
         } else {
             $datas = Application::all();
         }
@@ -111,8 +162,8 @@ class UtilityController extends Controller
     {
         if (auth()->user()->roles->first()->name == 'majikan') {
             $datas = Application::where('employe_id', auth()->user()->id)
-            ->whereNotNull('employe_id')
-            ->get();
+                ->whereNotNull('employe_id')
+                ->get();
             return view('cms.applicant.hire', compact('datas'));
         } else {
             $datas = Application::whereNotNull('employe_id')->get();
@@ -126,9 +177,8 @@ class UtilityController extends Controller
             $datas = Application::whereHas('vacancy.user', function ($query) {
                 $query->where('id', auth()->user()->id);
             })
-            ->whereNotNull('vacancy_id')
-            ->whereIn('status', ['accepted', 'passed', 'contract', 'verify', 'rejected'])
-            ->get();
+                ->whereNotNull('vacancy_id')
+                ->get();
         } else {
             $datas = Application::whereNotNull('vacancy_id')->get();
         }
@@ -140,8 +190,8 @@ class UtilityController extends Controller
     {
         if (auth()->user()->roles->first()->name == 'pembantu') {
             $datas = Application::where('servant_id', auth()->user()->id)
-            ->whereNotNull('employe_id')
-            ->get();
+                ->whereNotNull('employe_id')
+                ->get();
         } else {
             $datas = Application::whereNotNull('employe_id')->get();
         }
@@ -153,8 +203,8 @@ class UtilityController extends Controller
     {
         if (auth()->user()->roles->first()->name == 'pembantu') {
             $datas = Application::where('servant_id', auth()->user()->id)
-            ->whereNotNull('vacancy_id')
-            ->get();
+                ->whereNotNull('vacancy_id')
+                ->get();
         } else {
             $datas = Application::whereNotNull('vacancy_id')->get();
         }
@@ -191,7 +241,7 @@ class UtilityController extends Controller
                 'message' => $th->getMessage(),
                 'status' => 400
             ];
-            
+
             return view('cms.error', compact('data'));
         }
     }

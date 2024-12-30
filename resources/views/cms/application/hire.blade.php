@@ -22,6 +22,9 @@
                             @if ($datas->contains(fn($data) => $data->status === 'passed'))
                                 <th>Aksi</th>
                             @endif
+                            @if ($datas->contains(fn($data) => $data->status === 'accepted'))
+                                <th>Aksi</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -90,6 +93,26 @@
                                         ])
                                     </td>
                                 @endif
+
+                                @if ($data->status === 'accepted')
+                                    <td class="text-center">
+                                        @php
+                                            $hasComplaintWithSameServant = $data->complaint->contains(function (
+                                                $complaint,
+                                            ) use ($data) {
+                                                return $complaint->servant_id == $data->servant_id;
+                                            });
+                                        @endphp
+
+                                        @if (!$hasComplaintWithSameServant)
+                                            <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                                data-target="#complaintModal-{{ $data->id }}">
+                                                <i class="fas fa-bullhorn"></i>
+                                            </a>
+                                            @include('cms.application.modal.complaint', ['data' => $data])
+                                        @endif
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>
@@ -98,3 +121,11 @@
         </div>
     </div>
 @endsection
+
+@push('custom-style')
+    <link rel="stylesheet" href="{{ asset('assets/vendor/summernote/summernote-bs4.min.css') }}">
+@endpush
+
+@push('custom-script')
+    <script src="{{ asset('assets/vendor/summernote/summernote-bs4.min.js') }}"></script>
+@endpush
