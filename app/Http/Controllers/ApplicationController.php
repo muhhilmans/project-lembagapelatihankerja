@@ -127,6 +127,7 @@ class ApplicationController extends Controller
 
             $directory = "contracts/hire_{$employe->name}";
             $fileName = "contract_{$servant->name}." . $request->file('file_contract')->getClientOriginalExtension();
+            $storagePath = "public/{$directory}";
 
             // Buat direktori jika belum ada
             if (!Storage::exists($directory)) {
@@ -139,13 +140,13 @@ class ApplicationController extends Controller
             }
 
             // Simpan file kontrak baru
-            $path = $request->file('file_contract')->storeAs($directory, $fileName);
+            $path = $request->file('file_contract')->storeAs($storagePath, $fileName);
 
             DB::transaction(function () use ($application, $servant, $employe, $path, $request) {
                 $application->update([
                     'status' => 'accepted',
                     'work_start_date' => $request->input('work_start_date'),
-                    'file_contract' => $path,
+                    'file_contract' => str_replace('public/', '', $path),
                 ]);
 
                 $servantDetail = ServantDetail::where('user_id', $servant->id)->first();
@@ -346,6 +347,7 @@ class ApplicationController extends Controller
 
             $directory = "contracts/vacancy_{$vacancy->name}";
             $fileName = "contract_{$user->name}." . $request->file('file_contract')->getClientOriginalExtension();
+            $storagePath = "public/{$directory}";
 
             if (!Storage::exists($directory)) {
                 Storage::makeDirectory($directory);
@@ -355,14 +357,14 @@ class ApplicationController extends Controller
                 Storage::delete($applyJob->file_contract);
             }
 
-            $path = $request->file('file_contract')->storeAs($directory, $fileName);
+            $path = $request->file('file_contract')->storeAs($storagePath, $fileName);
 
             $status = 'accepted';
 
             $applyJob->update([
                 'status' => $status,
                 'work_start_date' => $request->input('work_start_date'),
-                'file_contract' => $path,
+                'file_contract' => str_replace('public/', '', $path),
             ]);
 
             if ($status == 'accepted') {

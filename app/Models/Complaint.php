@@ -19,6 +19,7 @@ class Complaint extends Model
         'employe_id',
         'message',
         'status',
+        'notes_rejected',
         'file',
     ];
 

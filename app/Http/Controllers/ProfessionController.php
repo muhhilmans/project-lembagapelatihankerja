@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Profession;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Validator;
 
 class ProfessionController extends Controller
 {
@@ -17,7 +18,7 @@ class ProfessionController extends Controller
     public function index()
     {
         $professions = Profession::all();
-        
+
         return view('cms.profession.index', compact('professions'));
     }
 
@@ -28,6 +29,7 @@ class ProfessionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
+            'file_draft' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -37,9 +39,20 @@ class ProfessionController extends Controller
         $data = $validator->validated();
 
         try {
-            DB::transaction(function () use ($data) {
+            $directory = "professions";
+            $fileName = "tc_{$data['name']}." . $request->file('file_draft')->getClientOriginalExtension();
+            $storagePath = "public/{$directory}";
+
+            if (!Storage::exists($storagePath)) {
+                Storage::makeDirectory($storagePath);
+            }
+
+            $path = $request->file('file_draft')->storeAs($storagePath, $fileName);
+
+            DB::transaction(function () use ($data, $path) {
                 Profession::create([
                     'name' => $data['name'],
+                    'file_draft' => str_replace('public/', '', $path)
                 ]);
             });
 
@@ -64,6 +77,7 @@ class ProfessionController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
+            'file_draft' => 'sometimes|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -73,9 +87,24 @@ class ProfessionController extends Controller
         $data = $validator->validated();
 
         try {
-            DB::transaction(function () use ($data, $dataUpdate) {
+            $directory = "professions";
+            $fileName = "tc_{$data['name']}." . $request->file('file_draft')->getClientOriginalExtension();
+            $storagePath = "public/{$directory}";
+
+            if (!Storage::exists($storagePath)) {
+                Storage::makeDirectory($storagePath);
+            }
+
+            if ($dataUpdate->file_draft && Storage::exists("public/{$dataUpdate->file_draft}")) {
+                Storage::delete("public/{$dataUpdate->file_draft}");
+            }
+
+            $path = $request->file('file_draft')->storeAs($storagePath, $fileName);
+
+            DB::transaction(function () use ($data, $dataUpdate, $path) {
                 $dataUpdate->update([
                     'name' => $data['name'],
+                    'file_draft' => str_replace('public/', '', $path)
                 ]);
             });
 

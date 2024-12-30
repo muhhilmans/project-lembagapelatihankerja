@@ -45,6 +45,7 @@ class ComplaintController extends Controller
                 if ($data['status'] == 'accepted') {
                     $directory = "complaints/vacancy_{$update->servant->name}";
                     $fileName = "memorandum_{$update->servant->name}." . $request->file('file')->getClientOriginalExtension();
+                    $storagePath = "public/{$directory}";
 
                     if (!Storage::exists($directory)) {
                         Storage::makeDirectory($directory);
@@ -54,11 +55,11 @@ class ComplaintController extends Controller
                         Storage::delete($update->file);
                     }
 
-                    $path = $request->file('file')->storeAs($directory, $fileName);
+                    $path = $request->file('file')->storeAs($storagePath, $fileName);
 
                     $update->update([
                         'status' => $data['status'],
-                        'file' => $path,
+                        'file' => str_replace('public/', '', $path),
                     ]);
                 } else {
                     $update->update([

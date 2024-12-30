@@ -15,6 +15,7 @@ class Profession extends Model
 
     protected $fillable = [
         'name',
+        'file_draft',
     ];
 
     public function servant()

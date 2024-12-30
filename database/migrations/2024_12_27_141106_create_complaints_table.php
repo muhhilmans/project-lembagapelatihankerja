@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignUuid('employe_id')->references('id')->on('users')->onDelete('cascade');
             $table->text('message');
             $table->enum('status', ['pending', 'process', 'accepted', 'rejected'])->default('pending');
+            $table->text('notes_rejected')->nullable();
             $table->string('file')->nullable();
             $table->timestamps();
         });

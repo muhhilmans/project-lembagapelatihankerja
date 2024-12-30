@@ -26,8 +26,14 @@
                         @foreach ($professions as $data)
                             <tr>
                                 <td class="text-center">{{ $loop->iteration }}</td>
-                                <td>{{ $data->name }}</td>
+                                <td>
+                                    <a href="#" class="text-secondary" data-toggle="modal" data-target="#draftModal-{{ $data->id }}">{{ $data->name }}</a>
+                                    @include('cms.profession.modal.draft', ['profession' => $data])
+                                </td>
                                 <td class="text-center">
+                                    <a href="#" class="btn btn-primary mb-2 mb-lg-0" data-toggle="modal" data-target="#draftModal-{{ $data->id }}"><i class="fas fa-fw fa-file-alt"></i></a>
+                                    @include('cms.profession.modal.draft', ['profession' => $data])
+
                                     <a class="btn btn-warning mb-2 mb-lg-0" href="#" data-toggle="modal"
                                         data-target="#editModal-{{ $data->id }}"><i class="fas fa-fw fa-edit"></i></a>
                                     @include('cms.profession.modal.edit', ['profession' => $data])
