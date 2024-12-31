@@ -94,7 +94,7 @@
                                     <td>{{ $d->servant->servantDetails->last_education == 'not_filled' ? '-' : $d->servant->servantDetails->last_education }}
                                     </td>
                                 </tr>
-                                <tr>
+                                {{-- <tr>
                                     <th scope="row">Nomor Telepon</th>
                                     <td>:</td>
                                     <td>{{ $d->servant->servantDetails->phone ?? '-' }}</td>
@@ -114,7 +114,7 @@
                                         {{ $d->servant->servantDetails->district }},
                                         {{ $d->servant->servantDetails->regency }},
                                         {{ $d->servant->servantDetails->province }}</td>
-                                </tr>
+                                </tr> --}}
                                 <tr>
                                     <th scope="row">Pengalaman Kerja</th>
                                     <td>:</td>

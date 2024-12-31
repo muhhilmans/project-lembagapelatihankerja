@@ -20,7 +20,7 @@
                             <th>Tanggal</th>
                             <th>Keterangan</th>
                             <th>Status</th>
-                            <th>Gaji (Dengan Potongan 2,5%)</th>
+                            <th>Gaji Pokok</th>
                             @if ($datas->contains(fn($data) => $data->status === 'passed'))
                                 <th>Aksi</th>
                             @endif
@@ -87,13 +87,13 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    @php
+                                    {{-- @php
                                         $salary = $data->salary;
                                         $service = $salary * 0.025;
                                         $gaji = $salary - $service;
-                                    @endphp
+                                    @endphp --}}
 
-                                    Rp. {{ number_format($gaji, 0, ',', '.') }}
+                                    Rp. {{ number_format($data->salary, 0, ',', '.') }}
                                 </td>
                                 @if ($data->status === 'passed')
                                     <td class="text-center">

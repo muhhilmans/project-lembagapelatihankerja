@@ -46,13 +46,13 @@
                                     <li class="mb-1"><strong>Catatan:</strong> {!! $d->notes_interview !!}</li>
                                 @endif
                                 @if ($d->salary != null)
-                                    @php
+                                    {{-- @php
                                         $salary = $d->salary;
                                         $service = $salary * 0.025;
                                         $gaji = $salary - $service;
-                                    @endphp
+                                    @endphp --}}
 
-                                    <li><strong>Gaji:</strong> Rp. {{ number_format($gaji, 0, ',', '.') }}</li>
+                                    <li><strong>Gaji:</strong> Rp. {{ number_format($d->salary, 0, ',', '.') }}</li>
                                 @endif
                             </ul>
 
