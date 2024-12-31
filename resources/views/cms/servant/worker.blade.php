@@ -24,7 +24,12 @@
                                 <th>Nama Majikan</th>
                             @endhasrole
                             <th>Tanggal Bekerja</th>
-                            <th>Gaji (Dengan Potongan 2,5%)</th>
+                            @hasrole('majikan')
+                                <th>Gaji (Dengan Tambahan 7,5%)</th>
+                            @endhasrole
+                            @hasrole('superadmin|admin|owner|pembantu')
+                                <th>Gaji (Dengan Potongan 2,5%)</th>
+                            @endhasrole
                             <th>Status</th>
                             <th>Bank</th>
                             @hasrole('superadmin|admin|owner')
@@ -49,15 +54,28 @@
                                 @endhasrole
                                 <td class="text-center">{{ \Carbon\Carbon::parse($data->work_start_date)->format('d-M-Y') }}
                                 </td>
-                                <td class="text-center">
-                                    @php
-                                        $salary = $data->salary;
-                                        $service = $salary * 0.025;
-                                        $gaji = $salary - $service;
-                                    @endphp
+                                @hasrole('majikan')
+                                    <td class="text-center">
+                                        @php
+                                            $salary = $data->salary;
+                                            $service = $salary * 0.075;
+                                            $gaji = $salary + $service;
+                                        @endphp
 
-                                    Rp. {{ number_format($gaji, 0, ',', '.') }}
-                                </td>
+                                        Rp. {{ number_format($gaji, 0, ',', '.') }}
+                                    </td>
+                                @endhasrole
+                                @hasrole('superadmin|admin|owner|pembantu')
+                                    <td class="text-center">
+                                        @php
+                                            $salary = $data->salary;
+                                            $service = $salary * 0.025;
+                                            $gaji = $salary - $service;
+                                        @endphp
+
+                                        Rp. {{ number_format($gaji, 0, ',', '.') }}
+                                    </td>
+                                @endhasrole
                                 <td class="text-center">
                                     <span
                                         class="p-2 badge badge-{{ match ($data->status) {
@@ -125,8 +143,7 @@
                                             @include('cms.servant.modal.laidoff', ['data' => $data])
 
                                             <a href="#" class="btn btn-danger" data-toggle="modal"
-                                                data-target="#rejectModal-{{ $data->id }}"><i
-                                                    class="fas fa-times"></i></a>
+                                                data-target="#rejectModal-{{ $data->id }}"><i class="fas fa-times"></i></a>
                                             @include('cms.servant.modal.reject', ['data' => $data])
                                         @endif
                                     @endhasrole

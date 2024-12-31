@@ -16,9 +16,9 @@
 
                     @if (file_exists($filePath))
                         @if (Str::endsWith($data->file_draft, ['.jpg', '.jpeg', '.png', '.gif']))
-                            <img src="{{ asset('storage/' . $data->file_draft) }}" alt="Preview" class="img-fluid">
+                            <img src="{{ asset('storage/public/' . $data->file_draft) }}" alt="Preview" class="img-fluid">
                         @elseif (Str::endsWith($data->file_draft, ['.pdf']))
-                            <iframe src="{{ asset('storage/' . $data->file_draft) }}" width="100%"
+                            <iframe src="{{ asset('storage/public/' . $data->file_draft) }}" width="100%"
                                 height="400px"></iframe>
                         @else
                             <p>Format file tidak didukung untuk preview.</p>
