@@ -294,6 +294,7 @@ class ApplicationController extends Controller
             'status' => ['required', 'string'],
             'notes' => ['nullable', 'string'],
             'interview_date' => ['sometimes', 'date'],
+            'work_end_date' => ['sometimes', 'date'],
             'salary' => ['nullable', 'numeric'],
         ]);
 
