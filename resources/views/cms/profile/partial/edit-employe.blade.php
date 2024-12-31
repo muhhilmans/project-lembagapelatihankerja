@@ -42,6 +42,27 @@
                     <label for="address">Alamat <span class="text-danger">*</span></label>
                     <textarea class="form-control" name="address" id="address" rows="3" required>{{ old('address', $data->employeDetails->address ?? '') }}</textarea>
                 </div>
+
+                <div class="form-group">
+                    <label for="identity_card">Kartu Tanda Penduduk</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inpoIdentityCard">Upload</span>
+                        </div>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="edit_identity_card" name="identity_card"
+                                aria-describedby="inpoIdentityCard" accept="image/*">
+                            <label class="custom-file-label" for="identity_card">Choose file</label>
+                        </div>
+                    </div>
+                    <div class="mt-3" id="editIdentityCardPreviewContainer">
+                        @if (!empty($data->employeDetails->identity_card))
+                            <img id="editIdentityCardPreview"
+                                src="{{ route('getImage', ['path' => 'identity_card', 'imageName' => $data->employeDetails->identity_card]) }}"
+                                alt="KTP" class="img-fluid rounded" style="max-width: 100px;">
+                        @endif
+                    </div>
+                </div>
             </div>
 
             <div class="card-footer">
@@ -51,3 +72,41 @@
         </form>
     </div>
 @endsection
+
+
+@push('custom-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            function updatePreview(inputId, previewContainerId) {
+                const inputFile = document.getElementById(inputId);
+                const previewContainer = document.getElementById(previewContainerId);
+
+                inputFile.addEventListener('change', function() {
+                    const file = this.files[0];
+
+                    const label = this.nextElementSibling;
+                    label.textContent = file ? file.name : 'Choose file';
+
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            let previewImage = previewContainer.querySelector('img');
+                            if (!previewImage) {
+                                previewImage = document.createElement('img');
+                                previewImage.className = 'img-fluid rounded';
+                                previewImage.style.maxWidth = '100px';
+                                previewContainer.appendChild(previewImage);
+                            }
+                            previewImage.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        previewContainer.innerHTML = '';
+                    }
+                });
+            }
+
+            updatePreview('edit_identity_card', 'editIdentityCardPreviewContainer');
+        });
+    </script>
+@endpush

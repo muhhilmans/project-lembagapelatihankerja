@@ -30,7 +30,7 @@
 @push('custom-script')
     <script>
         $(document).ready(function() {
-            $('#rejectedModal-{{ $d->id }}').on('shown.bs.modal', function () {
+            $('#rejectedModal-{{ $data->id }}').on('shown.bs.modal', function () {
                 $('#reject-notes-editor').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
@@ -42,7 +42,7 @@
                 });
             });
 
-            $('#rejectedModal-{{ $d->id }}').on('hidden.bs.modal', function () {
+            $('#rejectedModal-{{ $data->id }}').on('hidden.bs.modal', function () {
                 $('#reject-notes-editor').summernote('destroy');
             });
         });
