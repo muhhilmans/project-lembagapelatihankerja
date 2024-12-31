@@ -237,7 +237,7 @@ class ServantController extends Controller
     {
         $user = User::findOrFail($request->user_id);
 
-        if ($user->applyJobs->count() > 0) {
+        if ($user->appServant->count() > 0) {
             return redirect()->route('users-servant.index')->with('toast_error', 'Pembantu memiliki lamaran pekerjaan!');
         }
 
