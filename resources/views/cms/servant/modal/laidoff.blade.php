@@ -39,6 +39,11 @@
                     <div class="modal-body text-left">
                         <input type="text" name="status" value="laidoff" hidden>
 
+                        <div class="form-group">
+                            <label for="work_end_date">Tanggal Diberhentikan <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="work_end_date" name="work_end_date" required>
+                        </div>
+
                         {{-- <div class="form-group">
                             <label for="notes">Catatan <span class="text-danger">*Isi dengan alasan
                                 diberhentikan</span></label>
