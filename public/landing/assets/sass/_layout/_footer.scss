@@ -1,0 +1,277 @@
+//>>>> Footer V1 <<<<//
+.footer__section{
+    background: #F0F8FF;
+}
+.footer__top{
+    border-top: 1px solid rgba(0, 0, 0, 0.09);
+    padding-top: 60px;
+}
+.footer__item{
+    .footer__title{
+        font-weight: 700;
+        text-transform: capitalize;
+        color: var(--title);
+        display: inline-block;
+        margin-bottom: 41px;
+    }
+    .prag{
+        color: #748AA0;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 28px;
+        margin-bottom: 50px;
+        max-width: 325px;
+    }
+    .viewmap{
+        color: var(--titletwo);
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 18px;
+        text-transform: capitalize;
+    }
+    //get touch
+    .get__touch{
+        li{
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            &:not(:last-child){
+                margin-bottom: 23px;
+            }
+            a,
+            span{
+                color: var(--pra);
+                font-size: 16px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: 140%;
+            }
+            @include breakpoint(max-lg){
+                &:not(:last-child){
+                    margin-bottom: 15px;
+                } 
+            }
+        }
+    }
+    //clink
+    .clink{
+        li{
+            a{
+                transition: all 0.4s;
+                font-size: 16px;
+                font-weight: 400;
+                color: var(--pra);
+            }
+            &:not(:last-child){
+                margin-bottom: 24px;
+            }
+            &:hover{
+                a{
+                    padding-left: 5px;
+                    color: var(--base);
+                }
+            }
+        }
+        @include breakpoint(max-lg){
+            li{
+                &:not(:last-child){
+                    margin-bottom: 15px;
+                }
+            }
+        }
+    }
+    //footer recent
+    .footer__recent{
+        li{
+            a{
+                display: flex;
+                align-items: center;
+                gap: 20px;
+            }
+            .cont{
+                .count-title{
+                    color: var(--titletwo);
+                    font-size: 18px;
+                    display: block;
+                    font-weight: 600;
+                    line-height: 30px; 
+                    text-transform: capitalize;
+                    margin-bottom: 7px;
+                }
+                .count-week{
+                    color: var(--titletwo);
+                    font-size: 14px;
+                    font-weight: 400;
+                    line-height: 16px; 
+                    text-transform: capitalize;
+                }
+            }
+            &:not(:last-child){
+                margin-bottom: 30px;
+            }
+        }
+        @include breakpoint(max-xl){
+           li{
+            a{
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+           } 
+        }
+    }
+    .footer-logo{
+        margin-bottom: 24px;
+        display: block;
+    }
+    .footer-social{
+        gap: 24px;
+    }
+    @include breakpoint(max-xl){
+        .footer__title{
+            margin-bottom: 30px;
+        }
+        .footer-logo{
+            margin-bottom: 18px;
+        }
+        .prag{
+            margin-bottom: 24px;
+        }
+        margin-bottom: 15px;
+    }
+    @include breakpoint(max-lg){
+        .footer__title{
+            margin-bottom: 18px;
+        }
+    }
+} 
+.footer__bottom{
+    background: var(--title);
+    p{
+        padding: 25px 5px;
+        color: var(--pra);
+        text-align: center;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 30px;
+        text-transform: capitalize;
+        margin: 0;
+        a{
+            color: var(--pra);
+        }
+    }
+    @include breakpoint(max-xl){
+        p{
+            padding: 18px 5px;
+            line-height: 24px;
+        }
+    }
+}
+.footer-spara{
+    position: absolute;
+    right: 60px;
+    bottom: 220px;
+}
+.footer-working{
+    position: absolute;
+    bottom: 420px;
+    left: 60px;
+    animation: updown 2s linear infinite;
+    @include breakpoint(max-xxl){
+        display: none;
+    }
+}
+.cleaning-shape{
+    position: absolute;
+    right: 100px;
+    bottom: 120px;
+}
+.working-cirs{
+    position: absolute;
+    bottom: 120px;
+    left: 0;
+}
+.pricing-section{
+    z-index: 2;
+    &::before{
+        position: absolute;
+        top: 0;
+        left: 0;
+        content: "";
+        border-radius: 484px;
+        background: #F3CB5F;
+
+        filter: blur(350px);
+        width: 20px;
+        height: 20px;
+        overflow-x: 0;
+    }
+}
+
+//newsletter 
+.newsletter-section{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 130px;
+    padding-bottom: 65px;
+    .subcribe-title{
+        max-width: 345px;
+    }
+    form{
+        width: calc(100% - 345px);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 21px;
+        input{
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.09);
+            color: var(--pra);
+            padding: 13px 16px;
+        }
+        button{
+            margin-left: 20px;
+        }
+    }
+    @include breakpoint(max-xxl){
+        padding-top: 70px;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+        gap: 16px;
+        form{
+            flex-wrap: wrap;
+            width: calc(100%);
+            justify-content: center;
+            gap: 16px;
+            input{
+                width: 500px;
+                width: 100%;
+            }
+            button{
+                margin-left: 0px;
+            }
+        }
+    }
+    @include breakpoint(max-lg){
+        form{
+            display: inline-flex;
+            width: 100% !important;
+            gap: 15px;
+            input{
+                width: 100% !important;
+            }
+            button{
+                display: block;
+                margin-left: 0px;
+            }
+        }
+    }
+}
+//newsletter 
+//>>>> Footer V1 <<<<//

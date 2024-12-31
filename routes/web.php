@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UtilityController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,7 +19,8 @@ use App\Http\Controllers\ApplicationController;
 |
 */
 
-Route::get('/', [AuthController::class, 'login'])->name('login');
+Route::get('/', [HomeController::class, 'home'])->name('home');
+Route::get('/login', [AuthController::class, 'login'])->name('login');
 
 Route::post('/authenticate', [AuthController::class, 'authenticate'])->name('authenticate');
 

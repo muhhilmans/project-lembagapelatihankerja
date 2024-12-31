@@ -482,6 +482,26 @@
         const dataProvince = "{{ optional($data->servantDetails)->province }}";
 
         document.addEventListener('DOMContentLoaded', () => {
+            const isBankCheckbox = document.getElementById('is_bank');
+            const bankDetails = document.getElementById('bank-details');
+            isBankCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    bankDetails.classList.remove('d-none');
+                } else {
+                    bankDetails.classList.add('d-none');
+                }
+            });
+            
+            const isBpjsCheckbox = document.getElementById('is_bpjs');
+            const bpjsDetails = document.getElementById('bpjs-details');
+            isBpjsCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    bpjsDetails.classList.remove('d-none');
+                } else {
+                    bpjsDetails.classList.add('d-none');
+                }
+            });
+            
             function updatePreview(inputId, previewContainerId) {
                 const inputFile = document.getElementById(inputId);
                 const previewContainer = document.getElementById(previewContainerId);
