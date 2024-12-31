@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Application;
 use App\Models\User;
 use App\Models\Profession;
 use App\Models\ServantSkill;
@@ -268,4 +269,50 @@ class ProfileController extends Controller
         Alert::success('Berhasil', 'Profile berhasil diperbarui!');
         return redirect()->route('profile', $user->id);
     }
+
+    public function updateBank(Request $request, string $id)
+{
+    $oldData = Application::findOrFail($id);
+
+    $validator = Validator::make($request->all(), [
+        'is_bank' => ['sometimes', 'boolean'],
+        'bank_name' => ['required_if:is_bank,1', 'nullable', 'string', 'max:255'],
+        'account_number' => ['required_if:is_bank,1', 'nullable', 'string', 'max:255'],
+        'is_bpjs' => ['sometimes', 'boolean'],
+        'type_bpjs' => ['required_if:is_bpjs,1', 'nullable', 'string', 'max:255'],
+        'number_bpjs' => ['required_if:is_bpjs,1', 'nullable', 'string', 'max:255'],
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()->route('worker-all')->with('toast_error', $validator->messages()->all()[0])->withInput();
+    }
+
+    $data = $validator->validated();
+
+    try {
+        DB::transaction(function () use ($data, $oldData) {
+            $update = User::where('id', $oldData->servant_id)->first();
+
+            $update->servantDetails()->update([
+                'is_bank' => $data['is_bank'] ?? 0,
+                'bank_name' => $data['bank_name'] ?? null,
+                'account_number' => $data['account_number'] ?? null,
+                'is_bpjs' => $data['is_bpjs'] ?? 0,
+                'type_bpjs' => $data['type_bpjs'] ?? null,
+                'number_bpjs' => $data['number_bpjs'] ?? null,
+            ]);
+        });
+
+        Alert::success('Berhasil', 'Akun rekening berhasil diperbarui!');
+        return redirect()->route('worker-all');
+    } catch (\Throwable $th) {
+        $data = [
+            'message' => $th->getMessage(),
+            'status' => 400
+        ];
+
+        return view('cms.error', compact('data'));
+    }
+}
+
 }

@@ -61,6 +61,7 @@ class ApplicationController extends Controller
             'status' => ['required', 'string'],
             'notes' => ['nullable', 'string'],
             'interview_date' => ['sometimes', 'date'],
+            'work_end_date' => ['sometimes', 'date'],
             'salary' => ['nullable', 'numeric'],
         ]);
 
@@ -95,6 +96,15 @@ class ApplicationController extends Controller
                     $update->update([
                         'status' => $data['status'],
                         'notes_verify' => $data['notes'],
+                    ]);
+                } elseif ($data['status'] == 'laidoff') {
+                    $update->update([
+                        'status' => $data['status'],
+                        'work_end_date' => $data['work_end_date'],
+                    ]);
+                } elseif ($data['status'] == 'accepted') {
+                    $update->update([
+                        'status' => $data['status'],
                     ]);
                 } else {
                     $update->update([
@@ -317,6 +327,15 @@ class ApplicationController extends Controller
                     $update->update([
                         'status' => $data['status'],
                         'notes_verify' => $data['notes'],
+                    ]);
+                } elseif ($data['status'] == 'laidoff') {
+                    $update->update([
+                        'status' => $data['status'],
+                        'work_end_date' => $data['work_end_date'],
+                    ]);
+                } elseif ($data['status'] == 'accepted') {
+                    $update->update([
+                        'status' => $data['status'],
                     ]);
                 } else {
                     $update->update([

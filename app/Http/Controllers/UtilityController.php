@@ -37,7 +37,7 @@ class UtilityController extends Controller
     public function allWorker()
     {
         if (auth()->user()->roles->first()->name == 'majikan') {
-            $datas = Application::where('status', 'accepted')
+            $datas = Application::whereIn('status', ['accepted', 'review'])
                 ->where(function ($query) {
                     $query->where('employe_id', auth()->user()->id)
                         ->orWhereHas('vacancy.user', function ($q) {
@@ -45,7 +45,7 @@ class UtilityController extends Controller
                         });
                 })->get();
         } else {
-            $datas = Application::where('status', 'accepted')->get();
+            $datas = Application::whereIn('status', ['accepted', 'review'])->get();
         }
 
         return view('cms.servant.worker', compact('datas'));

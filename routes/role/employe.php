@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UtilityController;
 use App\Http\Controllers\VacancyController;
@@ -22,4 +23,5 @@ Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     Route::put('/applicant-indie/{vacancy}/{user}/upload', [ApplicationController::class, 'uploadContract'])->name('applicant-indie.upload');
     
     Route::get('/worker-all', [UtilityController::class, 'allWorker'])->name('worker-all');
+    Route::put('/worker/{id}', [ProfileController::class, 'updateBank'])->name('update-bank');
 });

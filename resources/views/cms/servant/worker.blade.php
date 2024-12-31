@@ -24,11 +24,13 @@
                                 <th>Nama Majikan</th>
                             @endhasrole
                             <th>Tanggal Bekerja</th>
+                            <th>Gaji (Dengan Potongan 2,5%)</th>
                             <th>Status</th>
                             <th>Bank</th>
                             @hasrole('superadmin|admin|owner')
                                 <th>BPJS</th>
                             @endhasrole
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,9 +39,24 @@
                                 <td class="text-center">{{ $loop->iteration }}</td>
                                 <td>{{ $data->servant->name }}</td>
                                 @hasrole('superadmin|admin|owner')
-                                    <td>{{ $data->vacancy->user->name }}</td>
+                                    <td>
+                                        @if ($data->vacancy_id != null)
+                                            {{ $data->vacancy->user->name }}
+                                        @else
+                                            {{ $data->employe->name }}
+                                        @endif
+                                    </td>
                                 @endhasrole
                                 <td class="text-center">{{ \Carbon\Carbon::parse($data->work_start_date)->format('d-M-Y') }}
+                                </td>
+                                <td class="text-center">
+                                    @php
+                                        $salary = $data->salary;
+                                        $service = $salary * 0.025;
+                                        $gaji = $salary - $service;
+                                    @endphp
+
+                                    Rp. {{ number_format($gaji, 0, ',', '.') }}
                                 </td>
                                 <td class="text-center">
                                     <span
@@ -65,7 +82,7 @@
                                             'choose' => 'Verifikasi',
                                             'verify' => 'Persiapan Kerja',
                                             'contract' => 'Perjanjian',
-                                            default => 'Status Tidak Diketahui',
+                                            default => 'Review',
                                         } }}
                                     </span>
                                 </td>
@@ -92,6 +109,35 @@
                                         @endif
                                     </td>
                                 @endhasrole
+                                <td class="text-center">
+                                    @hasrole('superadmin|admin')
+                                        @if ($data->servant->servantDetails->is_bank == 0 || $data->servant->servantDetails->is_bpjs == 0)
+                                            <a href="#" class="btn btn-warning mb-2" data-toggle="modal"
+                                                data-target="#editBankModal-{{ $data->id }}"><i
+                                                    class="fas fa-edit"></i></a>
+                                            @include('cms.servant.modal.edit-bank', ['data' => $data])
+                                        @endif
+
+                                        @if ($data->status == 'review')
+                                            <a href="#" class="btn btn-success mb-2" data-toggle="modal"
+                                                data-target="#laidoffModal-{{ $data->id }}"><i
+                                                    class="fas fa-check"></i></a>
+                                            @include('cms.servant.modal.laidoff', ['data' => $data])
+
+                                            <a href="#" class="btn btn-danger" data-toggle="modal"
+                                                data-target="#rejectModal-{{ $data->id }}"><i
+                                                    class="fas fa-times"></i></a>
+                                            @include('cms.servant.modal.reject', ['data' => $data])
+                                        @endif
+                                    @endhasrole
+
+                                    @if ($data->status == 'accepted')
+                                        <a href="#" class="btn btn-danger" data-toggle="modal"
+                                            data-target="#reviewModal-{{ $data->id }}"><i
+                                                class="fas fa-user-times"></i></a>
+                                        @include('cms.servant.modal.review', ['data' => $data])
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -100,3 +146,11 @@
         </div>
     </div>
 @endsection
+
+@push('custom-style')
+    <link rel="stylesheet" href="{{ asset('assets/vendor/summernote/summernote-bs4.min.css') }}">
+@endpush
+
+@push('custom-script')
+    <script src="{{ asset('assets/vendor/summernote/summernote-bs4.min.js') }}"></script>
+@endpush
