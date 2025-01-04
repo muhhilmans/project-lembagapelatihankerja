@@ -38,7 +38,7 @@
                             </li>
                             <li>Fasilitas yang Diterima Mitra ART:
                                 <ol type="a" class="font-weight-normal">
-                                    <li>Buku rekening tabungan/ATM Bank BCA yang dibuatkan secara gratis.</li>
+                                    <li>Buku rekening tabungan/ATM Bank yang dibuatkan secara gratis.</li>
                                     <li>Kartu BPJS Ketenagakerjaan untuk perlindungan kecelakaan kerja dan
                                         perlindungan kematian.</li>
                                     <li>Gaji bulanan yang ditransfer langsung ke rekening Mitra ART setiap tanggal 1.</li>

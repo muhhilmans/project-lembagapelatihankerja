@@ -160,24 +160,26 @@
                                     @endif
                                 </td>
                             </tr>
-                            <tr>
-                                <th scope="row">Nomor Telepon</th>
-                                <td>:</td>
-                                <td>{{ $data->servantDetails->phone ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Nomor Darurat</th>
-                                <td>:</td>
-                                <td>{{ $data->servantDetails->emergency_number ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Alamat</th>
-                                <td>:</td>
-                                <td>{{ $data->servantDetails->address }} RT {{ $data->servantDetails->rt }} RW
-                                    {{ $data->servantDetails->rw }}, {{ $data->servantDetails->village }},
-                                    {{ $data->servantDetails->district }}, {{ $data->servantDetails->regency }},
-                                    {{ $data->servantDetails->province }}</td>
-                            </tr>
+                            @hasrole('superadmin|admin|owner')
+                                <tr>
+                                    <th scope="row">Nomor Telepon</th>
+                                    <td>:</td>
+                                    <td>{{ $data->servantDetails->phone ?? '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Nomor Darurat</th>
+                                    <td>:</td>
+                                    <td>{{ $data->servantDetails->emergency_number ?? '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Alamat</th>
+                                    <td>:</td>
+                                    <td>{{ $data->servantDetails->address }} RT {{ $data->servantDetails->rt }} RW
+                                        {{ $data->servantDetails->rw }}, {{ $data->servantDetails->village }},
+                                        {{ $data->servantDetails->district }}, {{ $data->servantDetails->regency }},
+                                        {{ $data->servantDetails->province }}</td>
+                                </tr>
+                            @endhasrole
                             <tr>
                                 <th scope="row">Pengalaman Kerja</th>
                                 <td>:</td>
