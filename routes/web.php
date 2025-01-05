@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UtilityController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 
 /*
@@ -42,13 +43,9 @@ Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
 Route::get('storage/img/{path}/{imageName}', [UtilityController::class, 'displayImage'])->name('getImage');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard-servant', function () {
-        return view('cms.dashboard.dashboard-servant');
-    })->name('dashboard-servant');
+    Route::get('/dashboard-servant', [DashboardController::class, 'dashboardServant'])->name('dashboard-servant');
 
-    Route::get('/dashboard-employe', function () {
-        return view('cms.dashboard.dashboard-employe');
-    })->name('dashboard-employe');
+    Route::get('/dashboard-employe', [DashboardController::class, 'dashboardEmploye'])->name('dashboard-employe');
 
     require __DIR__.'/role/admin.php';
     require __DIR__.'/role/employe.php';

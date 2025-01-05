@@ -54,6 +54,7 @@
                     toolbar: [
                         ['font', ['bold', 'italic', 'underline']],
                         ['para', ['ul']],
+                        // ['insert', ['link']],
                     ]
                 });
             });

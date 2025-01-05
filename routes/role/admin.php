@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfessionController;
 use App\Http\Controllers\User\AdminController;
@@ -9,9 +10,7 @@ use App\Http\Controllers\User\ServantController;
 use App\Http\Controllers\UtilityController;
 
 Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
-    Route::get('/dashboard', function () {
-        return view('cms.dashboard.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 
     Route::resource('users-employe', EmployeController::class);
     Route::put('users-employe/{user}/change', [EmployeController::class, 'changeStatus'])->name('users-employe.change');
