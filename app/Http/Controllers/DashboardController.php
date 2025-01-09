@@ -13,6 +13,7 @@ class DashboardController extends Controller
     {
         $applications = Application::with('vacancy')->get();
         $complaints = Complaint::all();
+        $vacancies = Vacancy::all();
 
         $pendingApp = $applications->where('status', 'pending')->count();
         $processApp = $applications->whereIn('status', ['interview', 'schedule', 'verify', 'contract'])->count();
@@ -23,6 +24,31 @@ class DashboardController extends Controller
         $rejectedComp = $complaints->where('status', 'rejected')->count();
         $acceptedComp = $complaints->where('status', 'accepted')->count();
         $datasApp = $applications->where('status', 'interview')->sortByDesc('updated_at');
+
+        $chartWorker = $applications->whereIn('status', ['accepted', 'review'])->map(function ($item) {
+            $sum = $item->servant->servantDetails->profession->name;
+            return [
+                'worker_sum' => $sum,
+            ];
+        });
+
+        $chartServant = $applications->whereIn('status', ['pending', 'interview', 'schedule', 'verify', 'contract'])->map(function ($item) {
+            $sum = $item->servant->servantDetails->profession->name;
+            return [
+                'servant_sum' => $sum,
+            ];
+        });
+
+        $chartVacancy = $vacancies->where('status', true)->map(function ($item) {
+            $sum = $item->profession->name;
+            return [
+                'vacancy_sum' => $sum
+            ];
+        });
+        
+        $chartWorkerCount = $chartWorker->groupBy('worker_sum')->map->count();
+        $chartServantCount = $chartServant->groupBy('servant_sum')->map->count();
+        $chartVacancyCount = $chartVacancy->groupBy('vacancy_sum')->map->count();
 
         $data = [
             'pending' => $pendingApp,
@@ -35,7 +61,7 @@ class DashboardController extends Controller
             'acceptedComp' => $acceptedComp,
         ];
 
-        return view('cms.dashboard.dashboard', compact(['data', 'datasApp']));
+        return view('cms.dashboard.dashboard', compact(['data', 'datasApp', 'chartWorkerCount', 'chartServantCount', 'chartVacancyCount']));
     }
 
     public function dashboardEmploye()
