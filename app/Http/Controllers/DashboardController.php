@@ -9,43 +9,65 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
-        $applications = Application::with('vacancy')->get();
-        $complaints = Complaint::all();
-        $vacancies = Vacancy::all();
+        $filter = $request->get('filter', 'weekly');
+
+        switch ($filter) {
+            case 'monthly':
+                $startDate = now()->startOfMonth();
+                $endDate = now()->endOfMonth();
+                break;
+
+            case 'yearly':
+                $startDate = now()->startOfYear();
+                $endDate = now()->endOfYear();
+                break;
+
+            default:
+                $startDate = now()->startOfWeek();
+                $endDate = now()->endOfWeek();
+                break;
+        }
+
+        $applications = Application::with('vacancy')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
+
+        $complaints = Complaint::whereBetween('created_at', [$startDate, $endDate])->get();
+        $vacancies = Vacancy::whereBetween('created_at', [$startDate, $endDate])->get();
 
         $pendingApp = $applications->where('status', 'pending')->count();
         $processApp = $applications->whereIn('status', ['interview', 'schedule', 'verify', 'contract'])->count();
         $acceptedApp = $applications->where('status', 'accepted')->count();
         $rejectedApp = $applications->whereIn('status', ['rejected', 'laidoff'])->count();
-        $vacancy = Vacancy::where('status', true)->count();
-        $worker = Application::whereIn('status', ['accepted', 'review'])->count();
+        $vacancy = $vacancies->where('status', true)->count();
+        $worker = $applications->whereIn('status', ['accepted', 'review'])->count();
         $rejectedComp = $complaints->where('status', 'rejected')->count();
         $acceptedComp = $complaints->where('status', 'accepted')->count();
         $datasApp = $applications->where('status', 'interview')->sortByDesc('updated_at');
 
         $chartWorker = $applications->whereIn('status', ['accepted', 'review'])->map(function ($item) {
-            $sum = $item->servant->servantDetails->profession->name;
+            $sum = $item->servant->servantDetails->profession->name ?? 'Unknown';
             return [
                 'worker_sum' => $sum,
             ];
         });
 
         $chartServant = $applications->whereIn('status', ['pending', 'interview', 'schedule', 'verify', 'contract'])->map(function ($item) {
-            $sum = $item->servant->servantDetails->profession->name;
+            $sum = $item->servant->servantDetails->profession->name ?? 'Unknown';
             return [
                 'servant_sum' => $sum,
             ];
         });
 
         $chartVacancy = $vacancies->where('status', true)->map(function ($item) {
-            $sum = $item->profession->name;
+            $sum = $item->profession->name ?? 'Unknown';
             return [
-                'vacancy_sum' => $sum
+                'vacancy_sum' => $sum,
             ];
         });
-        
+
         $chartWorkerCount = $chartWorker->groupBy('worker_sum')->map->count();
         $chartServantCount = $chartServant->groupBy('servant_sum')->map->count();
         $chartVacancyCount = $chartVacancy->groupBy('vacancy_sum')->map->count();
@@ -61,7 +83,7 @@ class DashboardController extends Controller
             'acceptedComp' => $acceptedComp,
         ];
 
-        return view('cms.dashboard.dashboard', compact(['data', 'datasApp', 'chartWorkerCount', 'chartServantCount', 'chartVacancyCount']));
+        return view('cms.dashboard.dashboard', compact('data', 'datasApp', 'chartWorkerCount', 'chartServantCount', 'chartVacancyCount', 'filter'));
     }
 
     public function dashboardEmploye()
