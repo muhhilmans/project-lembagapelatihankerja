@@ -169,7 +169,7 @@
                                 <img src="{{ asset('assets/img/logo.png') }}" alt="logo" style="max-height: 35px; width: auto;">
                             </a>
                             <ul class="custom-nav d-lg-flex d-grid">
-                                <li class="menu-item position-relative">
+                                {{-- <li class="menu-item position-relative">
                                     <button class="position-relative d-flex align-items-center gap-2">
                                         Home
                                         <i class="bi bi-caret-down-fill"></i>
@@ -182,67 +182,25 @@
                                             <a href="index-2.html">Home Two</a>
                                         </li>
                                     </ul>
-                                </li>
-                                <li class="menu-item position-relative">
-                                    <button class="position-relative d-flex align-items-center gap-2">
-                                        Pages
-                                        <i class="bi bi-caret-down-fill"></i>
-                                    </button>
-                                    <ul class="sub-menu home-scroolls ">
-                                        <li class="menu-link">
-                                            <a href="project.html">Project</a>
-                                        </li>
-                                        <li class="menu-link">
-                                            <a href="project-details.html">Project Details</a>
-                                        </li>
-                                        <li class="menu-link">
-                                            <a href="pricing.html">Pricing</a>
-                                        </li>
-                                        <li class="menu-link">
-                                            <a href="team.html">Team</a>
-                                        </li>
-                                        <li class="menu-link">
-                                            <a href="team-details.html">Team Details</a>
-                                        </li>
-                                        <li class="menu-link">
-                                            <a href="faq.html">Faqs</a>
-                                        </li>
-                                        <li class="menu-link">
-                                            <a href="contact.html">Contact</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="menu-item position-relative">
-                                    <button class="position-relative d-flex align-items-center gap-2">
-                                        Service
-                                        <i class="bi bi-caret-down-fill"></i>
-                                    </button>
-                                    <ul class="sub-menu home-scroolls ">
-                                        <li class="menu-link">
-                                            <a href="service.html">Service</a>
-                                        </li>
-                                        <li class="menu-link">
-                                            <a href="service-details.html">Service Details</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="menu-item position-relative">
-                                    <button class="position-relative d-flex align-items-center gap-2">
-                                        Blog
-                                        <i class="bi bi-caret-down-fill"></i>
-                                    </button>
-                                    <ul class="sub-menu home-scroolls ">
-                                        <li class="menu-link">
-                                            <a href="blog.html">Blog</a>
-                                        </li>
-                                        <li class="menu-link">
-                                            <a href="blog-details.html">Blog Details</a>
-                                        </li>
-                                    </ul>
+                                </li> --}}
+                                <li class="menu-item itembg__1 position-relative">
+                                    <a href="{{ url('/') }}" class="fw_500">
+                                        Home
+                                    </a>
                                 </li>
                                 <li class="menu-item itembg__1 position-relative">
                                     <a href="about.html" class="fw_500">
                                         About us
+                                    </a>
+                                </li>
+                                <li class="menu-item itembg__1 position-relative">
+                                    <a href="about.html" class="fw_500">
+                                        Service
+                                    </a>
+                                </li>
+                                <li class="menu-item itembg__1 position-relative">
+                                    <a href="about.html" class="fw_500">
+                                        Blog
                                     </a>
                                 </li>
                                 <li class="menu-item itembg__1 position-relative">

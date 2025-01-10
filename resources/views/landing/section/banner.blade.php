@@ -25,14 +25,14 @@
                          Explore Our Services
                       </span>
                    </a>
-                   <div class="d-flex bn-main-vid align-items-center">
+                   {{-- <div class="d-flex bn-main-vid align-items-center">
                       <a href="https://www.youtube.com/watch?v=r5cJSGcNisw" class="circle-video video-btn">
                          <i class="bi bi-play-fill base"></i>
                       </a>
                       <span class="hows">
                          How It Works
                       </span>
-                   </div>
+                   </div> --}}
                 </div>
              </div>
           </div>

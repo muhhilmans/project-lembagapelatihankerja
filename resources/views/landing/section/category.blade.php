@@ -28,7 +28,7 @@
                    </div>
                 </div>
                 <p>
-                   We love to help you to get your clothes fresh and clean so we are here for you 24/7 for any question, concern or suggestion. The account manager and the ease of a state-of-the-art app that makes it possible.
+                  We are always here to help you. Our customer support is available 24 hours a day, 7 days a week to answer your questions, provide solutions, and ensure your satisfaction. With our support, you can feel at ease and comfortable.
                 </p>
                 <a href="contact.html" class="d-flex cate-btn align-items-center gap-xl-3 gap-2">
                    Contact With Us
@@ -63,7 +63,7 @@
                    </div>
                 </div>
                 <p>
-                   We love to help you to get your clothes fresh and clean so we are here for you 24/7 for any question, concern or suggestion. The account manager and the ease of a state-of-the-art app that makes it possible.
+                  Enjoy a variety of attractive offers and exclusive promotions that we provide. We always strive to offer the best prices and service packages that suit your needs. With us, cleaning your home becomes more enjoyable and affordable.
                 </p>
                 <a href="about.html" class="d-flex cate-btn align-items-center gap-xl-3 gap-2">
                    View Our Offers
@@ -98,7 +98,7 @@
                    </div>
                 </div>
                 <p>
-                   We love to help you to get your clothes fresh and clean so we are here for you 24/7 for any question, concern or suggestion. The account manager and the ease of a state-of-the-art app that makes it possible.
+                  Trust your home cleaning to our trained and experienced professionals. We use high-quality equipment and products to deliver optimal results. With us, your home will always be sparkling clean.
                 </p>
                 <a href="about.html" class="d-flex cate-btn align-items-center gap-xl-3 gap-2">
                    Meet With Our Staff
@@ -123,55 +123,55 @@
                             </span>
                          </a>
                          <h2 class="text-white wow fadeInDown" data-wow-delay="0.8s">
-                            Cleaning Today for Making Your Future Excellent
+                           Enjoy a Better Life with a Household Helper
                          </h2>
                          <p class="test n0-clr wow fadeInDown" data-wow-delay="0.9s">
-                            We love help you get your clothes fresh and clean so we here for you 24/7 for any question, concern or suggestion.
+                           With the help of a household helper, you can focus more on the important things in life. Enjoy your free time with family and friends.
                          </p>
                       </div>
                       <div class="about-indetails">
                          <div class="indetails-item wow fadeInUp" data-wow-delay="0.5s">
                             <div class="d-flex expert-head align-items-center gap-xxl-4 gap-2 mb-xl-4 mb-3">
-                               <img src="assets/images/icon/aicon1.png" alt="img">
+                               <img src="{{ asset('landing/assets/images/icon/aicon1.png') }}" alt="img">
                                <span class="title d-block fw-700">
-                                  Fast Work
+                                  High Quality
                                </span>
                             </div>
                             <p>
-                               This service focuses on cleaning & maintaining homes.
+                              We only provide high-quality household helpers.
                             </p>
                          </div>
                          <div class="indetails-item wow fadeInDown" data-wow-delay="0.6s">
                             <div class="d-flex expert-head align-items-center gap-xxl-4 gap-2 mb-xl-4 mb-3">
-                               <img src="assets/images/icon/aicon2.png" alt="img">
+                               <img src="{{ asset('landing/assets/images/icon/aicon2.png') }}" alt="img">
                                <span class="title d-block fw-700">
                                   Professional
                                </span>
                             </div>
                             <p>
-                               This service focuses on cleaning & maintaining homes.
+                              Our household helpers are trained and experienced.
                             </p>
                          </div>
                          <div class="indetails-item wow fadeInUp" data-wow-delay="0.7s">
                             <div class="d-flex expert-head align-items-center gap-xxl-4 gap-2 mb-xl-4 mb-3">
-                               <img src="assets/images/icon/aicon3.png" alt="img">
+                               <img src="{{ asset('landing/assets/images/icon/aicon3.png') }}" alt="img">
                                <span class="title d-block fw-700">
-                                  Brilliant Purity
+                                  Safe
                                </span>
                             </div>
                             <p>
-                               This service focuses on cleaning & maintaining homes.
+                              We guarantee your safety and comfort.
                             </p>
                          </div>
                          <div class="indetails-item wow fadeInDown" data-wow-delay="0.8s">
                             <div class="d-flex expert-head align-items-center gap-xxl-4 gap-2 mb-xl-4 mb-3">
-                               <img src="assets/images/icon/aicon4.png" alt="img">
+                               <img src="{{ asset('landing/assets/images/icon/aicon4.png') }}" alt="img">
                                <span class="title d-block fw-700">
-                                  Expert Cleaner
+                                  Trusted
                                </span>
                             </div>
                             <p>
-                               This service focuses on cleaning & maintaining homes.
+                              All our household helpers have undergone a rigorous verification process.
                             </p>
                          </div>
                       </div>
@@ -179,15 +179,15 @@
                 </div>
                 <div class="col-xxl-6 col-xl-6 col-lg-5">
                    <div class="about-company-thumb position-relative">
-                      <img src="assets/images/about/about.png" alt="">
+                      <img src="{{ asset('landing/assets/images/about/about.jpeg') }}" alt="">
                    </div>
                 </div>
              </div>
-             <img src="assets/images/icon/flower.png" alt="img" class="follower">
-             <img src="assets/images/icon/tung.png" alt="img" class="follower-tung">
+             <img src="{{ asset('landing/assets/images/icon/flower.png') }}" alt="img" class="follower">
+             <img src="{{ asset('landing/assets/images/icon/tung.png') }}" alt="img" class="follower-tung">
           </div>
        </div>
     </div>
-    <img src="assets/images/footer/footer-spra.png" alt="img" class="spra-g">
-    <img src="assets/images/icon/cirs.png" alt="img" class="a-cir">
+    <img src="{{ asset('landing/assets/images/footer/footer-spra.png') }}" alt="img" class="spra-g">
+    <img src="{{ asset('landing/assets/images/icon/cirs.png') }}" alt="img" class="a-cir">
  </section>

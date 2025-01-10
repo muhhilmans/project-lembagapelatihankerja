@@ -2126,10 +2126,11 @@ p {
   font-family: "Geologica", sans-serif;
   font-size: 84px;
   margin-bottom: 44px;
+  color: rgba(0, 0, 0, 0.76);
 }
 .banner-v1-content p {
   font-size: 22px;
-  color: rgba(255, 255, 255, 0.76);
+  color: rgba(0, 0, 0, 0.76);
   line-height: 34px;
   margin-bottom: 50px;
   max-width: 700px;
