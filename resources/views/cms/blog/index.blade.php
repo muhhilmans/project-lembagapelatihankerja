@@ -31,13 +31,19 @@
                                 <td>{{ $data->title }}</td>
                                 <td class="text-center">{{ $data->category ?? 'N/A' }}</td>
                                 <td class="text-center">
-                                    <img src="{{ route('getImage', ['path' => 'blogs', 'imageName' => $data->image]) }}" alt="" width="100">
+                                    <img src="{{ route('getImage', ['path' => 'blogs', 'imageName' => $data->image]) }}" alt="Foto" class="img-fluid zoomable-image" style="max-height: 100px;">
                                 </td>
                                 <td class="text-center">
-                                    <a class="btn btn-sm btn-info" href="#" data-toggle="modal" data-target="#editModal-{{ $data->id }}">
+                                    <a class="btn btn-sm btn-info mb-1 mb-lg-0" href="#" data-toggle="modal" data-target="#showModal-{{ $data->id }}">
+                                        <i class="fas fa-fw fa-eye"></i>
+                                    </a>
+                                    @include('cms.blog.modal.show', ['blog' => $data])
+
+                                    <a class="btn btn-sm btn-warning mb-1 mb-lg-0" href="#" data-toggle="modal" data-target="#editModal-{{ $data->id }}">
                                         <i class="fas fa-fw fa-edit"></i>
                                     </a>
-                                    
+                                    @include('cms.blog.modal.edit', ['blog' => $data])
+
                                     <a class="btn btn-sm btn-danger" href="#" data-toggle="modal" data-target="#deleteModal-{{ $data->id }}">
                                         <i class="fas fa-fw fa-trash"></i>
                                     </a>

@@ -95,7 +95,58 @@ class BlogController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $blog = Blog::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'tags' => 'required|string',
+            'category' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0]);
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::transaction(function () use ($data, $blog) {
+                $photoName = $blog->image;
+
+                if (isset($data['image'])) {
+                    $photo = $data['image'];
+                    if ($blog->image && Storage::exists("public/img/blogs/{$blog->image}")) {
+                        Storage::delete("public/img/blogs/{$blog->image}");
+                    }
+
+                    $newFileName = "blog_" . Str::slug($data['title']) . "." . $photo->getClientOriginalExtension();
+                    Storage::putFileAs("public/img/blogs", $photo, $newFileName);
+                    $photoName = $newFileName;
+                }
+
+                $blog->update([
+                    'user_id' => auth()->user()->id,
+                    'title' => $data['title'],
+                    'slug' => Str::slug($data['title']),
+                    'category' => $data['category'],
+                    'content' => $data['content'],
+                    'image' => $photoName,
+                    'tags' => $data['tags'],
+                ]);
+            });
+
+            Alert::success('Berhasil', 'Data berhasil diubah!');
+            return redirect()->route('blogs.index');
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return redirect()->back()->with('toast_error', $data);
+        }
     }
 
     /**
@@ -109,7 +160,7 @@ class BlogController extends Controller
             DB::transaction(function () use ($data) {
                 if ($data->image) {
                     $filePath = "public/img/blogs/" . $data->image;
-        
+
                     if (Storage::exists($filePath)) {
                         Storage::delete($filePath);
                     }
