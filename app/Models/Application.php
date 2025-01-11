@@ -23,6 +23,7 @@ class Application extends Model
         'notes_verify',
         'notes_accepted',
         'notes_rejected',
+        'link_interview',
         'interview_date',
         'work_start_date',
         'work_end_date',

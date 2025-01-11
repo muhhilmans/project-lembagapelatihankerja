@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('notes_accepted')->nullable();
             $table->text('notes_rejected')->nullable();
             $table->date('interview_date')->nullable();
+            $table->string('link_interview')->nullable();
             $table->date('work_start_date')->nullable();
             $table->date('work_end_date')->nullable();
             $table->string('file_contract')->nullable();
