@@ -131,6 +131,14 @@ class ProfessionController extends Controller
             return redirect()->route('professions.index')->with('toast_error', 'Profesi masih digunakan oleh pembantu!');
         }
 
+        if ($data->file_draft) {
+            $filePath = "public/professions/" . $data->file_draft;
+
+            if (Storage::exists($filePath)) {
+                Storage::delete($filePath);
+            }
+        }
+
         $data->delete();
 
         return redirect()->route('professions.index')->with('success', 'Profesi berhasil dihapus!');

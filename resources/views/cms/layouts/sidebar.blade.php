@@ -13,8 +13,7 @@
     <!-- Sidebar - Brand -->
     @hasrole('majikan')
         <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard-employe') }}">
-            <img src="{{ asset('assets/img/logo.png') }}" class="img-fluid" alt=""
-                style="max-width: 30px;">
+            <img src="{{ asset('assets/img/logo.png') }}" class="img-fluid" alt="" style="max-width: 30px;">
             <div class="sidebar-brand-text mx-3">SIPEMBANTU</div>
         </a>
     @endhasrole
@@ -22,8 +21,7 @@
     <!-- Sidebar - Brand -->
     @hasrole('pembantu')
         <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard-servant') }}">
-            <img src="{{ asset('assets/img/logo.png') }}" class="img-fluid" alt=""
-                style="max-width: 30px;">
+            <img src="{{ asset('assets/img/logo.png') }}" class="img-fluid" alt="" style="max-width: 30px;">
             <div class="sidebar-brand-text mx-3">SIPEMBANTU</div>
         </a>
     @endhasrole
@@ -132,20 +130,18 @@
 
     <!-- Nav Item - Pengaduan -->
     <li class="nav-item {{ Route::is('complaints.*') ? 'active' : '' }}">
-        <a class="nav-link {{ Route::is('complaints.*') ? 'active' : '' }}"
-            href="{{ route('complaints.index') }}">
+        <a class="nav-link {{ Route::is('complaints.*') ? 'active' : '' }}" href="{{ route('complaints.index') }}">
             <i class="fas fa-fw fa-bullhorn"></i>
             <span>Pengaduan</span></a>
     </li>
 
     @hasrole('superadmin|admin|owner|majikan')
-    <!-- Nav Item - Pekerja -->
-    <li class="nav-item {{ Route::is('worker-all') ? 'active' : '' }}">
-        <a class="nav-link {{ Route::is('worker-all') ? 'active' : '' }}"
-            href="{{ route('worker-all') }}">
-            <i class="fas fa-fw fa-id-badge"></i>
-            <span>Pekerja</span></a>
-    </li>
+        <!-- Nav Item - Pekerja -->
+        <li class="nav-item {{ Route::is('worker-all') ? 'active' : '' }}">
+            <a class="nav-link {{ Route::is('worker-all') ? 'active' : '' }}" href="{{ route('worker-all') }}">
+                <i class="fas fa-fw fa-id-badge"></i>
+                <span>Pekerja</span></a>
+        </li>
     @endhasrole
 
     @hasrole('majikan|pembantu')
@@ -198,6 +194,16 @@
                         @endhasrole
                     </div>
                 </div>
+            </li>
+        @endhasrole
+
+        @hasrole('superadmin|admin')
+            <!-- Nav Item - Blog -->
+            <li class="nav-item {{ Route::is('blogs.*') ? 'active' : '' }}">
+                <a class="nav-link {{ Route::is('blogs.*') ? 'active' : '' }}"
+                    href="{{ route('blogs.index') }}">
+                    <i class="fas fa-fw fa-newspaper"></i>
+                    <span>Blog</span></a>
             </li>
         @endhasrole
     @endif
