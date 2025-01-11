@@ -58,6 +58,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('contract/download/{applyJob}', [ApplicationController::class, 'downloadContract'])->name('contract.download');
 
     Route::resource('complaints', ComplaintController::class);
+    
+    Route::get('/worker-all', [UtilityController::class, 'allWorker'])->name('worker-all');
 
     Route::get('/profile/{id}', [ProfileController::class, 'profile'])->name('profile');
     Route::get('/profile/{id}/edit', [ProfileController::class, 'edit'])->name('profile.edit');

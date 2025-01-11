@@ -11,7 +11,11 @@ class DashboardController extends Controller
 {
     public function dashboard(Request $request)
     {
-        $filter = $request->get('filter', 'weekly');
+        if (auth()->user()->roles->first()->name == 'owner') {
+            $filter = $request->get('filter', 'monthly');
+        } else {
+            $filter = $request->get('filter', 'weekly');
+        }
 
         switch ($filter) {
             case 'monthly':
@@ -83,7 +87,40 @@ class DashboardController extends Controller
             'acceptedComp' => $acceptedComp,
         ];
 
-        return view('cms.dashboard.dashboard', compact('data', 'datasApp', 'chartWorkerCount', 'chartServantCount', 'chartVacancyCount', 'filter'));
+        $filterBar = $request->get('filterBar', 'weekly');
+        $labelsBar = [];
+        $activeWorkers = [];
+
+        switch ($filterBar) {
+            case 'monthly':
+                $labelsBar = collect(range(1, 12))->map(function ($month) {
+                    return now()->startOfYear()->addMonths($month - 1)->format('F');
+                });
+                $activeWorkers = $applications->where('status', 'accepted')->groupBy(function ($app) {
+                    return $app->created_at->format('F');
+                })->map->count();
+                break;
+
+            case 'yearly':
+                $firstYear = Application::oldest('created_at')->value('created_at')->year ?? now()->year;
+                $lastYear = Application::latest('created_at')->value('created_at')->year ?? now()->year;
+                $labelsBar = range($firstYear, $lastYear);
+                $activeWorkers = $applications->where('status', 'accepted')->groupBy(function ($app) {
+                    return $app->created_at->year;
+                })->map->count();
+                break;
+
+            default:
+                $labelsBar = collect(range(1, 5))->map(function ($week) {
+                    return "Minggu ke-$week";
+                });
+                $activeWorkers = $applications->where('status', 'accepted')->groupBy(function ($app) {
+                    return $app->created_at->weekOfMonth;
+                })->map->count();
+                break;
+        }
+
+        return view('cms.dashboard.dashboard', compact('data', 'datasApp', 'chartWorkerCount', 'chartServantCount', 'chartVacancyCount', 'activeWorkers', 'filter', 'filterBar', 'labelsBar'));
     }
 
     public function dashboardEmploye()

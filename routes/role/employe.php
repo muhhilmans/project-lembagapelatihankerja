@@ -22,6 +22,5 @@ Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     Route::put('/applicant-indie/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('applicant-indie.change');
     Route::put('/applicant-indie/{vacancy}/{user}/upload', [ApplicationController::class, 'uploadContract'])->name('applicant-indie.upload');
     
-    Route::get('/worker-all', [UtilityController::class, 'allWorker'])->name('worker-all');
     Route::put('/worker/{id}', [ProfileController::class, 'updateBank'])->name('update-bank');
 });

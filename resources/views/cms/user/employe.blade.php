@@ -25,7 +25,7 @@
                             <th>Email</th>
                             <th>No Telepon</th>
                             <th>Status</th>
-                            @hasrole('superadmin|admin')
+                            @hasrole('superadmin|admin|owner')
                                 <th>Aksi</th>
                             @endhasrole
                         </tr>
