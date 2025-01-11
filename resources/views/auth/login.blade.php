@@ -33,9 +33,9 @@
                                 <button type="submit" class="btn btn-primary btn-user btn-block">Login</button>
                             </form>
                             <hr>
-                            {{-- <div class="text-center">
-                                    <a class="small" href="forgot-password.html">Forgot Password?</a>
-                                </div> --}}
+                            <div class="text-center">
+                                    <a class="small" href="{{ route('forgot.password') }}">Lupa Password?</a>
+                                </div>
                             <div class="text-center small">
                                 Belum punya akun? <a href="{{ route('select-register') }}">Daftar Sekarang!</a>
                             </div>

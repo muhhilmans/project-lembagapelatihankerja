@@ -40,6 +40,11 @@ Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
     ->middleware('auth')
     ->name('verification.resend');
 
+Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('forgot.password');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('forgot.password.post');
+Route::get('/password-reset/{token}', [AuthController::class, 'showResetPasswordForm'])->name('reset.password');
+Route::post('/password-reset', [AuthController::class, 'resetPassword'])->name('reset.password.post');
+
 Route::get('storage/img/{path}/{imageName}', [UtilityController::class, 'displayImage'])->name('getImage');
 Route::get('/professions/pdf/{id}', [UtilityController::class, 'pdfProfession'])->name('pdfProfession');
 
