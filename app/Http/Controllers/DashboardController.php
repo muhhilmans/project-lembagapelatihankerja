@@ -171,6 +171,8 @@ class DashboardController extends Controller
         $accepted = $applications->where('status', 'accepted')->count();
         $rejected = $applications->whereIn('status', ['rejected', 'laidoff'])->count();
 
+        $datasApp = $applications->where('status', 'interview')->sortByDesc('updated_at');
+
         $data = [
             'pending' => $pending,
             'process' => $process,
@@ -178,6 +180,6 @@ class DashboardController extends Controller
             'rejected' => $rejected
         ];
 
-        return view('cms.dashboard.dashboard-servant', compact('data'));
+        return view('cms.dashboard.dashboard-servant', compact(['data', 'datasApp']));
     }
 }

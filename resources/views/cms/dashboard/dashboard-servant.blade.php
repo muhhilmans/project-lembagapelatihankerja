@@ -80,4 +80,39 @@
     </div>
 
     <!-- Content Row -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Jadwal Interview</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr class="text-center">
+                            <th>No</th>
+                            <th>Nama Majikan</th>
+                            <th>Nama Lowongan</th>
+                            <th>Status</th>
+                            <th>Tanggal Interview</th>
+                            <th>Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($datasApp as $data)
+                            <tr>
+                                <td class="text-center">{{ $loop->iteration }}</td>
+                                <td>{{ $data->vacancy_id ? $data->vacancy->user->name : $data->employe->name }}</td>
+                                <td class="text-center">{{ $data->vacancy_id ? $data->vacancy->title : '-' }}</td>
+                                <td class="text-center">{{ $data->vacancy_id ? 'Mandiri' : 'Hire' }}</td>
+                                <td class="text-center">
+                                    {{ \Carbon\Carbon::parse($data->interview_date ? $data->interview_date : '')->format('d-M-Y') }}
+                                </td>
+                                <td class="text-center">{!! $data->notes_interview !!}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 @endsection
