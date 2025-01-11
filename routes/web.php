@@ -41,24 +41,27 @@ Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
     ->name('verification.resend');
 
 Route::get('storage/img/{path}/{imageName}', [UtilityController::class, 'displayImage'])->name('getImage');
+Route::get('/professions/pdf/{id}', [UtilityController::class, 'pdfProfession'])->name('pdfProfession');
+
+Route::get('storage/{path}/{fileName}', [UtilityController::class, 'displayFile'])->name('getFile');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-servant', [DashboardController::class, 'dashboardServant'])->name('dashboard-servant');
 
     Route::get('/dashboard-employe', [DashboardController::class, 'dashboardEmploye'])->name('dashboard-employe');
 
-    require __DIR__.'/role/admin.php';
-    require __DIR__.'/role/employe.php';
-    require __DIR__.'/role/servant.php';
+    require __DIR__ . '/role/admin.php';
+    require __DIR__ . '/role/employe.php';
+    require __DIR__ . '/role/servant.php';
     Route::put('/applicant-hire/{id}/change', [ApplicationController::class, 'changeStatusHire'])->name('applicant-hire.change');
     Route::put('/applicant-hire/{id}/contract', [ApplicationController::class, 'hireContract'])->name('applicant-hire.contract');
     Route::put('/applicant-hire/{id}/reject', [ApplicationController::class, 'hireReject'])->name('applicant-hire.reject');
     Route::put('vacancies/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('vacancies.change');
-    
+
     Route::get('contract/download/{applyJob}', [ApplicationController::class, 'downloadContract'])->name('contract.download');
 
     Route::resource('complaints', ComplaintController::class);
-    
+
     Route::get('/worker-all', [UtilityController::class, 'allWorker'])->name('worker-all');
 
     Route::get('/profile/{id}', [ProfileController::class, 'profile'])->name('profile');
@@ -68,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/{id}/store-skill', [ProfileController::class, 'storeSkill'])->name('profile-servant.store-skill');
     Route::put('/profile/{id}/update-skill/{skill_id}', [ProfileController::class, 'updateSkill'])->name('profile-servant.update-skill');
     Route::delete('/profile/{id}/destroy-skill/{skill_id}', [ProfileController::class, 'destroySkill'])->name('profile-servant.destroy-skill');
-    
+
     Route::put('/profile/{id}/update-employe', [ProfileController::class, 'updateEmploye'])->name('profile-employe.update');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

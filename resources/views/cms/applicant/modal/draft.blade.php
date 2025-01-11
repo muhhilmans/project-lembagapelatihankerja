@@ -11,15 +11,19 @@
             <div class="modal-body text-left">
                 @if ($d->vacancy->profession->file_draft)
                     @php
-                        $filePath = storage_path('app/public/' . $d->vacancy->profession->file_draft);
+                        $filePath = storage_path(
+                            'app/public/professions/' . $d->vacancy->profession->file_draft,
+                        );
                     @endphp
 
                     @if (file_exists($filePath))
                         @if (Str::endsWith($d->vacancy->profession->file_draft, ['.jpg', '.jpeg', '.png', '.gif']))
-                            <img src="{{ asset('storage/' . $d->vacancy->profession->file_draft) }}" alt="Preview" class="img-fluid">
+                            <img src="{{ route('getFile', ['path' => 'professions', 'fileName' => $d->vacancy->profession->file_draft]) }}"
+                                alt="Preview" class="img-fluid">
                         @elseif (Str::endsWith($d->vacancy->profession->file_draft, ['.pdf']))
-                            <iframe src="{{ asset('storage/' . $d->vacancy->profession->file_draft) }}" width="100%"
-                                height="400px"></iframe>
+                            <iframe
+                                src="{{ route('getFile', ['path' => 'professions', 'fileName' => $d->vacancy->profession->file_draft]) }}"
+                                width="100%" height="400px"></iframe>
                         @else
                             <p>Format file tidak didukung untuk preview.</p>
                         @endif

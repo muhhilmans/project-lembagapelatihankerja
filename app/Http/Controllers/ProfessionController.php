@@ -49,10 +49,10 @@ class ProfessionController extends Controller
 
             $path = $request->file('file_draft')->storeAs($storagePath, $fileName);
 
-            DB::transaction(function () use ($data, $path) {
+            DB::transaction(function () use ($data, $fileName) {
                 Profession::create([
                     'name' => $data['name'],
-                    'file_draft' => str_replace('public/', '', $path)
+                    'file_draft' => $fileName
                 ]);
             });
 
@@ -95,16 +95,16 @@ class ProfessionController extends Controller
                 Storage::makeDirectory($storagePath);
             }
 
-            if ($dataUpdate->file_draft && Storage::exists("public/{$dataUpdate->file_draft}")) {
-                Storage::delete("public/{$dataUpdate->file_draft}");
+            if ($dataUpdate->file_draft && Storage::exists("{$storagePath}{$dataUpdate->file_draft}")) {
+                Storage::delete("{$storagePath}{$dataUpdate->file_draft}");
             }
 
             $path = $request->file('file_draft')->storeAs($storagePath, $fileName);
 
-            DB::transaction(function () use ($data, $dataUpdate, $path) {
+            DB::transaction(function () use ($data, $dataUpdate, $fileName) {
                 $dataUpdate->update([
                     'name' => $data['name'],
-                    'file_draft' => str_replace('public/', '', $path)
+                    'file_draft' => $fileName
                 ]);
             });
 

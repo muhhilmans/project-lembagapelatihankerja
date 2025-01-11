@@ -20,7 +20,7 @@ class UtilityController extends Controller
 {
     public function displayImage($path, $imageName)
     {
-        $path = storage_path('app/public/images/' . $path . '/' . $imageName);
+        $path = storage_path('app/public/img/' . $path . '/' . $imageName);
         if (!File::exists($path)) {
             abort(404);
         }
@@ -28,10 +28,68 @@ class UtilityController extends Controller
         $file = File::get($path);
         $type = File::mimeType($path);
 
-        $respose = Response::make($file, 200);
-        $respose->header('Content-Type', $type);
+        $response = Response::make($file, 200);
+        $response->header('Content-Type', $type);
 
-        return $respose;
+        return $response;
+    }
+
+    public function displayFile($path, $fileName)
+    {
+        $path = storage_path('app/public/' . $path . '/' . $fileName);
+        if (!File::exists($path)) {
+            abort(404);
+        }
+
+        $file = File::get($path);
+        $extension = File::extension($path);
+
+        $mimeType = match ($extension) {
+            'pdf' => 'application/pdf',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            default => File::mimeType($path),
+        };
+
+        return response($file, 200)
+            ->header('Content-Type', $mimeType)
+            ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
+    }
+
+    public function pdfProfession(string $id)
+    {
+        $profession = Profession::findOrFail($id);
+
+        if (!$profession->file_draft) {
+            abort(404, 'File PDF tidak ditemukan.');
+        }
+
+        $filePath = storage_path('app/public/professions/' . $profession->file_draft);
+
+        if (!file_exists($filePath)) {
+            abort(404, 'File PDF tidak ditemukan di server.');
+        }
+
+        try {
+            chmod($filePath, 0644);
+
+            $pdfContent = file_get_contents($filePath);
+
+            if ($pdfContent === false) {
+                throw new \Exception('Gagal membaca isi file PDF.');
+            }
+
+            return response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Terjadi kesalahan saat memproses file PDF.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function allWorker()

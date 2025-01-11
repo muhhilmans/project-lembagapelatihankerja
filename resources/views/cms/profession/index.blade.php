@@ -27,8 +27,10 @@
                             <tr>
                                 <td class="text-center">{{ $loop->iteration }}</td>
                                 <td>
-                                    <a href="#" class="text-secondary" data-toggle="modal" data-target="#draftModal-{{ $data->id }}">{{ $data->name }}</a>
-                                    @include('cms.profession.modal.draft', ['profession' => $data])
+                                    {{-- <a href="#" class="text-secondary" data-toggle="modal" data-target="#draftModal-{{ $data->id }}">{{ $data->name }}</a>
+                                    @include('cms.profession.modal.draft', ['profession' => $data]) --}}
+
+                                    <a href="{{ route('pdfProfession', $data->id) }}" target="_blank" class="text-secondary">{{ $data->name }}</a>
                                 </td>
                                 <td class="text-center">
                                     <a href="#" class="btn btn-primary mb-2 mb-lg-0" data-toggle="modal" data-target="#draftModal-{{ $data->id }}"><i class="fas fa-fw fa-file-alt"></i></a>

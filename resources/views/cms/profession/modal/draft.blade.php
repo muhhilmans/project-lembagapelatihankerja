@@ -11,23 +11,15 @@
             <div class="modal-body">
                 @if ($data->file_draft)
                     @php
-                        $filePath = storage_path('app/public/' . $data->file_draft);
+                        $fileUrl = route('getFile', ['path' => 'professions', 'fileName' => $data->file_draft]);
                     @endphp
 
-                    @if (file_exists($filePath))
-                        @if (Str::endsWith($data->file_draft, ['.jpg', '.jpeg', '.png', '.gif']))
-                            {{-- <img src="{{ asset('storage/public/' . $data->file_draft) }}" alt="Preview" class="img-fluid"> --}}
-                            <img src="{{ asset($data->file_draft) }}" alt="Preview" class="img-fluid">
-                        @elseif (Str::endsWith($data->file_draft, ['.pdf']))
-                            {{-- <iframe src="{{ asset('storage/public/' . $data->file_draft) }}" width="100%"
-                                height="400px"></iframe> --}}
-                            <iframe src="{{ asset($data->file_draft) }}" width="100%"
-                                height="400px"></iframe>
-                        @else
-                            <p>Format file tidak didukung untuk preview.</p>
-                        @endif
+                    @if (Str::endsWith($data->file_draft, ['.jpg', '.jpeg', '.png', '.gif']))
+                        <img src="{{ $fileUrl }}" alt="Preview" class="img-fluid">
+                    @elseif (Str::endsWith($data->file_draft, ['.pdf']))
+                        <iframe src="{{ $fileUrl }}" type="application/pdf" width="100%" height="400px"></iframe>
                     @else
-                        <p>File tidak ditemukan di server.</p>
+                        <p>Format file tidak didukung untuk preview.</p>
                     @endif
                 @else
                     <p>Belum ada file yang diunggah.</p>
