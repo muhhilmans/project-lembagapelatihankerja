@@ -10,6 +10,10 @@
     @include('landing.section.category')
     <!----//-banner Category-//-->
 
+    <!--<<  Blog section >>-->
+    @include('landing.section.blog')
+    <!--<<  Blog section >>-->
+
     <!----//-Provide Section-//-->
     @include('landing.section.provide')
     <!----//-Provide Section-//-->
@@ -50,10 +54,6 @@
     <!--<<  Faq section >>-->
     @include('landing.section.faq')
     <!--<<  Faq section >>-->
-
-    <!--<<  Blog section >>-->
-    @include('landing.section.blog')
-    <!--<<  Blog section >>-->
 
     <!--<<  Apointment section >>-->
     @include('landing.section.apointment')

@@ -33,7 +33,7 @@
 
                     <div class="form-group">
                         <label for="content">Konten <span class="text-danger">*</span></label>
-                        <textarea id="edit-content-editor" name="content" class="form-control" required>{!! old('content', $data->content) !!}</textarea>
+                        <textarea id="edit-content-editor-{{ $data->id }}" name="content" class="form-control" required>{!! old('content', $data->content) !!}</textarea>
                     </div>
 
                     <div class="form-group">
@@ -71,7 +71,7 @@
     <script>
         $(document).ready(function() {
             $('#editModal-{{ $data->id }}').on('shown.bs.modal', function() {
-                $('#edit-content-editor').summernote({
+                $('#edit-content-editor-{{ $data->id }}').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
                     height: 150,
@@ -94,7 +94,7 @@
             });
 
             $('#editModal-{{ $data->id }}').on('hidden.bs.modal', function() {
-                $('#edit-content-editor').summernote('destroy');
+                $('#edit-content-editor-{{ $data->id }}').summernote('destroy');
             });
 
             function updatePreview(inputId, previewContainerId) {

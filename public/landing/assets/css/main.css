@@ -170,6 +170,12 @@ p {
   color: var(--pra);
 }
 
+ol, ul, li {
+  line-height: 28px;
+  font-family: "DM Sans", sans-serif;
+  color: var(--pra);
+}
+
 .ntext {
   color: #646464;
 }

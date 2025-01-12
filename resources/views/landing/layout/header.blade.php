@@ -199,7 +199,7 @@
                                     </a>
                                 </li>
                                 <li class="menu-item itembg__1 position-relative">
-                                    <a href="about.html" class="fw_500">
+                                    <a href="{{ route('all-blogs') }}" class="fw_500">
                                         Blog
                                     </a>
                                 </li>

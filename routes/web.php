@@ -50,6 +50,9 @@ Route::get('/professions/pdf/{id}', [UtilityController::class, 'pdfProfession'])
 
 Route::get('storage/{path}/{fileName}', [UtilityController::class, 'displayFile'])->name('getFile');
 
+Route::get('/all-blogs', [HomeController::class, 'allBlogs'])->name('all-blogs');
+Route::get('/blog/{slug}', [HomeController::class, 'blogDetail'])->name('blog-detail');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-servant', [DashboardController::class, 'dashboardServant'])->name('dashboard-servant');
 
