@@ -18,13 +18,32 @@ class HomeController extends Controller
     {
         $blogs = Blog::orderBy('created_at', 'desc')->paginate(10);
 
-        return view('landing.pages.blog', compact('blogs'));
+        $blogLatest = Blog::orderBy('created_at', 'desc')->limit(3)->get();
+
+        $tags = Blog::all()->pluck('tags')->toArray();
+        $tagsArray = [];
+
+        foreach ($tags as $tag) {
+            $decodedTags = json_decode($tag, true); // Decode JSON tags
+            foreach ($decodedTags as $item) {
+                $tagsArray[] = $item['value']; // Ambil value saja
+            }
+        }
+
+        $popularTags = collect($tagsArray)
+            ->countBy() // Hitung jumlah setiap tag
+            ->sortDesc() // Urutkan berdasarkan jumlah terbanyak
+            ->take(10);
+
+        return view('landing.pages.blog', compact(['blogs', 'blogLatest', 'popularTags']));
     }
 
     public function blogDetail($slug)
     {
         $blog = Blog::where('slug', $slug)->firstOrFail();
 
-        return view('landing.pages.blog-detail', compact('blog'));
+        $blogs = Blog::orderBy('created_at', 'desc')->limit(3)->get();
+
+        return view('landing.pages.blog-detail', compact(['blog', 'blogs']));
     }
 }

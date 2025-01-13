@@ -50,7 +50,8 @@
                     <div class="blog-details-left">
                         <div class="blog-details-item">
                             <div class="thumb-big">
-                                <img src="{{ route('getImage', ['path' => 'blogs', 'imageName' => $blog->image]) }}" alt="img">
+                                <img src="{{ route('getImage', ['path' => 'blogs', 'imageName' => $blog->image]) }}"
+                                    alt="img">
                             </div>
                             <ul class="admin d-flex flex-wrap align-items-center gap-3">
                                 <li class="d-flex align-items-center gap-1">
@@ -161,7 +162,7 @@
                 <div class="col-lg-4">
                     <div class="service-details-rightbar mt-3 mt-lg-0">
                         <div class="service-box1 ser-inform cmn-padding">
-                            <div class="mb-space50">
+                            {{-- <div class="mb-space50">
                                 <h3 class="title mb-4">
                                     Send Message
                                 </h3>
@@ -171,7 +172,7 @@
                             </div>
                             <div class="mb-space50">
                                 <h3 class="title">
-                                    Categories
+                                    Kategori
                                 </h3>
                                 <ul class="se-boxlist">
                                     <li>
@@ -215,72 +216,35 @@
                                         </a>
                                     </li>
                                 </ul>
-                            </div>
+                            </div> --}}
                             <div class="mb-space50">
                                 <h3 class="title">
                                     Latest Posts
                                 </h3>
                                 <ul class="latest-recent-post">
-                                    <li>
-                                        <a href="javascript:void(0)">
-                                            <span class="thumb">
-                                                <img src="assets/images/blog/recent1.png" alt="img">
-                                            </span>
-                                            <span class="cont">
-                                                <span class="fw-700 title">
-                                                    How to manage your business in next project
+                                    @foreach ($blogs as $blog)
+                                        <li>
+                                            <a href="{{ route('blog-detail', ['slug' => $blog->slug]) }}">
+                                                <span class="thumb">
+                                                    <img src="{{ route('getImage', ['path' => 'blogs', 'imageName' => $blog->image]) }}"
+                                                        alt="img" style="max-width: 70px;">
                                                 </span>
-                                                <span>
-                                                    <span class="d-flex align-items-center gap-1">
-                                                        <i class="bi bi-calendar4-week base fz-18"></i>
-                                                        <span class="pra prafont">
-                                                            10 April, 2024
+                                                <span class="cont">
+                                                    <span class="fw-700 title">
+                                                        {{ $blog->title }}
+                                                    </span>
+                                                    <span>
+                                                        <span class="d-flex align-items-center gap-1">
+                                                            <i class="bi bi-calendar4-week base fz-18"></i>
+                                                            <span class="pra prafont">
+                                                                {{ \Carbon\Carbon::parse($blog->created_at)->format('d F Y') }}
+                                                            </span>
                                                         </span>
                                                     </span>
                                                 </span>
-                                            </span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0)">
-                                            <span class="thumb">
-                                                <img src="assets/images/blog/recent2.png" alt="img">
-                                            </span>
-                                            <span class="cont">
-                                                <span class="fw-700 title">
-                                                    Best business policy for your next project
-                                                </span>
-                                                <span>
-                                                    <span class="d-flex align-items-center gap-1">
-                                                        <i class="bi bi-calendar4-week base fz-18"></i>
-                                                        <span class="pra prafont">
-                                                            18 April, 2024
-                                                        </span>
-                                                    </span>
-                                                </span>
-                                            </span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0)">
-                                            <span class="thumb">
-                                                <img src="assets/images/blog/recent3.png" alt="img">
-                                            </span>
-                                            <span class="cont">
-                                                <span class="fw-700 title">
-                                                    You can do anything in the 2024 what you want
-                                                </span>
-                                                <span>
-                                                    <span class="d-flex align-items-center gap-1">
-                                                        <i class="bi bi-calendar4-week base fz-18"></i>
-                                                        <span class="pra prafont">
-                                                            27 December, 2024
-                                                        </span>
-                                                    </span>
-                                                </span>
-                                            </span>
-                                        </a>
-                                    </li>
+                                            </a>
+                                        </li>
+                                    @endforeach
                                 </ul>
                             </div>
                             <div class="mb-space50-not">
@@ -288,24 +252,9 @@
                                     Popular tags:
                                 </h3>
                                 <div class="populat-tag">
-                                    <a href="javascript:void(0)">
-                                        Cleaning
-                                    </a>
-                                    <a href="javascript:void(0)">
-                                        Indoor
-                                    </a>
-                                    <a href="javascript:void(0)">
-                                        Office
-                                    </a>
-                                    <a href="javascript:void(0)">
-                                        Nice
-                                    </a>
-                                    <a href="javascript:void(0)">
-                                        Window
-                                    </a>
-                                    <a href="javascript:void(0)">
-                                        House
-                                    </a>
+                                    @foreach (json_decode($blog->tags, true) as $tag)
+                                        <a href="javascript:void(0)">{{ $tag['value'] }}</a>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
