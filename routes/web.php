@@ -67,6 +67,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('vacancies/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('vacancies.change');
 
     Route::get('contract/download/{applicationId}', [ApplicationController::class, 'downloadContract'])->name('contract.download');
+    Route::get('contract/success', function () {
+        return redirect()->back()->with('toast_success', 'File kontrak berhasil diunduh.');
+    })->name('contract.success');
 
     Route::resource('complaints', ComplaintController::class);
 

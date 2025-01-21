@@ -439,12 +439,14 @@ class ApplicationController extends Controller
     {
         try {
             $data = Application::findOrFail($applicationId);
-            
+
             $filePath = $data->file_contract;
 
             if ($filePath && storage_path('app/public/' . $filePath)) {
-                Alert::success('Berhasil', 'File kontrak berhasil diunduh.');
-                return response()->download(storage_path('app/public/' . $filePath));
+                $response = response()->download(storage_path('app/public/' . $filePath));
+
+                $response->headers->set('Location', route('contract.success'));
+                return $response;
             }
 
             return redirect()->back()->with('toast_error', 'File kontrak tidak ditemukan.');
