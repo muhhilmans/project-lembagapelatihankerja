@@ -183,7 +183,7 @@
                             <tr>
                                 <th scope="row">Pengalaman Kerja</th>
                                 <td>:</td>
-                                <td>{{ $data->servantDetails->experience }}</td>
+                                <td>{{ $data->servantDetails->experience }} Tahun</td>
                             </tr>
                             <tr>
                                 <th scope="row">Deskripsi</th>

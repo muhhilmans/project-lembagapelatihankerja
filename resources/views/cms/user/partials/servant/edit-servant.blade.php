@@ -397,8 +397,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="experience">Pengalaman Kerja <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="experience" name="experience"
+                            <label for="experience">Pengalaman Kerja <span class="text-danger">*(Isi dengan tahun pengalaman kerja)</span></label>
+                            <input type="number" class="form-control" id="experience" name="experience"
                                 value="{{ old('experience', $user->servantDetails->experience) }}">
                             @error('experience')
                                 <div class="invalid-feedback">
