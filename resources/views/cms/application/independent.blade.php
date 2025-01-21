@@ -21,12 +21,11 @@
                             <th>Keterangan</th>
                             <th>Status</th>
                             <th>Gaji Pokok</th>
-                            @if ($datas->contains(fn($data) => $data->status === 'passed'))
-                                <th>Aksi</th>
-                            @endif
-                            @if ($datas->contains(fn($data) => $data->status === 'accepted'))
-                                <th>Aksi</th>
-                            @endif
+                            @hasrole('superadmin|pembantu')
+                                @if ($datas->contains(fn($data) => $data->status === ['passed', 'accepted']))
+                                    <th>Aksi</th>
+                                @endif
+                            @endhasrole
                         </tr>
                     </thead>
                     <tbody>
@@ -95,36 +94,39 @@
 
                                     Rp. {{ number_format($data->salary, 0, ',', '.') }}
                                 </td>
-                                @if ($data->status === 'passed')
-                                    <td class="text-center">
-                                        <a href="#" class="btn btn-sm btn-success" data-toggle="modal"
-                                            data-target="#passedModal-{{ $data->id }}"><i
-                                                class="fas fa-building"></i></a>
-                                        @include('cms.application.modal.passed', [
-                                            'data' => $data,
-                                        ])
-                                    </td>
-                                @endif
 
-                                @if ($data->status === 'accepted')
+                                @hasrole('superadmin|pembantu')
                                     <td class="text-center">
-                                        @php
-                                            $hasComplaintWithSameServant = $data->complaint->contains(function (
-                                                $complaint,
-                                            ) use ($data) {
-                                                return $complaint->servant_id == $data->servant_id;
-                                            });
-                                        @endphp
+                                        @if ($data->status === 'passed')
+                                            <a href="#" class="btn btn-sm btn-success" data-toggle="modal"
+                                                data-target="#passedModal-{{ $data->id }}"><i
+                                                    class="fas fa-building"></i></a>
+                                            @include('cms.application.modal.passed', [
+                                                'data' => $data,
+                                            ])
+                                        @endif
 
-                                        @if (!$hasComplaintWithSameServant)
-                                            <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
-                                                data-target="#complaintModal-{{ $data->id }}">
-                                                <i class="fas fa-bullhorn"></i>
-                                            </a>
-                                            @include('cms.application.modal.complaint', ['data' => $data])
+                                        @if ($data->status === 'accepted')
+                                            @php
+                                                $hasComplaintWithSameServant = $data->complaint->contains(function (
+                                                    $complaint,
+                                                ) use ($data) {
+                                                    return $complaint->servant_id == $data->servant_id;
+                                                });
+                                            @endphp
+
+                                            @if (!$hasComplaintWithSameServant)
+                                                <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                                                    data-target="#complaintModal-{{ $data->id }}">
+                                                    <i class="fas fa-bullhorn"></i>
+                                                </a>
+                                                @include('cms.application.modal.complaint', [
+                                                    'data' => $data,
+                                                ])
+                                            @endif
                                         @endif
                                     </td>
-                                @endif
+                                @endhasrole
                             </tr>
                         @endforeach
                     </tbody>
