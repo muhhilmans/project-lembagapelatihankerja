@@ -58,23 +58,25 @@
                 ])
             @endif
 
-            @if ($d->status === 'passed')
-                <td class="text-center">
-                    <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                        data-target="#chooseModal-{{ $d->id }}"><i class="fas fa-check"></i></a>
-                    @include('cms.applicant.modal.choose', [
-                        'data' => $d,
-                    ])
+            @hasrole('superadmin')
+                @if ($d->status === 'passed')
+                    <td class="text-center">
+                        <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
+                            data-target="#chooseModal-{{ $d->id }}"><i class="fas fa-check"></i></a>
+                        @include('cms.applicant.modal.choose', [
+                            'data' => $d,
+                        ])
 
-                    <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
-                        data-target="#rejectModal-{{ $d->id }}">
-                        <i class="fas fa-times"></i>
-                    </a>
-                    @include('cms.applicant.modal.reject', [
-                        'data' => $d,
-                    ])
-                </td>
-            @endif
+                        <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                            data-target="#rejectModal-{{ $d->id }}">
+                            <i class="fas fa-times"></i>
+                        </a>
+                        @include('cms.applicant.modal.reject', [
+                            'data' => $d,
+                        ])
+                    </td>
+                @endif
+            @endhasrole
 
             @if ($d->status === 'choose')
                 <td class="text-center">

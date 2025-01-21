@@ -55,10 +55,15 @@
     @endhasrole
 
     <!-- Divider -->
-    <hr class="sidebar-divider my-0">
+    <hr class="sidebar-divider">
 
     @if (auth()->user()->is_active == 1)
         @hasrole('superadmin|admin|pembantu')
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Pembantu
+            </div>
+
             <!-- Nav Item - Cari Lowongan -->
             <li class="nav-item {{ Route::is('all-vacancy', 'show-vacancy') ? 'active' : '' }}">
                 <a class="nav-link {{ Route::is('all-vacancy', 'show-vacancy') ? 'active' : '' }}"
@@ -87,9 +92,27 @@
                     </div>
                 </div>
             </li>
+            
+            @hasrole('pembantu')
+                <!-- Nav Item - Pengaduan -->
+                <li class="nav-item {{ Route::is('complaints.*') ? 'active' : '' }}">
+                    <a class="nav-link {{ Route::is('complaints.*') ? 'active' : '' }}"
+                        href="{{ route('complaints.index') }}">
+                        <i class="fas fa-fw fa-bullhorn"></i>
+                        <span>Pengaduan</span></a>
+                </li>
+            @endhasrole
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
         @endhasrole
 
         @hasrole('superadmin|admin|majikan')
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Majikan
+            </div>
+
             <!-- Nav Item - Pembantu -->
             <li class="nav-item {{ Route::is('all-servant', 'show-servant') ? 'active' : '' }}">
                 <a class="nav-link {{ Route::is('all-servant', 'show-servant') ? 'active' : '' }}"
@@ -125,15 +148,16 @@
                     </div>
                 </div>
             </li>
+
+            <!-- Nav Item - Pengaduan -->
+            <li class="nav-item {{ Route::is('complaints.*') ? 'active' : '' }}">
+                <a class="nav-link {{ Route::is('complaints.*') ? 'active' : '' }}"
+                    href="{{ route('complaints.index') }}">
+                    <i class="fas fa-fw fa-bullhorn"></i>
+                    <span>Pengaduan</span></a>
+            </li>
         @endhasrole
     @endif
-
-    <!-- Nav Item - Pengaduan -->
-    <li class="nav-item {{ Route::is('complaints.*') ? 'active' : '' }}">
-        <a class="nav-link {{ Route::is('complaints.*') ? 'active' : '' }}" href="{{ route('complaints.index') }}">
-            <i class="fas fa-fw fa-bullhorn"></i>
-            <span>Pengaduan</span></a>
-    </li>
 
     @hasrole('superadmin|admin|owner|majikan')
         <!-- Nav Item - Pekerja -->
@@ -200,8 +224,7 @@
         @hasrole('superadmin|admin')
             <!-- Nav Item - Blog -->
             <li class="nav-item {{ Route::is('blogs.*') ? 'active' : '' }}">
-                <a class="nav-link {{ Route::is('blogs.*') ? 'active' : '' }}"
-                    href="{{ route('blogs.index') }}">
+                <a class="nav-link {{ Route::is('blogs.*') ? 'active' : '' }}" href="{{ route('blogs.index') }}">
                     <i class="fas fa-fw fa-newspaper"></i>
                     <span>Blog</span></a>
             </li>
