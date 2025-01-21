@@ -20,12 +20,11 @@
                             <th>Keterangan</th>
                             <th>Status</th>
                             <th>Gaji Pokok</th>
-                            @if ($datas->contains(fn($data) => $data->status === 'passed'))
-                                <th>Aksi</th>
-                            @endif
-                            @if ($datas->contains(fn($data) => $data->status === 'accepted'))
-                                <th>Aksi</th>
-                            @endif
+                            @hasrole('superadmin|pembantu')
+                                @if ($datas->contains(fn($data) => in_array($data->status, ['passed', 'accepted'])))
+                                    <th>Aksi</th>
+                                @endif
+                            @endhasrole
                         </tr>
                     </thead>
                     <tbody>
@@ -93,19 +92,17 @@
 
                                     Rp. {{ number_format($data->salary, 0, ',', '.') }}
                                 </td>
-                                @if ($data->status === 'passed')
-                                    <td class="text-center">
+
+                                <td class="text-center">
+                                    @if ($data->status === 'passed')
                                         <a href="#" class="btn btn-sm btn-success" data-toggle="modal"
-                                            data-target="#passedModal-{{ $data->id }}"><i
-                                                class="fas fa-building"></i></a>
+                                            data-target="#passedModal-{{ $data->id }}"><i class="fas fa-building"></i></a>
                                         @include('cms.application.modal.passed-hire', [
                                             'data' => $data,
                                         ])
-                                    </td>
-                                @endif
-
-                                @if ($data->status === 'accepted')
-                                    <td class="text-center">
+                                    @endif
+                                    
+                                    @if ($data->status === 'accepted')
                                         @php
                                             $hasComplaintWithSameServant = $data->complaint->contains(function (
                                                 $complaint,
@@ -121,8 +118,8 @@
                                             </a>
                                             @include('cms.application.modal.complaint', ['data' => $data])
                                         @endif
-                                    </td>
-                                @endif
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
