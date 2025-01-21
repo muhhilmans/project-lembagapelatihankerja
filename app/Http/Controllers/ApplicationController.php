@@ -436,9 +436,9 @@ class ApplicationController extends Controller
 
             $filePath = trim($data->file_contract);
 
-            if ($filePath && Storage::exists($filePath)) {
+            if ($filePath && Storage::disk('local')->exists($filePath)) {
                 Alert::success('Berhasil', 'File kontrak berhasil diunduh.');
-                return Storage::download($filePath);
+                return response()->download(storage_path('app/' . urlencode($filePath)));
             }
 
             return redirect()->back()->with('toast_error', 'File kontrak tidak ditemukan.');

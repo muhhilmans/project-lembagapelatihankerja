@@ -150,7 +150,7 @@
                 @include('cms.applicant.modal.complaint', ['data' => $d])
             @endif
 
-            <a href="{{ route('contract.download', $d->id) }}" class="btn btn-sm btn-success mr-1"><i
+            <a href="{{ route('contract.download', ['applicationId' => $d->id]) }}" class="btn btn-sm btn-success mr-1"><i
                     class="fas fa-file-download"></i></a>
         @endif
 
