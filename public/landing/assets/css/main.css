@@ -170,6 +170,10 @@ p {
   color: var(--pra);
 }
 
+div {
+  color: var(--pra);
+}
+
 ol, ul, li {
   line-height: 28px;
   font-family: "DM Sans", sans-serif;
@@ -4840,6 +4844,9 @@ ol, ul, li {
 }
 
 .blog-v1-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.09);
   background: var(--white);

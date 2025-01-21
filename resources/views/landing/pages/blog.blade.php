@@ -45,12 +45,12 @@
     <!----//-blog Section-//-->
     <section class="blog-main-section pt-120 pb-120 overflow-hidden">
         <div class="container">
-            <div class="row g-4 justify-content-between">
+            <div class="row g-4">
                 <div class="col-lg-8">
                     @if ($blogs->count() > 0)
                         <div class="row g-4">
                             @foreach ($blogs as $blog)
-                                <div class="col-lg-lg-6 col-md-6 col-sm-6">
+                                <div class="col-lg-6 col-md-12">
                                     <div class="blog-v1-item">
                                         <ul class="admin">
                                             <li class="d-flex align-items-center gap-1">
@@ -74,10 +74,10 @@
                                         <a href="{{ route('blog-detail', ['slug' => $blog->slug]) }}" class="thumb">
                                             <img src="{{ route('getImage', ['path' => 'blogs', 'imageName' => $blog->image]) }}"
                                                 alt="img" class="img-fluid"
-                                                style="max-height: 200px; object-fit: cover; width: 100%;">
+                                                style="max-height: 200px; object-fit: cover; width: 100%;" />
                                         </a>
                                         <p class="pra text-muted">
-                                            {!! \Illuminate\Support\Str::limit($blog->content, 100) !!}
+                                            {{ \Illuminate\Support\Str::limit(strip_tags($blog->content), 100) }}
                                         </p>
                                         <a href="{{ route('blog-detail', ['slug' => $blog->slug]) }}"
                                             class="d-flex similer-btn align-items-center gap-3 title">
@@ -99,7 +99,7 @@
                         </div>
                         {{ $blogs->links('landing.layout.pagination') }}
                     @else
-                        <div class="col-lg-lg-12">
+                        <div class="col-12">
                             <div class="text-center pra">
                                 No blogs found
                             </div>

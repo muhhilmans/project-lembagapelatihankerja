@@ -51,7 +51,7 @@
                         <div class="blog-details-item">
                             <div class="thumb-big">
                                 <img src="{{ route('getImage', ['path' => 'blogs', 'imageName' => $blog->image]) }}"
-                                    alt="img" class="img-fluid" style="max-height: 200px; width: auto;">
+                                    alt="img" class="img-fluid mx-auto d-block" style="max-height: 500px; width: auto;">
                             </div>
                             <ul class="admin d-flex flex-wrap align-items-center gap-3">
                                 <li class="d-flex align-items-center gap-1">

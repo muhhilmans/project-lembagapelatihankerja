@@ -24,15 +24,15 @@ class HomeController extends Controller
         $tagsArray = [];
 
         foreach ($tags as $tag) {
-            $decodedTags = json_decode($tag, true); // Decode JSON tags
+            $decodedTags = json_decode($tag, true);
             foreach ($decodedTags as $item) {
-                $tagsArray[] = $item['value']; // Ambil value saja
+                $tagsArray[] = $item['value'];
             }
         }
 
         $popularTags = collect($tagsArray)
-            ->countBy() // Hitung jumlah setiap tag
-            ->sortDesc() // Urutkan berdasarkan jumlah terbanyak
+            ->countBy()
+            ->sortDesc()
             ->take(10);
 
         return view('landing.pages.blog', compact(['blogs', 'blogLatest', 'popularTags']));
