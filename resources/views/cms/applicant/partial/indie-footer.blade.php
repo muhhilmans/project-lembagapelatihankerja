@@ -150,8 +150,8 @@
                 @include('cms.applicant.modal.complaint', ['data' => $d])
             @endif
 
-            <a href="{{ route('contract.download', ['applicationId' => $d->id]) }}"
-                class="btn btn-sm btn-success mr-1" id="download-button-"><i class="fas fa-file-download"></i></a>
+            <a href="{{ route('contract.download', ['applicationId' => $d->id]) }}" class="btn btn-sm btn-success mr-1"><i
+                    class="fas fa-file-download"></i></a>
         @endif
 
         @if ($d->status == 'pending' || $d->status == 'interview')
@@ -171,21 +171,3 @@
         @include('cms.vacancy.modal.servant-detail', ['data' => $d])
     </div>
 </div>
-
-@push('custom-script')
-    <script>
-        document.getElementById('download-button').addEventListener('click', function() {
-            setTimeout(() => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'File kontrak berhasil diunduh.',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000
-                });
-            }, 1000);
-        });
-    </script>
-@endpush

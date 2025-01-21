@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Application;
-use App\Models\ServantDetail;
+use Exception;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Models\Application;
 use Illuminate\Http\Request;
+use App\Models\ServantDetail;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
-use Exception;
 
 class ApplicationController extends Controller
 {
@@ -443,10 +444,7 @@ class ApplicationController extends Controller
             $filePath = $data->file_contract;
 
             if ($filePath && storage_path('app/public/' . $filePath)) {
-                $response = response()->download(storage_path('app/public/' . $filePath));
-
-                $response->headers->set('Location', route('contract.success'));
-                return $response;
+                return response()->download(storage_path('app/public/' . $filePath));
             }
 
             return redirect()->back()->with('toast_error', 'File kontrak tidak ditemukan.');
