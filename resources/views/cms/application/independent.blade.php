@@ -22,7 +22,7 @@
                             <th>Status</th>
                             <th>Gaji Pokok</th>
                             @hasrole('superadmin|pembantu')
-                                @if ($datas->contains(fn($data) => $data->status === ['passed', 'accepted']))
+                                @if ($datas->contains(fn($data) => in_array($data->status, ['passed', 'accepted'])))
                                     <th>Aksi</th>
                                 @endif
                             @endhasrole
