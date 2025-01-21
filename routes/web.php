@@ -66,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/applicant-hire/{id}/reject', [ApplicationController::class, 'hireReject'])->name('applicant-hire.reject');
     Route::put('vacancies/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('vacancies.change');
 
-    Route::get('contract/download/{applyJob}', [ApplicationController::class, 'downloadContract'])->name('contract.download');
+    Route::get('contract/download/{applicationId}', [ApplicationController::class, 'downloadContract'])->name('contract.download');
 
     Route::resource('complaints', ComplaintController::class);
 

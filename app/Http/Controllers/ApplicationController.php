@@ -65,13 +65,13 @@ class ApplicationController extends Controller
             'salary' => ['nullable', 'numeric'],
         ]);
 
-        
+
         if ($validator->fails()) {
             return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
-        
+
         $data = $validator->validated();
-        
+
         $update = Application::findOrFail($id);
 
         try {
@@ -434,10 +434,11 @@ class ApplicationController extends Controller
         try {
             $data = Application::findOrFail($applicationId);
 
-            if ($data->file_contract && Storage::exists($data->file_contract)) {
+            $filePath = trim($data->file_contract);
 
+            if ($filePath && Storage::exists($filePath)) {
                 Alert::success('Berhasil', 'File kontrak berhasil diunduh.');
-                return Storage::download($data->file_contract);
+                return Storage::download($filePath);
             }
 
             return redirect()->back()->with('toast_error', 'File kontrak tidak ditemukan.');
