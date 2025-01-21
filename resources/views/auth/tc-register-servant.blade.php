@@ -101,6 +101,7 @@
                                         tepat waktu.</li>
                                     <li>Segala aktivitas pendaftaran dan kerja sama akan diawasi oleh pihak Aplikasi
                                         Sipembantu untuk menjamin kepercayaan dan keamanan semua pihak.</li>
+                                    <li>Pihak Mitra ART wajib membayar BPJS Ketenagakerjaan sebesar Rp. 20.000,- per bulan</li>
                                 </ol>
                             </li>
                         </ol>

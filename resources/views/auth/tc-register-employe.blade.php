@@ -66,18 +66,19 @@
                                         KK, lokasi tempat tinggal, nomor telepon keluarga, dan sidik jari.</li>
                                 </ol>
                             </li>
-                            <li>Layanan Antar Tenaga Kerja:
+                            <li>Biaya tambahan untuk Tenaga Kerja:
                                 <ol type="a" class="font-weight-normal">
                                     <li>PRT/ART akan diantar langsung oleh pihak aplikasi Sipembantu ke rumah
-                                        pengguna jasa dengan biaya tambahan sebagai berikut:
-                                        <ul type="disc" class="font-weight-normal">
+                                        pengguna jasa dengan biaya tambahan sebesar Rp. 500.000,-
+                                        {{-- <ul type="disc" class="font-weight-normal">
                                             <li>Tangerang: Rp 100.000</li>
                                             <li>Jakarta: Rp 150.000</li>
                                             <li>Depok: Rp 200.000</li>
                                             <li>Bekasi: Rp 350.000</li>
                                             <li>Bogor: Rp 350.000</li>
-                                        </ul>
+                                        </ul> --}}
                                     </li>
+                                    <li>Biaya BPJS Ketenagakerjaan sebesar Rp. 20.000,- per bulan.</li>
                                 </ol>
                             </li>
                             <li>Ketentuan Pembayaran yang Terlambat:

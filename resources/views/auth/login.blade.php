@@ -10,6 +10,7 @@
                     <div class="col-lg-12">
                         <div class="p-5">
                             <div class="text-center">
+                                <a href="{{ route('home') }}"><img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="img-fluid mb-2" style="max-height: 100px; width: auto;"></a>
                                 <h1 class="h4 text-gray-900 mb-4">Silahkan Login!</h1>
                             </div>
                             <form class="user" action="{{ route('authenticate') }}" method="POST">

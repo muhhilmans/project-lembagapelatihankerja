@@ -8,6 +8,7 @@
         <div class="row text-center">
             <div class="col-lg-12">
                 <div class="card o-hidden border-0 shadow-lg mb-3 mb-lg-0 p-3">
+                    <a href="{{ route('home') }}"><img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="img-fluid mb-2" style="max-height: 100px; width: auto;"></a>
                     <h3 class="card-title font-weight-bold">Registrasi Akun</h3>
                     <div class="card-body text-start">
                         <form action="{{ route('store-employe-register') }}" method="POST">
