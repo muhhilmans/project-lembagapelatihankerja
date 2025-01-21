@@ -9,6 +9,11 @@
     <!-- Filter Section -->
     <div class="card p-4 shadow-sm mb-4">
         <div class="row">
+            <!-- Search -->
+            <div class="col-md-12 mb-3">
+                <label for="searchInput" class="font-weight-bold">Cari Pembantu</label>
+                <input type="text" id="searchInput" class="form-control" placeholder="Masukkan nama pembantu...">
+            </div>
             <!-- Profesi -->
             <div class="col-md-6 mb-3">
                 <label for="filterProfession" class="font-weight-bold">Profesi</label>
@@ -123,16 +128,19 @@
             @endforeach
         @endif
     </div>
+@endsection
 
-    <!-- JavaScript for Filtering -->
+@push('custom-script')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const servantList = document.getElementById('servantList');
             const filterInputs = document.querySelectorAll(
-                '#filterProfession, #filterReligion, #filterMinAge, #filterMaxAge, #filterMinExperience, #filterMaxExperience'
-                );
+                '#filterProfession, #filterReligion, #filterMinAge, #filterMaxAge, #filterMinExperience, #filterMaxExperience, #searchInput'
+            );
 
+            // Apply filters to servant list
             function applyFilters() {
+                const searchValue = document.getElementById('searchInput').value.toLowerCase();
                 const profession = document.getElementById('filterProfession').value.toLowerCase();
                 const religion = document.getElementById('filterReligion').value.toLowerCase();
                 const minAge = parseInt(document.getElementById('filterMinAge').value);
@@ -142,39 +150,53 @@
 
                 const items = Array.from(servantList.getElementsByClassName('servant-item'));
                 items.forEach(item => {
-                    const matchesProfession = profession ? item.dataset.profession.toLowerCase().includes(
-                        profession) : true;
+                    const name = item.querySelector('ul li:first-child strong').nextSibling.textContent
+                        .trim().toLowerCase();
+                    const itemProfession = item.dataset.profession.toLowerCase();
+                    const age = parseInt(item.dataset.age);
+                    const experience = parseInt(item.dataset.experience);
+
+                    const matchesSearch = searchValue ?
+                        name.includes(searchValue) || itemProfession.includes(searchValue) :
+                        true;
+                    const matchesProfession = profession ? itemProfession.includes(profession) : true;
                     const matchesReligion = religion ? item.dataset.religion.toLowerCase().includes(
                         religion) : true;
-                    const age = parseInt(item.dataset.age);
                     const matchesAge = age >= minAge && age <= maxAge;
-                    const experience = parseInt(item.dataset.experience);
                     const matchesExperience = experience >= minExperience && experience <= maxExperience;
 
-                    item.style.display = matchesProfession && matchesReligion && matchesAge &&
-                        matchesExperience ? '' : 'none';
+                    item.style.display = matchesSearch && matchesProfession && matchesReligion &&
+                        matchesAge && matchesExperience ?
+                        '' :
+                        'none';
                 });
             }
 
-            filterInputs.forEach(input => input.addEventListener('input', applyFilters));
+            filterInputs.forEach(input => {
+                input.addEventListener('input', applyFilters);
+            });
 
             const minAgeLabel = document.getElementById('minAgeLabel');
             const maxAgeLabel = document.getElementById('maxAgeLabel');
             document.getElementById('filterMinAge').addEventListener('input', function() {
                 minAgeLabel.textContent = this.value;
+                applyFilters();
             });
             document.getElementById('filterMaxAge').addEventListener('input', function() {
                 maxAgeLabel.textContent = this.value;
+                applyFilters();
             });
 
             const minExperienceLabel = document.getElementById('minExperienceLabel');
             const maxExperienceLabel = document.getElementById('maxExperienceLabel');
             document.getElementById('filterMinExperience').addEventListener('input', function() {
                 minExperienceLabel.textContent = this.value;
+                applyFilters();
             });
             document.getElementById('filterMaxExperience').addEventListener('input', function() {
                 maxExperienceLabel.textContent = this.value;
+                applyFilters();
             });
         });
     </script>
-@endsection
+@endpush
