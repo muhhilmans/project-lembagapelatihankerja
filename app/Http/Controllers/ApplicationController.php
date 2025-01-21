@@ -138,8 +138,11 @@ class ApplicationController extends Controller
             $employe = User::findOrFail($application->employe_id);
             $servant = User::findOrFail($application->servant_id);
 
-            $directory = "contracts/hire_{$employe->name}";
-            $fileName = "contract_{$servant->name}." . $request->file('file_contract')->getClientOriginalExtension();
+            $employeName = str_replace(' ', '_', $employe->name);
+            $servantName = str_replace(' ', '_', $servant->name);
+
+            $directory = "contracts/hire_{$employeName}";
+            $fileName = "contract_{$servantName}." . $request->file('file_contract')->getClientOriginalExtension();
             $storagePath = "public/{$directory}";
 
             // Buat direktori jika belum ada
@@ -370,8 +373,11 @@ class ApplicationController extends Controller
                 ->where('servant_id', $user->id)
                 ->first();
 
-            $directory = "contracts/vacancy_{$vacancy->name}";
-            $fileName = "contract_{$user->name}." . $request->file('file_contract')->getClientOriginalExtension();
+            $vacancyName = str_replace(' ', '_', $vacancy->name);
+            $userName = str_replace(' ', '_', $user->name);
+
+            $directory = "contracts/vacancy_{$vacancyName}";
+            $fileName = "contract_{$userName}." . $request->file('file_contract')->getClientOriginalExtension();
             $storagePath = "public/{$directory}";
 
             if (!Storage::exists($directory)) {
@@ -433,12 +439,12 @@ class ApplicationController extends Controller
     {
         try {
             $data = Application::findOrFail($applicationId);
+            
+            $filePath = $data->file_contract;
 
-            $filePath = trim($data->file_contract);
-
-            if ($filePath && Storage::disk('local')->exists($filePath)) {
+            if ($filePath && storage_path('app/public/' . $filePath)) {
                 Alert::success('Berhasil', 'File kontrak berhasil diunduh.');
-                return response()->download(storage_path('app/' . $filePath));
+                return response()->download(storage_path('app/public/' . $filePath));
             }
 
             return redirect()->back()->with('toast_error', 'File kontrak tidak ditemukan.');
