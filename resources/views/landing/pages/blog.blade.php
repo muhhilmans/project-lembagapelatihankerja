@@ -45,7 +45,7 @@
     <!----//-blog Section-//-->
     <section class="blog-main-section pt-120 pb-120 overflow-hidden">
         <div class="container">
-            <div class="row g-4">
+            <div class="row g-4 justify-content-between">
                 <div class="col-lg-8">
                     @if ($blogs->count() > 0)
                         <div class="row g-4">
@@ -99,7 +99,7 @@
                         </div>
                         {{ $blogs->links('landing.layout.pagination') }}
                     @else
-                        <div class="col-12">
+                        <div class="col-lg-lg-12">
                             <div class="text-center pra">
                                 No blogs found
                             </div>
