@@ -49,4 +49,9 @@ class Application extends Model
     {
         return $this->hasMany(Complaint::class, 'application_id');
     }
+
+    public function workerSalary()
+    {
+        return $this->hasMany(WorkerSalary::class, 'application_id');
+    }
 }

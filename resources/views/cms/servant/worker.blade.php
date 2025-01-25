@@ -129,36 +129,38 @@
                                         @endif
                                     </td>
                                 @endhasrole
-                                @hasrole('superadmin|admin|majikan')
-                                    <td class="text-center">
+                                <td class="text-center">
+                                    <a href="{{ route('worker.show', $data->id) }}" class="btn btn-sm btn-info mb-1"><i
+                                        class="fas fa-eye"></i></a>
+                                    @hasrole('superadmin|admin|majikan')
                                         @hasrole('superadmin|admin')
                                             @if ($data->servant->servantDetails->is_bank == 0 || $data->servant->servantDetails->is_bpjs == 0)
-                                                <a href="#" class="btn btn-warning mb-2" data-toggle="modal"
+                                                <a href="#" class="btn btn-sm btn-warning mb-1" data-toggle="modal"
                                                     data-target="#editBankModal-{{ $data->id }}"><i
                                                         class="fas fa-edit"></i></a>
                                                 @include('cms.servant.modal.edit-bank', ['data' => $data])
                                             @endif
 
                                             @if ($data->status == 'review')
-                                                <a href="#" class="btn btn-success mb-2" data-toggle="modal"
+                                                <a href="#" class="btn btn-sm btn-success mb-1" data-toggle="modal"
                                                     data-target="#laidoffModal-{{ $data->id }}"><i
                                                         class="fas fa-check"></i></a>
                                                 @include('cms.servant.modal.laidoff', ['data' => $data])
 
-                                                <a href="#" class="btn btn-danger" data-toggle="modal"
+                                                <a href="#" class="btn btn-sm btn-danger" data-toggle="modal"
                                                     data-target="#rejectModal-{{ $data->id }}"><i class="fas fa-times"></i></a>
                                                 @include('cms.servant.modal.reject', ['data' => $data])
                                             @endif
                                         @endhasrole
 
                                         @if ($data->status == 'accepted')
-                                            <a href="#" class="btn btn-danger" data-toggle="modal"
+                                            <a href="#" class="btn btn-sm btn-danger" data-toggle="modal"
                                                 data-target="#reviewModal-{{ $data->id }}"><i
                                                     class="fas fa-user-times"></i></a>
                                             @include('cms.servant.modal.review', ['data' => $data])
                                         @endif
-                                    </td>
-                                @endhasrole
+                                    @endhasrole
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

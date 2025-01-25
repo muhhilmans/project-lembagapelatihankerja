@@ -61,6 +61,7 @@ class ApplicationController extends Controller
         $validator = Validator::make($request->all(), [
             'status' => ['required', 'string'],
             'notes' => ['nullable', 'string'],
+            'interview_link' => ['nullable', 'url'],
             'interview_date' => ['sometimes', 'date'],
             'work_end_date' => ['sometimes', 'date'],
             'salary' => ['nullable', 'numeric'],
@@ -86,6 +87,7 @@ class ApplicationController extends Controller
                 } elseif ($data['status'] == 'interview') {
                     $update->update([
                         'status' => $data['status'],
+                        'link_interview' => $data['interview_link'],
                         'notes_interview' => $data['notes'],
                     ]);
                 } elseif ($data['status'] == 'passed') {
@@ -297,6 +299,7 @@ class ApplicationController extends Controller
         $validator = Validator::make($request->all(), [
             'status' => ['required', 'string'],
             'notes' => ['nullable', 'string'],
+            'interview_link' => ['nullable', 'url'],
             'interview_date' => ['sometimes', 'date'],
             'work_end_date' => ['sometimes', 'date'],
             'salary' => ['nullable', 'numeric'],
@@ -321,6 +324,7 @@ class ApplicationController extends Controller
                 } elseif ($data['status'] == 'interview') {
                     $update->update([
                         'status' => $data['status'],
+                        'link_interview' => $data['interview_link'],
                         'notes_interview' => $data['notes'],
                     ]);
                 } elseif ($data['status'] == 'passed') {

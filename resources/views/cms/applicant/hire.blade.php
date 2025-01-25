@@ -41,6 +41,8 @@
                                     @endif
                                 @endhasrole
                                 @if ($d->status == 'interview')
+                                    <li class="mb-1"><strong>Link Interview:</strong> <a href="{{ $d->link_interview }}"
+                                            target="_blank" rel="noopener noreferrer">{{ $d->link_interview }}</a></li>
                                     <li class="mb-1"><strong>Tanggal Interview:</strong>
                                         {{ \Carbon\Carbon::parse($d->interview_date)->format('d-m-Y') }}</li>
                                     <li class="mb-1"><strong>Catatan:</strong> {!! $d->notes_interview !!}</li>

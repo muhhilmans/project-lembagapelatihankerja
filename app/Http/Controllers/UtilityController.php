@@ -92,67 +92,6 @@ class UtilityController extends Controller
         }
     }
 
-    public function allWorker()
-    {
-        if (auth()->user()->roles->first()->name == 'majikan') {
-            $datas = Application::whereIn('status', ['accepted', 'review'])
-                ->where(function ($query) {
-                    $query->where('employe_id', auth()->user()->id)
-                        ->orWhereHas('vacancy.user', function ($q) {
-                            $q->where('id', auth()->user()->id);
-                        });
-                })->get();
-        } else {
-            $datas = Application::whereIn('status', ['accepted', 'review'])->get();
-        }
-
-        return view('cms.servant.worker', compact('datas'));
-    }
-
-    public function downloadPdf(Request $request)
-    {
-        $request->validate([
-            'select_data' => 'required|string',
-        ]);
-
-        $filter = $request->input('select_data');
-        $query = Application::where('status', 'accepted');
-
-        if ($filter === 'not_have_bank') {
-            $query->whereHas('servant.servantDetails', function ($q) {
-                $q->where('is_bank', 0);
-            });
-        } elseif ($filter === 'not_have_bpjs') {
-            $query->whereHas('servant.servantDetails', function ($q) {
-                $q->where('is_bpjs', 0);
-            });
-        } elseif ($filter === 'not_have_account') {
-            $query->whereHas('servant.servantDetails', function ($q) {
-                $q->where('is_bank', 0)->where('is_bpjs', 0);
-            });
-        }
-
-        $datas = $query->get();
-
-        if ($filter === 'not_have_bank') {
-            $pdf = Pdf::loadView('cms.servant.pdf.export-bank', compact('datas'))
-                ->setPaper('a4', 'potrait');
-            return $pdf->download('data_pekerja_tidak_memiliki_rekening_' . date('d-M-Y') . '.pdf');
-        } elseif ($filter === 'not_have_bpjs') {
-            $pdf = Pdf::loadView('cms.servant.pdf.export-bpjs', compact('datas'))
-                ->setPaper('a4', 'potrait');
-            return $pdf->download('data_pekerja_tidak_memiliki_bpjs' . date('d-M-Y') . '.pdf');
-        } elseif ($filter === 'not_have_account') {
-            $pdf = Pdf::loadView('cms.servant.pdf.export', compact('datas'))
-                ->setPaper('a4', 'landscape');
-            return $pdf->download('data_pekerja_tidak_memiliki_rekening_dan_bpjs' . date('d-M-Y') . '.pdf');
-        } else {
-            $pdf = Pdf::loadView('cms.servant.pdf.export', compact('datas'))
-                ->setPaper('a4', 'landscape');
-            return $pdf->download('data_pekerja_' . date('d-M-Y') . '.pdf');
-        }
-    }
-
     public function allServant()
     {
         $datas = User::with(['roles', 'servantDetails'])

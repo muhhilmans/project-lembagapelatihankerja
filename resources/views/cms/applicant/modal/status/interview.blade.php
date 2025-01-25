@@ -14,6 +14,11 @@
                     <input type="text" name="status" value="interview" hidden>
 
                     <div class="form-group">
+                        <label for="interview_link">Link Interview</label>
+                        <input type="text" id="interview_link" name="interview_link" class="form-control">
+                    </div>
+
+                    <div class="form-group">
                         <label for="notes">Catatan <span class="text-danger">*Berikan waktu pasti interview</label>
                         <textarea id="notes-editor" name="notes" class="form-control"></textarea>
                     </div>
