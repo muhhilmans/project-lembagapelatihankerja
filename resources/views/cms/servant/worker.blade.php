@@ -59,23 +59,57 @@
                                 @hasrole('majikan')
                                     <td class="text-center">
                                         @php
-                                            $salary = $data->salary;
-                                            $service = $salary * 0.075;
-                                            $gaji = $salary + $service;
+                                            $workerSalaries = App\Models\WorkerSalary::where(
+                                                'application_id',
+                                                $data->id,
+                                            )->first();
+
+                                            if (
+                                                $workerSalaries &&
+                                                \Carbon\Carbon::parse($workerSalaries->month)->format('F Y') ==
+                                                    \Carbon\Carbon::now()->format('F Y')
+                                            ) {
+                                                $workerSalary =
+                                                    'Rp. ' .
+                                                    number_format($workerSalaries->total_salary_majikan, 0, ',', '.');
+                                            } else {
+                                                $workerSalary = 'Belum Mengisi Kehadiran';
+                                            }
                                         @endphp
 
-                                        Rp. {{ number_format($gaji, 0, ',', '.') }}
+                                        @if (is_numeric($workerSalary))
+                                            Rp. {{ $workerSalary }}
+                                        @else
+                                            {{ $workerSalary }}
+                                        @endif
                                     </td>
                                 @endhasrole
                                 @hasrole('superadmin|admin|owner|pembantu')
                                     <td class="text-center">
                                         @php
-                                            $salary = $data->salary;
-                                            $service = $salary * 0.025;
-                                            $gaji = $salary - $service;
+                                            $workerSalaries = App\Models\WorkerSalary::where(
+                                                'application_id',
+                                                $data->id,
+                                            )->first();
+
+                                            if (
+                                                $workerSalaries &&
+                                                \Carbon\Carbon::parse($workerSalaries->month)->format('F Y') ==
+                                                    \Carbon\Carbon::now()->format('F Y')
+                                            ) {
+                                                $workerSalary =
+                                                    'Rp. ' .
+                                                    number_format($workerSalaries->total_salary_pembantu, 0, ',', '.');
+                                            } else {
+                                                $workerSalary = 'Belum Mengisi Kehadiran';
+                                            }
                                         @endphp
 
-                                        Rp. {{ number_format($gaji, 0, ',', '.') }}
+                                        @if (is_numeric($workerSalary))
+                                            Rp. {{ $workerSalary }}
+                                        @else
+                                            {{ $workerSalary }}
+                                        @endif
                                     </td>
                                 @endhasrole
                                 <td class="text-center">
@@ -131,7 +165,7 @@
                                 @endhasrole
                                 <td class="text-center">
                                     <a href="{{ route('worker.show', $data->id) }}" class="btn btn-sm btn-info mb-1"><i
-                                        class="fas fa-eye"></i></a>
+                                            class="fas fa-eye"></i></a>
                                     @hasrole('superadmin|admin|majikan')
                                         @hasrole('superadmin|admin')
                                             @if ($data->servant->servantDetails->is_bank == 0 || $data->servant->servantDetails->is_bpjs == 0)
@@ -147,14 +181,14 @@
                                                         class="fas fa-check"></i></a>
                                                 @include('cms.servant.modal.laidoff', ['data' => $data])
 
-                                                <a href="#" class="btn btn-sm btn-danger" data-toggle="modal"
+                                                <a href="#" class="btn btn-sm btn-danger mb-1" data-toggle="modal"
                                                     data-target="#rejectModal-{{ $data->id }}"><i class="fas fa-times"></i></a>
                                                 @include('cms.servant.modal.reject', ['data' => $data])
                                             @endif
                                         @endhasrole
 
                                         @if ($data->status == 'accepted')
-                                            <a href="#" class="btn btn-sm btn-danger" data-toggle="modal"
+                                            <a href="#" class="btn btn-sm btn-danger mb-1" data-toggle="modal"
                                                 data-target="#reviewModal-{{ $data->id }}"><i
                                                     class="fas fa-user-times"></i></a>
                                             @include('cms.servant.modal.review', ['data' => $data])

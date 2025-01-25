@@ -156,15 +156,15 @@
                     <i class="fas fa-fw fa-bullhorn"></i>
                     <span>Pengaduan</span></a>
             </li>
+        @endhasrole
 
-            @hasrole('superadmin|admin|owner|majikan')
-                <!-- Nav Item - Pekerja -->
-                <li class="nav-item {{ Route::is('worker-all') ? 'active' : '' }}">
-                    <a class="nav-link {{ Route::is('worker-all') ? 'active' : '' }}" href="{{ route('worker-all') }}">
-                        <i class="fas fa-fw fa-id-badge"></i>
-                        <span>Pekerja</span></a>
-                </li>
-            @endhasrole
+        @hasrole('superadmin|admin|owner|majikan|pembantu')
+            <!-- Nav Item - Pekerja -->
+            <li class="nav-item {{ Route::is('worker-all') ? 'active' : '' }}">
+                <a class="nav-link {{ Route::is('worker-all') ? 'active' : '' }}" href="{{ route('worker-all') }}">
+                    <i class="fas fa-fw fa-id-badge"></i>
+                    <span>Pekerja</span></a>
+            </li>
         @endhasrole
     @endif
 

@@ -112,9 +112,7 @@
                                                             style="max-height: 100px;" alt="...">
                                                     </a>
                                                 @else
-                                                    <img src="{{ asset('assets/img/undraw_rocket.svg') }}"
-                                                        class="img-fluid rounded mx-auto d-block zoomable-image"
-                                                        style="max-height: 100px;" alt="...">
+                                                    Majikan Belum Membayar
                                                 @endif
                                             </td>
                                         @endhasrole
@@ -131,9 +129,7 @@
                                                             style="max-height: 100px;" alt="...">
                                                     </a>
                                                 @else
-                                                    <img src="{{ asset('assets/img/undraw_rocket.svg') }}"
-                                                        class="img-fluid rounded mx-auto d-block zoomable-image"
-                                                        style="max-height: 100px;" alt="...">
+                                                    Belum Dibayarkan
                                                 @endif
                                             </td>
                                         @endhasrole

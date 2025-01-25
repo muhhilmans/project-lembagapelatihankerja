@@ -23,6 +23,11 @@ class WorkerController extends Controller
                             $q->where('id', auth()->user()->id);
                         });
                 })->get();
+        } elseif (auth()->user()->roles->first()->name == 'pembantu') {
+            $datas = Application::whereIn('status', ['accepted', 'review'])
+                ->where(function ($query) {
+                    $query->where('servant_id', auth()->user()->id);
+                })->get();
         } else {
             $datas = Application::whereIn('status', ['accepted', 'review'])->get();
         }
@@ -116,7 +121,7 @@ class WorkerController extends Controller
             'total_salary_majikan' => ceil($totalSalaryMajikan),
             'total_salary_pembantu' => ceil($totalSalaryPembantu)
         ];
-        
+
         try {
             DB::transaction(function () use ($data, $dataSalary) {
                 WorkerSalary::create([
