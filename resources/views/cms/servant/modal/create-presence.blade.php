@@ -25,6 +25,10 @@
                                 <input type="number" name="presence" id="presence" class="form-control" max="{{ now()->daysInMonth }}" required>
                             </div>
                         </div>
+                        <div class="col-lg-12">
+                            <label for="voucher">Kode Voucher</label>
+                            <input type="text" name="voucher" id="voucher" class="form-control">
+                        </div>
                     </div>
                 </div>
 

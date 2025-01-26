@@ -23,10 +23,16 @@ class WorkerSalary extends Model
         'status',
         'payment_majikan_image',
         'payment_pembantu_image',
+        'voucher_id',
     ];
 
     public function application()
     {
         return $this->belongsTo(Application::class, 'application_id');
+    }
+
+    public function voucher()
+    {
+        return $this->belongsTo(Voucher::class);
     }
 }

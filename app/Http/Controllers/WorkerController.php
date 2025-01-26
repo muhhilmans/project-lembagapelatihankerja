@@ -93,6 +93,7 @@ class WorkerController extends Controller
             'application_id' => 'required|exists:applications,id',
             'month' => 'required',
             'presence' => 'required|integer',
+            'voucher' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -110,10 +111,10 @@ class WorkerController extends Controller
         $totalSalary = $data['presence'] * $daySalary;
 
         $addSalaryMajikan = $totalSalary * 0.075;
-        $totalSalaryMajikan = $totalSalary + $addSalaryMajikan;
+        $totalSalaryMajikan = ($totalSalary + $addSalaryMajikan) + 20000;
 
         $addSalaryPembantu = $totalSalary * 0.025;
-        $totalSalaryPembantu = $totalSalary + $addSalaryPembantu;
+        $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - 20000;
 
         $dataSalary = [
             'day_salary' => ceil($daySalary),

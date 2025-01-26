@@ -187,6 +187,16 @@
                 Master
             </div>
 
+            @hasrole('superadmin')
+                <!-- Nav Item - Voucher -->
+                <li class="nav-item {{ Route::is('vouchers.*') ? 'active' : '' }}">
+                    <a class="nav-link {{ Route::is('vouchers.*') ? 'active' : '' }}"
+                        href="{{ route('vouchers.index') }}">
+                        <i class="fas fa-fw fa-percentage"></i>
+                        <span>Voucher</span></a>
+                </li>
+            @endhasrole
+
             <!-- Nav Item - Profesi -->
             <li class="nav-item {{ Route::is('professions.*') ? 'active' : '' }}">
                 <a class="nav-link {{ Route::is('professions.*') ? 'active' : '' }}"

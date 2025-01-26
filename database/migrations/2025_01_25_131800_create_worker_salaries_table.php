@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('status')->nullable();
             $table->string('payment_majikan_image')->nullable();
             $table->string('payment_pembantu_image')->nullable();
+            $table->foreignUuid('voucher_id')->nullable()->references('id')->on('vouchers')->onDelete('cascade');
             $table->timestamps();
         });
     }
