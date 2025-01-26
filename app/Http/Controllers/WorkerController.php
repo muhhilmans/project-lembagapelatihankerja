@@ -146,11 +146,11 @@ class WorkerController extends Controller
         $daySalary = $application->salary / $daysInMonth;
 
         $totalSalary = $data['presence'] * $daySalary;
-        $discount = $voucher ? ($voucher->discount / 100) : 0.075;
-
+        $discount = $voucher ? (0.075 - ($voucher->discount / 100)) : 0.075;
+        
         $majikanBonus = $totalSalary * $discount;
         $totalSalaryMajikan = ($totalSalary + $majikanBonus) + 20000;
-
+        
         $addSalaryPembantu = $totalSalary * 0.025;
         $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - 20000;
 

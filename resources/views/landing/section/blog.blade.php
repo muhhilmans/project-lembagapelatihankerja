@@ -5,21 +5,21 @@
                 <div class="cmn-section-title apointment-content">
                     <a href="blog.html" class="cmn--btn cmn-alt2 wow fadeInDown" data-wow-delay="0.4s">
                         <span>
-                            Our Insights
+                            Blog dan Berita
                         </span>
                     </a>
                     <h2 class="title mt-xxl-4 mt-2 mb-0 wow fadeInUp" data-wow-delay="0.6s">
-                        Update with our latest blog and news
+                        Informasi Terbaru dari Kami
                     </h2>
                 </div>
             </div>
-            <div class="col-xl-5 col-lg-6 col-md-6 wow fadeInDown" data-wow-delay="0.7s">
-                <p class="pra">
-                    We believe in the power of attention to detail. Our cleaners are meticulous in their work, leaving
-                    no nook or cranny untouched. We take pride in our ability to. We believe in the power of attention
-                    to detail.
-                </p>
-            </div>
+            <!--<div class="col-xl-5 col-lg-6 col-md-6 wow fadeInDown" data-wow-delay="0.7s">-->
+            <!--    <p class="pra">-->
+            <!--        We believe in the power of attention to detail. Our cleaners are meticulous in their work, leaving-->
+            <!--        no nook or cranny untouched. We take pride in our ability to. We believe in the power of attention-->
+            <!--        to detail.-->
+            <!--    </p>-->
+            <!--</div>-->
         </div>
         <div class="row g-4">
             @if (isset($blogs) && $blogs->isNotEmpty())
@@ -54,7 +54,7 @@
                             </p>
                             <a href="{{ route('blog-detail', ['slug' => $blog->slug]) }}" class="d-flex similer-btn align-items-center gap-3 title">
                                 <span>
-                                    Continue Reading
+                                    Baca Selengkapnya
                                 </span>
                                 <span class="icon">
                                     <svg width="32" height="8" viewBox="0 0 32 8" fill="none"
@@ -71,14 +71,14 @@
                 <div class="servie-btn text-center mt-xxl-4 mt-4">
                     <a href="{{ route('all-blogs') }}" class="cmn--btn">
                         <span>
-                            View All Blogs
+                            Lihat Semua Blog
                         </span>
                     </a>
                 </div>
             @else
                 <div class="col-12 wow fadeInUp" data-wow-delay="0.4s">
                     <div class="text-center pra">
-                        No blogs found
+                        Belum ada Blog/Berita
                     </div>
                 </div>
             @endif

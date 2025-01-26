@@ -19,28 +19,28 @@
     <!----//-Provide Section-//-->
 
     <!----//-why choose Section-//-->
-    @include('landing.section.why')
+    {{-- @include('landing.section.why') --}}
     <!----//-why choose Section-//-->
 
     <!--<<  Howit work >>-->
-    @include('landing.section.howit')
+    {{-- @include('landing.section.howit') --}}
     <!--<<  Howit work >>-->
 
     <!--<<  Team Member >>-->
-    @include('landing.section.team')
+    {{-- @include('landing.section.team') --}}
     <!--<<  Team Member >>-->
 
 
     <!--<<  Testimonial sectioN >>-->
-    @include('landing.section.testimonial')
+    {{-- @include('landing.section.testimonial') --}}
     <!--<<  Testimonial sectioN >>-->
 
     <!--<<  Pricing sectioN >>-->
-    @include('landing.section.pricing')
+    {{-- @include('landing.section.pricing') --}}
     <!--<<  Pricing sectioN >>-->
 
     <!--<<  Sponsor section >>-->
-    @include('landing.section.sponsor')
+    {{-- @include('landing.section.sponsor') --}}
     <!--<<  Sponsor section >>-->
 
     <!--<<  Cleaning Quote section >>-->
@@ -48,7 +48,7 @@
     <!--<<  Cleaning Quote section >>-->
 
     <!--<<  Counter section >>-->
-    @include('landing.section.counter')
+    {{-- @include('landing.section.counter') --}}
     <!--<<  Counter section >>-->
 
     <!--<<  Faq section >>-->
