@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\Application;
+use App\Models\Voucher;
 use App\Models\WorkerSalary;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -38,7 +39,9 @@ class WorkerController extends Controller
     public function showWorker(string $id)
     {
         $data = Application::findOrFail($id);
-        $salaries = WorkerSalary::where('application_id', $id)->get();
+        $salaries = WorkerSalary::where('application_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('cms.servant.partial.detail-worker', compact(['data', 'salaries']));
     }
@@ -104,14 +107,49 @@ class WorkerController extends Controller
 
         $application = Application::findOrFail($id);
 
+        $voucher = null;
+        if (!empty($data['voucher'])) {
+            $voucher = Voucher::where('code', $data['voucher'])->first();
+
+            if (!$voucher) {
+                return redirect()->back()->with('toast_error', 'Kode voucher tidak ditemukan');
+            }
+
+            if (!$voucher->is_active) {
+                return redirect()->back()->with('toast_error', 'Kode voucher sudah tidak aktif');
+            }
+
+            if ($voucher->expired_date && $voucher->expired_date < Carbon::now()->format('Y-m-d')) {
+                return redirect()->back()->with('toast_error', 'Kode voucher sudah tidak berlaku');
+            }
+
+            $usedCount = WorkerSalary::where('voucher_id', $voucher->id)->count();
+            $usedInApplication = $application->workerSalary()
+                ->where('voucher_id', $voucher->id)
+                ->count();
+
+            if ($voucher->people_used && $usedCount >= $voucher->people_used) {
+                if ($voucher->time_used && $usedInApplication < $voucher->time_used) {
+                    // Tidak ada aksi, lanjutkan proses
+                } else {
+                    return redirect()->back()->with('toast_error', 'Kode voucher telah mencapai batas pengguna');
+                }
+            }
+
+            if ($voucher->time_used && $usedInApplication >= $voucher->time_used) {
+                return redirect()->back()->with('toast_error', 'Kode voucher telah mencapai batas penggunaan pada pembantu ini');
+            }
+        }
+
         $month = Carbon::createFromFormat('Y-m', $data['month']);
+        $daysInMonth = $month->daysInMonth;
+        $daySalary = $application->salary / $daysInMonth;
 
-        $dayMonth = $month->daysInMonth;
-        $daySalary = $application->salary / $dayMonth;
         $totalSalary = $data['presence'] * $daySalary;
+        $discount = $voucher ? ($voucher->discount / 100) : 0.075;
 
-        $addSalaryMajikan = $totalSalary * 0.075;
-        $totalSalaryMajikan = ($totalSalary + $addSalaryMajikan) + 20000;
+        $majikanBonus = $totalSalary * $discount;
+        $totalSalaryMajikan = ($totalSalary + $majikanBonus) + 20000;
 
         $addSalaryPembantu = $totalSalary * 0.025;
         $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - 20000;
@@ -120,18 +158,19 @@ class WorkerController extends Controller
             'day_salary' => ceil($daySalary),
             'total_salary' => ceil($totalSalary),
             'total_salary_majikan' => ceil($totalSalaryMajikan),
-            'total_salary_pembantu' => ceil($totalSalaryPembantu)
+            'total_salary_pembantu' => ceil($totalSalaryPembantu),
         ];
 
         try {
-            DB::transaction(function () use ($data, $dataSalary) {
+            DB::transaction(function () use ($data, $dataSalary, $voucher) {
                 WorkerSalary::create([
                     'application_id' => $data['application_id'],
                     'month' => Carbon::createFromFormat('Y-m', $data['month'])->startOfMonth()->format('Y-m-d'),
                     'presence' => $data['presence'],
                     'total_salary' => $dataSalary['total_salary'],
                     'total_salary_majikan' => $dataSalary['total_salary_majikan'],
-                    'total_salary_pembantu' => $dataSalary['total_salary_pembantu']
+                    'total_salary_pembantu' => $dataSalary['total_salary_pembantu'],
+                    'voucher_id' => $voucher ? $voucher->id : null,
                 ]);
             });
 

@@ -77,6 +77,7 @@
                         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                             <thead>
                                 <tr class="text-center">
+                                    <th>#</th>
                                     <th>Bulan</th>
                                     <th>Hadir</th>
                                     @hasrole('superadmin|admin|owner|majikan')
@@ -95,6 +96,7 @@
                             <tbody>
                                 @foreach ($salaries as $salary)
                                     <tr>
+                                        <td class="text-center">{{ $loop->iteration }}</td>
                                         <td>{{ \Carbon\Carbon::parse($salary->month)->format('F Y') }}</td>
                                         <td class="text-center">
                                             {{ $salary->presence }} Hari
