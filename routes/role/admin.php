@@ -32,6 +32,8 @@ Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
     Route::post('worker-all/download', [WorkerController::class, 'downloadPdf'])->name('worker.download');
 
     Route::resource('blogs', BlogController::class);
+
+    Route::put('/worker/{app}/salary/{salary}/upload-admin', [WorkerController::class, 'uploadAdmin'])->name('payment-admin.upload');
 });
 
 Route::group(['middleware' => ['role:superadmin|owner']], function () {

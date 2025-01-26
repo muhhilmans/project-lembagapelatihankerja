@@ -106,13 +106,28 @@
                                                 Rp. {{ number_format($salary->total_salary_majikan, 0, ',', '.') }}
                                             </td>
                                             <td class="text-center">
-                                                @if ($salary->payment_proof)
-                                                    <a href="{{ route('getImage', ['path' => 'payment_proof', 'imageName' => $salary->payment_proof]) }}"
-                                                        target="_blank">
-                                                        <img src="{{ route('getImage', ['path' => 'payment_proof', 'imageName' => $salary->payment_proof]) }}"
-                                                            class="img-fluid rounded mx-auto d-block zoomable-image"
-                                                            style="max-height: 100px;" alt="...">
-                                                    </a>
+                                                @if ($salary->payment_majikan_image)
+                                                    @php
+                                                        $filePath = storage_path(
+                                                            'app/public/payments/' . $salary->payment_majikan_image,
+                                                        );
+                                                    @endphp
+
+                                                    @if (file_exists($filePath))
+                                                        @if (Str::endsWith($salary->payment_majikan_image, ['.jpg', '.jpeg', '.png', '.gif']))
+                                                            <img src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salary->payment_majikan_image]) }}"
+                                                                alt="Preview" class="img-fluid zoomable-image"
+                                                                style="max-height: 100px;">
+                                                        @elseif (Str::endsWith($salary->payment_majikan_image, ['.pdf']))
+                                                            <iframe
+                                                                src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salary->payment_majikan_image]) }}"
+                                                                width="100%" height="100px"></iframe>
+                                                        @else
+                                                            <p>Format file tidak didukung untuk preview.</p>
+                                                        @endif
+                                                    @else
+                                                        <p>File tidak ditemukan di server.</p>
+                                                    @endif
                                                 @else
                                                     Majikan Belum Membayar
                                                 @endif
@@ -123,13 +138,28 @@
                                                 Rp. {{ number_format($salary->total_salary_pembantu, 0, ',', '.') }}
                                             </td>
                                             <td class="text-center">
-                                                @if ($salary->paid_proof)
-                                                    <a href="{{ route('getImage', ['path' => 'paid_proof', 'imageName' => $salary->paid_proof]) }}"
-                                                        target="_blank">
-                                                        <img src="{{ route('getImage', ['path' => 'paid_proof', 'imageName' => $salary->paid_proof]) }}"
-                                                            class="img-fluid rounded mx-auto d-block zoomable-image"
-                                                            style="max-height: 100px;" alt="...">
-                                                    </a>
+                                                @if ($salary->payment_pembantu_image)
+                                                    @php
+                                                        $filePath = storage_path(
+                                                            'app/public/payments/' . $salary->payment_pembantu_image,
+                                                        );
+                                                    @endphp
+
+                                                    @if (file_exists($filePath))
+                                                        @if (Str::endsWith($salary->payment_pembantu_image, ['.jpg', '.jpeg', '.png', '.gif']))
+                                                            <img src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salary->payment_pembantu_image]) }}"
+                                                                alt="Preview" class="img-fluid zoomable-image"
+                                                                style="max-height: 300px;">
+                                                        @elseif (Str::endsWith($salary->payment_pembantu_image, ['.pdf']))
+                                                            <iframe
+                                                                src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salary->payment_pembantu_image]) }}"
+                                                                width="100%" height="300px"></iframe>
+                                                        @else
+                                                            <p>Format file tidak didukung untuk preview.</p>
+                                                        @endif
+                                                    @else
+                                                        <p>File tidak ditemukan di server.</p>
+                                                    @endif
                                                 @else
                                                     Belum Dibayarkan
                                                 @endif
@@ -137,16 +167,46 @@
                                         @endhasrole
                                         @hasrole('superadmin|admin|majikan')
                                             <td class="text-center">
-                                                <a href="#" class="btn btn-sm btn-primary mb-1"><i
-                                                        class="fas fa-money-check-alt"></i></a>
+                                                @hasrole('majikan')
+                                                    @if (!$salary->payment_majikan_image)
+                                                        <a href="#" class="btn btn-sm btn-primary mb-1" data-toggle="modal"
+                                                            data-target="#paymentMajikanModal-{{ $salary->id }}"><i
+                                                                class="fas fa-money-check-alt"></i></a>
+                                                        @include('cms.servant.modal.payment-majikan', [
+                                                            'data' => $salary,
+                                                        ])
+
+                                                        <a href="#" class="btn btn-sm btn-warning mb-1" data-toggle="modal"
+                                                            data-target="#editKehadiranModal-{{ $salary->id }}"><i
+                                                                class="fas fa-edit"></i></a>
+                                                        @include('cms.servant.modal.edit-presence', [
+                                                            'data' => $salary,
+                                                        ])
+                                                    @endif
+                                                @endhasrole
 
                                                 @hasrole('superadmin|admin')
-                                                    <a href="#" class="btn btn-sm btn-info mb-1"><i
+                                                    <a href="#" class="btn btn-sm btn-primary mb-1" data-toggle="modal"
+                                                        data-target="#paymentMajikanModal-{{ $salary->id }}"><i
+                                                            class="fas fa-money-check-alt"></i></a>
+                                                    @include('cms.servant.modal.payment-majikan', [
+                                                        'data' => $salary,
+                                                    ])
+
+                                                    <a href="#" class="btn btn-sm btn-info mb-1" data-toggle="modal"
+                                                        data-target="#paymentAdminModal-{{ $salary->id }}"><i
                                                             class="fas fa-money-bill-wave"></i></a>
+                                                    @include('cms.servant.modal.payment-admin', [
+                                                        'data' => $salary,
+                                                    ])
+
+                                                    <a href="#" class="btn btn-sm btn-warning mb-1" data-toggle="modal"
+                                                        data-target="#editKehadiranModal-{{ $salary->id }}"><i
+                                                            class="fas fa-edit"></i></a>
+                                                    @include('cms.servant.modal.edit-presence', [
+                                                        'data' => $salary,
+                                                    ])
                                                 @endhasrole
-                                                
-                                                <a href="#" class="btn btn-sm btn-warning mb-1"><i
-                                                    class="fas fa-edit"></i></a>
                                             </td>
                                         @endhasrole
                                     </tr>

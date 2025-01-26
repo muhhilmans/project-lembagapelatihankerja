@@ -73,7 +73,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/worker-all', [WorkerController::class, 'allWorker'])->name('worker-all');
     Route::get('/worker/{id}', [WorkerController::class, 'showWorker'])->name('worker.show');
-    Route::post('/worker/{id}/presence', [WorkerController::class, 'presenceWorker'])->name('worker.presence.store');
 
     Route::get('/profile/{id}', [ProfileController::class, 'profile'])->name('profile');
     Route::get('/profile/{id}/edit', [ProfileController::class, 'edit'])->name('profile.edit');

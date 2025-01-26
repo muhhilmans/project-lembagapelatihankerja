@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UtilityController;
 use App\Http\Controllers\VacancyController;
+use App\Http\Controllers\WorkerController;
 
 Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     Route::get('/all-servant', [UtilityController::class, 'allServant'])->name('all-servant');
@@ -23,4 +24,8 @@ Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     Route::put('/applicant-indie/{vacancy}/{user}/upload', [ApplicationController::class, 'uploadContract'])->name('applicant-indie.upload');
     
     Route::put('/worker/{id}', [ProfileController::class, 'updateBank'])->name('update-bank');
+
+    Route::post('/worker/{id}/presence', [WorkerController::class, 'presenceWorker'])->name('worker.presence.store');
+    Route::put('/worker/{app}/presence/{salary}', [WorkerController::class, 'updatePresenceWorker'])->name('worker.presence.update');
+    Route::put('/worker/{app}/salary/{salary}/upload-majikan', [WorkerController::class, 'uploadMajikan'])->name('payment-majikan.upload');
 });

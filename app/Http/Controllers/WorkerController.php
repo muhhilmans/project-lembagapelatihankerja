@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\Application;
 use App\Models\Voucher;
+use App\Models\Application;
+use Illuminate\Support\Str;
 use App\Models\WorkerSalary;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
 
@@ -147,10 +149,10 @@ class WorkerController extends Controller
 
         $totalSalary = $data['presence'] * $daySalary;
         $discount = $voucher ? (0.075 - ($voucher->discount / 100)) : 0.075;
-        
+
         $majikanBonus = $totalSalary * $discount;
         $totalSalaryMajikan = ($totalSalary + $majikanBonus) + 20000;
-        
+
         $addSalaryPembantu = $totalSalary * 0.025;
         $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - 20000;
 
@@ -175,6 +177,158 @@ class WorkerController extends Controller
             });
 
             Alert::success('Berhasil', 'Berhasil mengisi kehadiran!');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
+    public function updatePresenceWorker(Request $request, Application $app, WorkerSalary $salary)
+    {
+        $validator = Validator::make($request->all(), [
+            'presence' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0]);
+        }
+
+        $data = $validator->validated();
+
+        $monthString = substr($salary->month, 0, 7);
+        $month = Carbon::createFromFormat('Y-m', $monthString);
+        $daysInMonth = $month->daysInMonth;
+        $daySalary = $app->salary / $daysInMonth;
+        
+        $totalSalary = $data['presence'] * $daySalary;
+        $discount = $salary->voucher_id ? (0.075 - ($salary->voucher->discount / 100)) : 0.075;
+
+        $majikanBonus = $totalSalary * $discount;
+        $totalSalaryMajikan = ($totalSalary + $majikanBonus) + 20000;
+
+        $addSalaryPembantu = $totalSalary * 0.025;
+        $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - 20000;
+
+        $dataSalary = [
+            'discount' => $discount,
+            'day_salary' => ceil($daySalary),
+            'total_salary' => ceil($totalSalary),
+            'total_salary_majikan' => ceil($totalSalaryMajikan),
+            'total_salary_pembantu' => ceil($totalSalaryPembantu),
+        ];
+        
+        try {
+            DB::transaction(function () use ($salary, $data, $dataSalary) {
+                $salary->update([
+                    'presence' => $data['presence'],
+                    'total_salary' => $dataSalary['total_salary'],
+                    'total_salary_majikan' => $dataSalary['total_salary_majikan'],
+                    'total_salary_pembantu' => $dataSalary['total_salary_pembantu'],
+                ]);
+            });
+
+            Alert::success('Berhasil', 'Berhasil mengubah kehadiran!');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
+    public function uploadMajikan(Request $request, Application $app, WorkerSalary $salary)
+    {
+        $validator = Validator::make($request->all(), [
+            'proof_majikan' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0]);
+        }
+
+        $data = $validator->validated();
+
+        try {
+            $majikanName = str_replace(' ', '_', ($app->vacancy ? $app->vacancy->user->name : $app->employe->name));
+            $servantName = str_replace(' ', '_', $app->servant->name);
+            $date = Carbon::parse($salary->month)->format('M-Y');
+            $directory = "payments/{$majikanName}/{$servantName}";
+            $fileName = "proof_majikan_" . $date . "_{$servantName}." . $request->file('proof_majikan')->getClientOriginalExtension();
+            $storagePath = "public/{$directory}";
+
+            if (!Storage::exists($storagePath)) {
+                Storage::makeDirectory($storagePath);
+            }
+
+            if ($salary->payment_majikan_image && Storage::exists("payments/{$salary->payment_majikan_image}")) {
+                Storage::delete("payments/{$salary->payment_majikan_image}");
+            }
+
+            $path = $request->file('proof_majikan')->storeAs($storagePath, $fileName);
+
+            DB::transaction(function () use ($salary, $path) {
+                $salary->update([
+                    'payment_majikan_image' => str_replace('public/payments/', '', $path),
+                ]);
+            });
+
+            Alert::success('Berhasil', 'Berhasil mengupload bukti pembayaran!');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
+    public function uploadAdmin(Request $request, Application $app, WorkerSalary $salary)
+    {
+        $validator = Validator::make($request->all(), [
+            'proof_admin' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0]);
+        }
+
+        $data = $validator->validated();
+
+        try {
+            $majikanName = str_replace(' ', '_', ($app->vacancy ? $app->vacancy->user->name : $app->employe->name));
+            $servantName = str_replace(' ', '_', $app->servant->name);
+            $date = Carbon::parse($salary->month)->format('M-Y');
+            $directory = "payments/{$majikanName}/{$servantName}";
+            $fileName = "proof_admin_" . $date . "_{$servantName}." . $request->file('proof_admin')->getClientOriginalExtension();
+            $storagePath = "public/{$directory}";
+
+            if (!Storage::exists($storagePath)) {
+                Storage::makeDirectory($storagePath);
+            }
+
+            if ($salary->payment_pembantu_image && Storage::exists("payments/{$salary->payment_pembantu_image}")) {
+                Storage::delete("payments/{$salary->payment_pembantu_image}");
+            }
+
+            $path = $request->file('proof_admin')->storeAs($storagePath, $fileName);
+
+            DB::transaction(function () use ($salary, $path) {
+                $salary->update([
+                    'payment_pembantu_image' => str_replace('public/payments/', '', $path),
+                ]);
+            });
+
+            Alert::success('Berhasil', 'Berhasil mengupload bukti pembayaran!');
             return redirect()->back();
         } catch (\Throwable $th) {
             $data = [

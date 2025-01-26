@@ -117,7 +117,7 @@
 
         @hasrole('majikan')
             @if ($d->status == 'verify')
-                <a href="#" class="btn btn-sm btn-primary mr-1" data-toggle="modal"
+                <a href="#" class="btn btn-sm btn-secondary mr-1" data-toggle="modal"
                     data-target="#draftModal-{{ $d->id }}"><i class="fas fa-file-alt"></i></a>
                 @include('cms.applicant.modal.draft', [
                     'data' => $d,

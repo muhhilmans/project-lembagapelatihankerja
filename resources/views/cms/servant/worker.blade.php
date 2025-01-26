@@ -62,23 +62,26 @@
                                             $workerSalaries = App\Models\WorkerSalary::where(
                                                 'application_id',
                                                 $data->id,
-                                            )->first();
+                                            )->get();
+                                            $currentMonth = \Carbon\Carbon::now()->format('F Y');
 
-                                            if (
-                                                $workerSalaries &&
-                                                \Carbon\Carbon::parse($workerSalaries->month)->format('F Y') ==
-                                                    \Carbon\Carbon::now()->format('F Y')
-                                            ) {
-                                                $workerSalary =
-                                                    'Rp. ' .
-                                                    number_format($workerSalaries->total_salary_majikan, 0, ',', '.');
-                                            } else {
-                                                $workerSalary = 'Belum Mengisi Kehadiran';
+                                            $workerSalary = 'Belum Mengisi Kehadiran';
+
+                                            foreach ($workerSalaries as $salary) {
+                                                if (
+                                                    \Carbon\Carbon::parse($salary->month)->format('F Y') ==
+                                                    $currentMonth
+                                                ) {
+                                                    $workerSalary =
+                                                        'Rp. ' .
+                                                        number_format($salary->total_salary_majikan, 0, ',', '.');
+                                                    break;
+                                                }
                                             }
                                         @endphp
 
-                                        @if (is_numeric($workerSalary))
-                                            Rp. {{ $workerSalary }}
+                                        @if (strpos($workerSalary, 'Rp.') !== false)
+                                            {!! $workerSalary !!}
                                         @else
                                             {{ $workerSalary }}
                                         @endif
@@ -90,23 +93,26 @@
                                             $workerSalaries = App\Models\WorkerSalary::where(
                                                 'application_id',
                                                 $data->id,
-                                            )->first();
+                                            )->get();
+                                            $currentMonth = \Carbon\Carbon::now()->format('F Y');
 
-                                            if (
-                                                $workerSalaries &&
-                                                \Carbon\Carbon::parse($workerSalaries->month)->format('F Y') ==
-                                                    \Carbon\Carbon::now()->format('F Y')
-                                            ) {
-                                                $workerSalary =
-                                                    'Rp. ' .
-                                                    number_format($workerSalaries->total_salary_pembantu, 0, ',', '.');
-                                            } else {
-                                                $workerSalary = 'Belum Mengisi Kehadiran';
+                                            $workerSalary = 'Belum Mengisi Kehadiran';
+
+                                            foreach ($workerSalaries as $salary) {
+                                                if (
+                                                    \Carbon\Carbon::parse($salary->month)->format('F Y') ==
+                                                    $currentMonth
+                                                ) {
+                                                    $workerSalary =
+                                                        'Rp. ' .
+                                                        number_format($salary->total_salary_pembantu, 0, ',', '.');
+                                                    break;
+                                                }
                                             }
                                         @endphp
 
-                                        @if (is_numeric($workerSalary))
-                                            Rp. {{ $workerSalary }}
+                                        @if (strpos($workerSalary, 'Rp.') !== false)
+                                            {!! $workerSalary !!}
                                         @else
                                             {{ $workerSalary }}
                                         @endif
