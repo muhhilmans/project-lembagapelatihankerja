@@ -2220,8 +2220,9 @@ ol, ul, li {
   content: attr(data-text);
   position: absolute;
   color: var(--subtitle);
-  width: 0px;
+  width: 0;
   overflow: hidden;
+  white-space: nowrap;
   animation: pulse-width 3s ease-in infinite;
   -webkit-text-stroke-width: 1px;
   -webkit-text-stroke-color: var(--subtitle);
@@ -2233,11 +2234,19 @@ ol, ul, li {
   color: transparent;
   transition: all 0.5s;
   position: relative;
+  display: inline-block;
+  overflow: hidden;
 }
 
 @keyframes pulse-width {
+  0% {
+    width: 0; /* Awal teks tidak terlihat */
+  }
   50% {
-    width: 100%;
+    width: 100%; /* Teks tampil sepenuhnya */
+  }
+  100% {
+    width: 0; /* Kembali ke awal */
   }
 }
 .banner-section-v2 {

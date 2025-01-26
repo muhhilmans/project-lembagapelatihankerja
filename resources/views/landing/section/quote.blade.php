@@ -25,9 +25,12 @@
                                 </span>
                             </div>
                             <h3 class="title">
-                                Jl. Poris Paradise 2, RT.005/RW.010, Cipondoh Indah,
+                                Jl. Poris Paradise 2, RT.005/RW.010,
                                 <span class="d-block">
-                                    Kec. Cipondoh, Kota Tangerang, Banten 15148
+                                    Cipondoh Indah, Kec. Cipondoh,
+                                </span>
+                                <span class="d-block">
+                                    Kota Tangerang, Banten 15148
                                 </span>
                             </h3>
                         </div>
@@ -52,47 +55,45 @@
                     <div class="row g-4">
                         <div class="col-lg-6 col-md-6">
                             <div class="clean-form-grp">
-                                <label>First Name</label>
-                                <input type="text" placeholder="First name">
+                                <label>Nama Lengkap</label>
+                                <input type="text" placeholder="Nama Lengkap">
                             </div>
                         </div>
                         <div class="col-lg-6 col-md-6">
                             <div class="clean-form-grp">
-                                <label>Address</label>
-                                <input type="text" placeholder="Your Address">
+                                <label>Sebagai</label>
+                                <input type="text" placeholder="Pembantu/Majikan">
                             </div>
                         </div>
                         <div class="col-lg-6 col-md-6">
                             <div class="clean-form-grp">
-                                <label>Your Email</label>
-                                <input type="text" placeholder="Your Email">
+                                <label>Email</label>
+                                <input type="email" placeholder="example@email.com">
                             </div>
                         </div>
                         <div class="col-lg-6 col-md-6">
                             <div class="clean-form-grp">
-                                <label>Service</label>
-                                <input type="text" placeholder="Service name">
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6">
-                            <div class="clean-form-grp">
-                                <label>Day of Service</label>
-                                <input type="text" placeholder="Day of Service">
+                                <label>No Telepon/Whatsapp</label>
+                                <input type="text" placeholder="08XXXXXXXXX">
                             </div>
                         </div>
                         <div class="col-lg-12">
                             <div class="clean-form-grp">
-                                <label>Add a Note</label>
-                                <textarea name="add-none" rows="5" placeholder="Add a note">
- 
-                         </textarea>
+                                <label>Alamat Lengkap</label>
+                                <textarea name="address" rows="3" placeholder="Alamat Lengkap"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="clean-form-grp">
+                                <label>Catatan</label>
+                                <textarea name="note" rows="5" placeholder="Masukkan catatan"></textarea>
                             </div>
                         </div>
                         <div class="col-lg-6">
                             <div class="clean-form-grp">
                                 <button type="submit" class="cmn--btn cmn-alt2">
                                     <span>
-                                        Submit Your Information
+                                        Kirim Pesan
                                     </span>
                                 </button>
                             </div>
