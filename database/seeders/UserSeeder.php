@@ -43,20 +43,20 @@ class UserSeeder extends Seeder
             $role = Role::findByName($data['role'], 'web');
             $user->assignRole($role);
 
-            $profession = Profession::inRandomOrder()->first();
+            // $profession = Profession::inRandomOrder()->first();
 
-            if ($data['role'] == 'pembantu') {
-                ServantDetail::create([
-                    'user_id' => $user->id,
-                    'profession_id' => $profession->id
-                ]);
-            }
+            // if ($data['role'] == 'pembantu') {
+            //     ServantDetail::create([
+            //         'user_id' => $user->id,
+            //         'profession_id' => $profession->id
+            //     ]);
+            // }
 
-            if ($data['role'] == 'majikan') {
-                EmployeDetail::create([
-                    'user_id' => $user->id,
-                ]);
-            }
+            // if ($data['role'] == 'majikan') {
+            //     EmployeDetail::create([
+            //         'user_id' => $user->id,
+            //     ]);
+            // }
         }
     }
 }
