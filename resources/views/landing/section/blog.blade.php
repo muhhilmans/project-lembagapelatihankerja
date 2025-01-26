@@ -50,7 +50,7 @@
                                     alt="img" class="img-fluid" style="max-height: 200px; object-fit: cover; width: 100%;">
                             </a>
                             <p class="pra text-muted">
-                                {!! \Illuminate\Support\Str::limit($blog->content, 100) !!}
+                                {{ \Illuminate\Support\Str::limit(strip_tags($blog->content), 100) }}
                             </p>
                             <a href="{{ route('blog-detail', ['slug' => $blog->slug]) }}" class="d-flex similer-btn align-items-center gap-3 title">
                                 <span>
