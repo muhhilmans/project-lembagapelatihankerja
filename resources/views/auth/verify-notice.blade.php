@@ -13,7 +13,13 @@
                                 <h1 class="h4 text-gray-900 mb-4">Email Belum Diverifikasi!</h1>
                             </div>
                             <p class="card-text">Silakan cek email Anda untuk memverifikasi akun.</p>
-                            <p class="card-text">Jika Anda tidak menerima email, <a href="{{ route('verification.resend') }}">klik di sini</a> untuk mengirim ulang.</p>
+                            <p class="card-text">
+                                Jika Anda tidak menerima email, silahkan klik tombol dibawah untuk mengirim ulank verifikasi email.
+                            </p>
+                            <form action="{{ route('verification.resend') }}" method="post" class="d-flex justify-content-center">
+                                @csrf
+                                <button type="submit" class="btn btn-primary">Kirim Ulang Verifikasi Email</button>
+                            </form>
                         </div>
                     </div>
                 </div>
