@@ -1,4 +1,4 @@
-<section class="faq-section pt-120 overflow-hidden position-relative">
+<section class="faq-section pt-120 overflow-hidden position-relative" id="faq">
   <div class="container">
      <div class="row justify-content-center">
         <div class="col-xxl-4 col-xl-6 col-lg-6">

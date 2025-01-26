@@ -4,7 +4,7 @@
     </div>
     <div class="sub__contact__wrapper d-grid">
         <a href="{{ route('home') }}" class="side-logo">
-            <img src="{{ asset('assets/img/logo.png') }}" alt="img" style="max-height: 35px; width: auto;">
+            <img src="{{ asset('assets/img/logo.png') }}" alt="img" style="max-height: 50px; width: auto;">
         </a>
         <p>
             Platform Penyalur ART terbaik di Jabodetabek melalui layanan yang cepat, transparan, dan
@@ -13,7 +13,7 @@
         </p>
         <div class="sub__contact-left d-grid">
             <div class="sub__contac-item">
-                <a href="https://wa.link/9ab2ix" class="d-flex mb-1 align-items-center gap-1">
+                <a href="#" class="d-flex mb-1 align-items-center gap-1">
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -24,13 +24,13 @@
                         24/7 Support
                     </span>
                 </a>
-                <a href="#0" class="textp">
+                <a href="https://wa.link/9ab2ix" class="textp">
                     (+62) 851-1700-9996
                 </a>
             </div>
             <div class="vline-s"></div>
             <div class="sub__contac-item">
-                <a href="mailto:info@sipembantu.com" class="d-flex mb-1 align-items-center gap-1">
+                <a href="#" class="d-flex mb-1 align-items-center gap-1">
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -41,7 +41,7 @@
                         Send Your Message
                     </span>
                 </a>
-                <a href="#0" class="textp">
+                <a href="mailto:info@sipembantu.com" class="textp">
                     info@sipembantu.com
                 </a>
             </div>
@@ -71,7 +71,7 @@
                         <a href="https://youtube.com/@sipembantu?si=h4Jw2PZv3ykJyvl9" target="_blank">
                             <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
                                 <path
-                                    d="M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6-11.4 42.9-11.4 132.3-11.4 132.3s0 89.4 11.4 132.3c6.3 23.7 24.8 41.5 48.3 47.8C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zm-317.5 213.5V175.2l142.7 81.2-142.7 81.2z" />
+                                    d="M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6-11.4 42.9-11.4 132.3-11.4 132.3s0 89.4 11.4 132.3c6.3 23.7 24.8 41.5 48.3 47.8C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zm-317.5 213.5V175.2l142.7 81.2-142.7 81.2z" fill="#032B52" />
                             </svg>
                         </a>
                     </li>
@@ -95,7 +95,7 @@
                         <a href="https://www.tiktok.com/@sipembantu.com" target="_blank">
                             <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
                                 <path
-                                    d="M448 209.9a210.1 210.1 0 0 1 -122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0l88 0a121.2 121.2 0 0 0 1.9 22.2h0A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z" />
+                                    d="M448 209.9a210.1 210.1 0 0 1 -122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0l88 0a121.2 121.2 0 0 0 1.9 22.2h0A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z" fill="#032B52" />
                             </svg>
                         </a>
                     </li>
