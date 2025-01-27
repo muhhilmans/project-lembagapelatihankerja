@@ -98,7 +98,7 @@
                   </div>
                </div>
                <p>
-                 Kami hanya menghadirkan ART yang profesional dan melalui proses seleksi ketat, memastikan kepercayaan dan kualitas layanan.
+                 Kami menghadirkan ART yang profesional dan melalui proses seleksi ketat, memastikan kepercayaan dan kualitas layanan.
                </p>
                <a href="#contact" class="d-flex cate-btn align-items-center gap-xl-3 gap-2">
                   Hubungi Sekarang

@@ -17,7 +17,7 @@
                   <!--</span>-->
                </h1>
                <p class="wow fadeIn" data-wow-delay="1s">
-                 Mempermudah Anda menemukan ART profesional yang transparan dan terpercaya, tanpa biaya admin di awal.
+                 Kini hadir untuk mempermudah Anda menemukan ART profesional yang transparan dan terpercaya, tanpa biaya admin di awal.
                </p>
                <div class="d-flex bn-vid wow fadeInDown" data-wow-delay="1.2s">
                   <a href="#about" class="cmn--btn">
