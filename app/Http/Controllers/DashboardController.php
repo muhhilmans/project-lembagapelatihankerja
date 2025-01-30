@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Application;
 use App\Models\Complaint;
+use App\Models\User;
 use App\Models\Vacancy;
 use Illuminate\Http\Request;
 
@@ -76,6 +77,19 @@ class DashboardController extends Controller
         $chartServantCount = $chartServant->groupBy('servant_sum')->map->count();
         $chartVacancyCount = $chartVacancy->groupBy('vacancy_sum')->map->count();
 
+        $admins = User::where('is_active', true)
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'admin');
+            })->count();
+        $employes = User::where('is_active', true)
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'majikan');
+            })->count();
+        $servants = User::where('is_active', true)
+            ->whereHas('roles', function ($query) {
+                $query->where('name', 'pembantu');
+            })->count();
+
         $data = [
             'pending' => $pendingApp,
             'process' => $processApp,
@@ -85,6 +99,9 @@ class DashboardController extends Controller
             'worker' => $worker,
             'rejectedComp' => $rejectedComp,
             'acceptedComp' => $acceptedComp,
+            'admins' => $admins,
+            'employes' => $employes,
+            'servants' => $servants,
         ];
 
         $filterBar = $request->get('filterBar', 'weekly');
