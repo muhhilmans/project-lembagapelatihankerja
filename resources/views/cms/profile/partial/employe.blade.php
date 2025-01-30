@@ -28,6 +28,19 @@
                     <td>:</td>
                     <td>{{ $data->employeDetails->address }}</td>
                 </tr>
+                <tr>
+                    <th scope="row">KTP</th>
+                    <td>:</td>
+                    <td>
+                        @if ($data->employeDetails->identity_card == null)
+                            -
+                        @else
+                            <img src="{{ route('getImage', ['path' => 'identity_card', 'imageName' => $data->employeDetails->identity_card]) }}"
+                                alt="Kartu Tanda Penduduk" class="img-fluid rounded zoomable-image"
+                                style="max-height: 150px;">
+                        @endif
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>

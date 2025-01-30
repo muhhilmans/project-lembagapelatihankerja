@@ -30,7 +30,7 @@
                             <input type="password" class="form-control" id="password" name="password" required>
                         </div>
                     </div>
-                    <div class="form-row">
+                    {{-- <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="bank_name">Nama Bank <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="bank_name" name="bank_name" required>
@@ -40,7 +40,7 @@
                             <input type="text" class="form-control" id="account_number" name="account_number"
                                 required>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="phone">Nomor Telepon <span class="text-danger">*</span></label>

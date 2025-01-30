@@ -247,6 +247,7 @@ class ProfileController extends Controller
             'email' => ['sometimes', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id),],
             'phone' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
+            'identity_card' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
         
         if ($validator->fails()) {
@@ -254,6 +255,25 @@ class ProfileController extends Controller
         }
 
         $data = $validator->validated();
+
+        $filesToUpdate = ['identity_card'];
+
+        foreach ($filesToUpdate as $fileKey) {
+            if (isset($data[$fileKey])) {
+                $oldFile = $user->employeDetails->$fileKey;
+
+                if ($oldFile && Storage::exists("public/img/$fileKey/$oldFile")) {
+                    Storage::delete("public/img/$fileKey/$oldFile");
+                }
+
+                $newFile = $data[$fileKey];
+                $newFileName = "{$fileKey}_{$user->username}." . $newFile->getClientOriginalExtension();
+                Storage::putFileAs("public/img/$fileKey", $newFile, $newFileName);
+                $data[$fileKey] = $newFileName;
+            } else {
+                $data[$fileKey] = $user->employeDetails->$fileKey;
+            }
+        }
 
         $user->update([
             'name' => $data['name'],
@@ -263,7 +283,10 @@ class ProfileController extends Controller
 
         $user->employeDetails()->update([
             'phone' => $data['phone'],
-            'address' => $data['address']
+            'address' => $data['address'],
+            'bank_name' => "-",
+            'account_number' => "-",
+            'identity_card' => $data['identity_card'],
         ]);
 
         Alert::success('Berhasil', 'Profile berhasil diperbarui!');

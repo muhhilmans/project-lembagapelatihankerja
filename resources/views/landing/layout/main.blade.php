@@ -6,8 +6,26 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="pembantu rumah tangga, babysitter, penyalur pembantu, yayasan pembantu, perawat lansia, sopir">
+    <meta name="description" content="Sipembantu.com menyediakan jasa pembantu rumah tangga profesional dan terpercaya. Cari pembantu harian, bulanan, atau perawat lansia dengan mudah dan aman. Hubungi kami sekarang!">
+    <meta name="author" content="Sipembantu">
+    <meta property="og:title" content="Jasa Pembantu Rumah Tangga Profesional | Sipembantu.com">
+    <meta property="og:description" content="Sipembantu.com menyediakan jasa pembantu rumah tangga profesional dan terpercaya. Cari pembantu harian, bulanan, atau perawat lansia dengan mudah dan aman. Hubungi kami sekarang!">
+    <meta property="og:image" content="https://sipembantu.com/images/logo.png">
+    <meta property="og:url" content="https://sipembantu.com/">
+    <meta property="og:site_name" content="sipembantu.com/">
+    <meta property="og:locale" content="id_ID">
+
+    {{-- Twitter --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Jasa Pembantu Rumah Tangga Profesional | Sipembantu.com">
+    <meta name="twitter:description" content="Sipembantu.com menyediakan jasa pembantu rumah tangga profesional dan terpercaya. Cari pembantu harian, bulanan, atau perawat lansia dengan mudah dan aman. Hubungi kami sekarang!">
+    <meta name="twitter:image" content="https://sipembantu.com/images/logo.png">
+
     <!--<< Title >>-->
     <title>{{ $title }} | {{ env('APP_NAME') }}</title>
+
+    <link rel="canonical" href="https://sipembantu.com/">
     <!--<< Favcion >>-->
     <link rel="shortcut icon" href="{{ asset('assets/img/logo.png') }}">
     <!--<< Bootstrap min.css >>-->

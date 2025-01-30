@@ -29,7 +29,7 @@ class VacancyController extends Controller
 
             $users = User::whereHas('roles', function ($query) {
                 $query->where('name', 'majikan');
-            })->get();
+            })->where('is_active', true)->get();
         }
 
         return view('cms.vacancy.index', compact(['datas', 'users', 'professions']));

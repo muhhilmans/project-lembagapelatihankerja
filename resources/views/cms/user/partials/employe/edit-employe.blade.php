@@ -15,12 +15,12 @@
                 <div class="modal-body text-left">
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label for="name">Nama Lengkap</label>
+                            <label for="name">Nama Lengkap <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="name" name="name"
                                 value="{{ old('name', $user->name) }}" required>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="username">Username</label>
+                            <label for="username">Username <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="username" name="username"
                                 value="{{ old('username', $user->username) }}" required>
                         </div>
@@ -28,7 +28,7 @@
 
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label for="email">Email</label>
+                            <label for="email">Email <span class="text-danger">*</span></label>
                             <input type="email" class="form-control" id="email" name="email"
                                 value="{{ old('email', $user->email) }}" required>
                         </div>
@@ -38,8 +38,8 @@
                                 value="{{ old('phone', $user->employeDetails->phone ?? '') }}" required>
                         </div>
                     </div>
-                    
-                    <div class="form-row">
+
+                    {{-- <div class="form-row">
                         <div class="form-group col-md-6">
                             <label for="bank_name">Nama Bank <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{ old('bank_name', $user->employeDetails->bank_name ?? '') }}" required>
@@ -49,7 +49,7 @@
                             <input type="text" class="form-control" id="account_number" value="{{ old('account_number', $user->employeDetails->account_number ?? '') }}" name="account_number"
                                 required>
                         </div>
-                    </div>
+                    </div> --}}
 
                     <div class="form-group">
                         <label for="address">Alamat <span class="text-danger">*</span></label>
@@ -60,22 +60,21 @@
                         <label for="identity_card">Kartu Tanda Penduduk</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" id="inpoIdentityCard">Upload</span>
+                                <span class="input-group-text">Upload</span>
                             </div>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="edit_identity_card" name="identity_card"
-                                    aria-describedby="inpoIdentityCard" accept="image/*">
-                                <label class="custom-file-label" for="identity_card">Choose file</label>
+                                <input type="file" class="custom-file-input" name="identity_card" accept="image/*">
+                                <label class="custom-file-label">Choose file</label>
                             </div>
                         </div>
-                        <div class="mt-3" id="editIdentityCardPreviewContainer">
+                        <div class="mt-3 preview-container">
                             @if (!empty($user->employeDetails->identity_card))
-                                <img id="editIdentityCardPreview"
-                                    src="{{ route('getImage', ['path' => 'identity_card', 'imageName' => $user->employeDetails->identity_card]) }}"
+                                <img src="{{ route('getImage', ['path' => 'identity_card', 'imageName' => $user->employeDetails->identity_card]) }}"
                                     alt="KTP" class="img-fluid rounded" style="max-width: 100px;">
                             @endif
                         </div>
                     </div>
+
                 </div>
 
                 <div class="modal-footer">
@@ -90,15 +89,17 @@
 @push('custom-script')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            function updatePreview(inputId, previewContainerId) {
-                const inputFile = document.getElementById(inputId);
-                const previewContainer = document.getElementById(previewContainerId);
-
+            document.querySelectorAll('.custom-file-input').forEach(inputFile => {
                 inputFile.addEventListener('change', function() {
                     const file = this.files[0];
 
+                    // Perbarui label file
                     const label = this.nextElementSibling;
                     label.textContent = file ? file.name : 'Choose file';
+
+                    // Cari container preview terkait
+                    const previewContainer = this.closest('.form-group').querySelector(
+                        '.preview-container');
 
                     if (file) {
                         const reader = new FileReader();
@@ -117,9 +118,7 @@
                         previewContainer.innerHTML = '';
                     }
                 });
-            }
-
-            updatePreview('edit_identity_card', 'editIdentityCardPreviewContainer');
+            });
         });
     </script>
 @endpush

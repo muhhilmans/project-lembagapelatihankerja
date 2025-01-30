@@ -12,15 +12,15 @@
                 @csrf
                 @method('PUT')
 
-                <div class="modal-body">
+                <div class="modal-body text-left">
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label for="name">Nama Lengkap</label>
+                            <label for="name">Nama Lengkap <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="name" name="name"
                                 value="{{ old('name', $user->name) }}" required>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="username">Username</label>
+                            <label for="username">Username <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="username" name="username"
                                 value="{{ old('username', $user->username) }}" required>
                         </div>
@@ -28,26 +28,25 @@
 
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <label for="email">Email</label>
+                            <label for="email">Email <span class="text-danger">*</span></label>
                             <input type="email" class="form-control" id="email" name="email"
                                 value="{{ old('email', $user->email) }}" required>
                         </div>
+
+                        @hasrole('superadmin')
+                            <div class="form-group col-md-6">
+                                <label for="role">Roles <span class="text-danger">*</span></label>
+                                <select id="role" name="role" class="form-control" required>
+                                    @foreach ($dataRoles as $role)
+                                        <option value="{{ $role->uuid }}"
+                                            {{ $role->uuid == $user->roles[0]->uuid ? 'selected' : '' }}>
+                                            {{ ucfirst($role->name) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endhasrole
                     </div>
-
-
-                    @hasrole('superadmin')
-                        <div class="form-group">
-                            <label for="role">Roles</label>
-                            <select id="role" name="role" class="form-control" required>
-                                @foreach ($dataRoles as $role)
-                                    <option value="{{ $role->uuid }}"
-                                        {{ $role->uuid == $user->roles[0]->uuid ? 'selected' : '' }}>
-                                        {{ ucfirst($role->name) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    @endhasrole
                 </div>
 
                 <div class="modal-footer">

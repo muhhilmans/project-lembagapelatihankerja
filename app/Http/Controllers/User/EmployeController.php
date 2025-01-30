@@ -43,8 +43,8 @@ class EmployeController extends Controller
             'password' => ['required', Rules\Password::defaults()],
             'phone' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
-            'bank_name' => ['required', 'string', 'max:255'],
-            'account_number' => ['required', 'string', 'max:255'],
+            // 'bank_name' => ['nullable', 'string', 'max:255'],
+            // 'account_number' => ['nullable', 'string', 'max:255'],
             'identity_card' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
 
@@ -82,8 +82,10 @@ class EmployeController extends Controller
                     'user_id' => $store->id,
                     'phone' => $data['phone'],
                     'address' => $data['address'],
-                    'bank_name' => $data['bank_name'],
-                    'account_number' => $data['account_number'],
+                    // 'bank_name' => $data['bank_name'],
+                    // 'account_number' => $data['account_number'],
+                    'bank_name' => "-",
+                    'account_number' => "-",
                     'identity_card' => $data['identity_card'],
                 ]);
             });
@@ -99,7 +101,7 @@ class EmployeController extends Controller
                 'status' => 400
             ];
 
-            return view('error', compact('data'));
+            return view('cms.error', compact('data'));
         }
     }
 
@@ -116,9 +118,9 @@ class EmployeController extends Controller
             'email' => ['sometimes', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id),],
             'phone' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
-            'bank_name' => ['required', 'string', 'max:255'],
-            'account_number' => ['required', 'string', 'max:255'],
-            'identity_card' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            // 'bank_name' => ['nullable', 'string', 'max:255'],
+            // 'account_number' => ['nullable', 'string', 'max:255'],
+            'identity_card' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
 
         if ($validator->fails()) {
@@ -155,8 +157,10 @@ class EmployeController extends Controller
         $user->employeDetails()->update([
             'phone' => $data['phone'],
             'address' => $data['address'],
-            'bank_name' => $data['bank_name'],
-            'account_number' => $data['account_number'],
+            // 'bank_name' => $data['bank_name'],
+            // 'account_number' => $data['account_number'],
+            'bank_name' => "-",
+            'account_number' => "-",
             'identity_card' => $data['identity_card'],
         ]);
 
@@ -189,15 +193,34 @@ class EmployeController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $user = User::findOrFail($request->user_id);
+        $data = User::findOrFail($request->user_id);
 
-        if ($user->vacancies->count() > 0) {
+        if ($data->vacancies->count() > 0) {
             return redirect()->route('users-employe.index')->with('toast_error', 'Majikan memiliki lowongan pekerjaan!');
         }
 
-        $user->delete();
+        try {
+            DB::transaction(function () use ($data) {
+                if ($data->employeDetails->identity_card) {
+                    $filePath = "public/img/identity_card/" . $data->employeDetails->identity_card;
 
-        Alert::success('Berhasil!', 'Majikan berhasil dihapus!');
-        return redirect()->route('users-employe.index');
+                    if (Storage::exists($filePath)) {
+                        Storage::delete($filePath);
+                    }
+                }
+
+                $data->delete();
+            });
+
+            Alert::success('Berhasil', 'Majikan berhasil dihapus!');
+            return redirect()->route('users-employe.index');
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
     }
 }

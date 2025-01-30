@@ -37,11 +37,11 @@
                         <td>:</td>
                         <td>{{ $data->employeDetails->address }}</td>
                     </tr>
-                    <tr>
+                    {{-- <tr>
                         <th scope="row">Rekening</th>
                         <td>:</td>
                         <td>{{ $data->employeDetails->account_number }} ({{ $data->employeDetails->bank_name }})</td>
-                    </tr>
+                    </tr> --}}
                     <tr>
                         <th scope="row">KTP</th>
                         <td>:</td>
