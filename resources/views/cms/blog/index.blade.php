@@ -7,10 +7,13 @@
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#createModal">
+            {{-- <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#createModal">
                 Tambah
             </a>
-            @include('cms.blog.modal.create')
+            @include('cms.blog.modal.create') --}}
+            <a class="btn btn-primary" href="{{ route('blogs.create') }}">
+                Tambah
+            </a>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -39,10 +42,14 @@
                                     </a>
                                     @include('cms.blog.modal.show', ['blog' => $data])
 
-                                    <a class="btn btn-sm btn-warning mb-1 mb-lg-0" href="#" data-toggle="modal" data-target="#editModal-{{ $data->id }}">
+                                    {{-- <a class="btn btn-sm btn-warning mb-1 mb-lg-0" href="#" data-toggle="modal" data-target="#editModal-{{ $data->id }}">
                                         <i class="fas fa-fw fa-edit"></i>
                                     </a>
-                                    @include('cms.blog.modal.edit', ['blog' => $data])
+                                    @include('cms.blog.modal.edit', ['blog' => $data]) --}}
+
+                                    <a class="btn btn-sm btn-warning mb-1 mb-lg-0" href="{{ route('blogs.edit', $data->id) }}">
+                                        <i class="fas fa-fw fa-edit"></i>
+                                    </a>
 
                                     <a class="btn btn-sm btn-danger" href="#" data-toggle="modal" data-target="#deleteModal-{{ $data->id }}">
                                         <i class="fas fa-fw fa-trash"></i>

@@ -22,6 +22,11 @@ class BlogController extends Controller
         return view('cms.blog.index', compact('datas'));
     }
 
+    public function create()
+    {
+        return view('cms.blog.partial.create');
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -87,7 +92,9 @@ class BlogController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $data = Blog::findOrFail($id);
+
+        return view('cms.blog.partial.edit', compact('data'));
     }
 
     /**

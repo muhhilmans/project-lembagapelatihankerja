@@ -35,7 +35,7 @@
                             @hasrole('superadmin|admin|owner')
                                 <th>BPJS</th>
                             @endhasrole
-                            @hasrole('superadmin|admin|majikan')
+                            @hasrole('superadmin|admin|majikan|owner')
                                 <th>Aksi</th>
                             @endhasrole
                         </tr>

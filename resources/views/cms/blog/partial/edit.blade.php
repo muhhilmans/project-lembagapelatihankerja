@@ -1,13 +1,17 @@
-<div class="modal fade" id="editModal-{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Edit Blog</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
+@extends('cms.layouts.main', ['title' => 'Edit Blog'])
+
+@section('content')
+    <!-- Page Heading -->
+    <div class="d-flex justify-content-between align-items-baseline">
+        <h1 class="h3 mb-4 text-gray-800">Edit Blog</h1>
+        <div class="d-flex">
+            <a href="{{ route('blogs.index') }}" class="btn btn-sm btn-secondary shadow"><i
+                    class="fas fa-fw fa-arrow-left"></i></a>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
             <form method="POST" action="{{ route('blogs.update', $data->id) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
@@ -27,13 +31,13 @@
 
                     <div class="form-group">
                         <label for="tags">Tags <span class="text-danger">*</span></label>
-                        <input type="text" id="edit-tags" name="tags" class="form-control"
-                            placeholder="Tambahkan tag" value="{{ old('tags', $data->tags) }}" required>
+                        <input type="text" id="tags" name="tags" class="tags-look" placeholder="Tambahkan tag"
+                            value="{{ old('tags', $data->tags) }}" required>
                     </div>
 
                     <div class="form-group">
                         <label for="content">Konten <span class="text-danger">*</span></label>
-                        <textarea id="edit-content-editor-{{ $data->id }}" name="content" class="form-control" required>{!! old('content', $data->content) !!}</textarea>
+                        <textarea id="content-editor" name="content" class="form-control" required>{!! old('content', $data->content) !!}</textarea>
                     </div>
 
                     <div class="form-group">
@@ -45,7 +49,8 @@
                             </div>
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="editImage" name="image"
-                                    aria-describedby="editInpoImage" accept="image/*"  {{ $data->image ? null : 'required' }}>
+                                    aria-describedby="editInpoImage" accept="image/*"
+                                    {{ $data->image ? null : 'required' }}>
                                 <label class="custom-file-label" for="image">Choose file</label>
                             </div>
                         </div>
@@ -65,37 +70,58 @@
             </form>
         </div>
     </div>
-</div>
+@endsection
+
+@push('custom-style')
+    <link rel="stylesheet" href="{{ asset('assets/vendor/summernote/summernote-bs4.min.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
+    <style>
+        .tags-look {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            border-radius: 5px;
+            padding: 8px;
+            min-height: 40px;
+            max-width: 100%;
+        }
+    </style>
+@endpush
 
 @push('custom-script')
+    <script src="{{ asset('assets/vendor/summernote/summernote-bs4.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#editModal-{{ $data->id }}').on('shown.bs.modal', function() {
-                $('#edit-content-editor-{{ $data->id }}').summernote({
-                    placeholder: 'Tulis deskripsi di sini...',
-                    tabsize: 2,
-                    height: 150,
-                    toolbar: [
-                        ['font', ['bold', 'italic', 'underline']],
-                        ['para', ['ul', 'ol']],
-                    ]
+            $('#content-editor').summernote({
+                placeholder: 'Tulis deskripsi di sini...',
+                tabsize: 2,
+                height: 150,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['para', ['ul', 'ol']],
+                    ['table', ['table']],
+                    ['insert', ['link']],
+                    ['view', ['fullscreen', 'help']],
+                ]
+            });
+
+            var input = document.querySelector('#tags');
+            if (!input.tagify) {
+                var tagify = new Tagify(input, {
+                    delimiters: ",",
+                    maxTags: 10,
+                    dropdown: {
+                        maxItems: 20,
+                        classname: 'tags-look',
+                        enabled: 0,
+                        closeOnSelect: false
+                    }
                 });
-
-                var input = document.querySelector('#edit-tags');
-                if (!input.tagify) {
-                    var tagify = new Tagify(input, {
-                        delimiters: ",",
-                        maxTags: 10,
-                        dropdown: {
-                            enabled: 0
-                        }
-                    });
-                }
-            });
-
-            $('#editModal-{{ $data->id }}').on('hidden.bs.modal', function() {
-                $('#edit-content-editor-{{ $data->id }}').summernote('destroy');
-            });
+                // tagify.addTags(["Pembantu", "Blog", "Sipembantu"]);
+            }
 
             function updatePreview(inputId, previewContainerId) {
                 const inputFile = document.getElementById(inputId);
@@ -126,7 +152,7 @@
                 });
             }
 
-            updatePreview('editImage', 'editImagePreviewContainer');
+            updatePreview('image', 'imagePreviewContainer');
         });
     </script>
 @endpush

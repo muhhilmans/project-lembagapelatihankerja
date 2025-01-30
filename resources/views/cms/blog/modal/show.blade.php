@@ -22,9 +22,9 @@
                             <p class="card-text"><i class="fas fa-fw fa-clock"></i>
                                 {{ \Carbon\Carbon::parse($data->created_at)->format('d F Y') }}</p>
                         </div>
-                        <p class="card-text px-2"><i class="fas fa-fw fa-tags"></i>
+                        <p class="card-text"><i class="fas fa-fw fa-tags"></i>
                             @foreach (json_decode($data->tags, true) as $tag)
-                                <span class="badge bg-secondary text-light p-2">{{ $tag['value'] }}</span>
+                                <span class="badge bg-secondary text-light p-2 m-1">{{ $tag['value'] }}</span>
                             @endforeach
                         </p>
                         <p class="card-text text-justify">{!! $data->content !!}</p>
