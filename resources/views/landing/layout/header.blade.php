@@ -6,7 +6,8 @@
                 <div class="sub__contact-right position-relative">
                     <div class="main__logo">
                         <a href="{{ url('/') }}" class="logo">
-                            <img src="{{ asset('assets/img/logo.png') }}" alt="logo" style="max-height: 50px; width: auto;">
+                            <img src="{{ asset('assets/img/logo.png') }}" alt="logo"
+                                style="max-height: 50px; width: auto;">
                         </a>
                     </div>
                 </div>
@@ -23,8 +24,8 @@
                                 24/7 Support
                             </span>
                         </a>
-                        <a href="https://wa.link/9ab2ix" class="textp">
-                            (+62) 851-1700-9996
+                        <a href="https://wa.link/x5uy9m" class="textp">
+                            (+62) 856-9360-6348
                         </a>
                     </div>
                     <div class="vline-s"></div>
@@ -66,9 +67,11 @@
                     <ul class="d-flex socss align-items-center">
                         <li>
                             <a href="https://youtube.com/@sipembantu?si=h4Jw2PZv3ykJyvl9" target="_blank">
-                                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 576 512">
                                     <path
-                                        d="M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6-11.4 42.9-11.4 132.3-11.4 132.3s0 89.4 11.4 132.3c6.3 23.7 24.8 41.5 48.3 47.8C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zm-317.5 213.5V175.2l142.7 81.2-142.7 81.2z" fill="white" />
+                                        d="M549.7 124.1c-6.3-23.7-24.8-42.3-48.3-48.6C458.8 64 288 64 288 64S117.2 64 74.6 75.5c-23.5 6.3-42 24.9-48.3 48.6-11.4 42.9-11.4 132.3-11.4 132.3s0 89.4 11.4 132.3c6.3 23.7 24.8 41.5 48.3 47.8C117.2 448 288 448 288 448s170.8 0 213.4-11.5c23.5-6.3 42-24.2 48.3-47.8 11.4-42.9 11.4-132.3 11.4-132.3s0-89.4-11.4-132.3zm-317.5 213.5V175.2l142.7 81.2-142.7 81.2z"
+                                        fill="white" />
                                 </svg>
                             </a>
                         </li>
@@ -93,7 +96,8 @@
                                 <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 448 512">
                                     <path
-                                        d="M448 209.9a210.1 210.1 0 0 1 -122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0l88 0a121.2 121.2 0 0 0 1.9 22.2h0A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z" fill="white" />
+                                        d="M448 209.9a210.1 210.1 0 0 1 -122.8-39.3V349.4A162.6 162.6 0 1 1 185 188.3V278.2a74.6 74.6 0 1 0 52.2 71.2V0l88 0a121.2 121.2 0 0 0 1.9 22.2h0A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z"
+                                        fill="white" />
                                 </svg>
                             </a>
                         </li>
@@ -136,9 +140,11 @@
             <div class="main-navbar">
                 <nav class="navbar-custom">
                     <div class="d-flex align-items-center justify-content-between">
-                        <a href="{{ route('home')}}" class="nav-brand d-block d-lg-none">
-                            <img class="d-none d-md-block" src="{{ asset('assets/img/logo.png') }}" alt="logo" style="max-height: 35px; width: auto;">
-                            <img class="d-block d-md-none" src="{{ asset('assets/img/logo.png') }}" alt="logo" style="max-height: 35px; width: auto;">
+                        <a href="{{ route('home') }}" class="nav-brand d-block d-lg-none">
+                            <img class="d-none d-md-block" src="{{ asset('assets/img/logo.png') }}" alt="logo"
+                                style="max-height: 35px; width: auto;">
+                            <img class="d-block d-md-none" src="{{ asset('assets/img/logo.png') }}" alt="logo"
+                                style="max-height: 35px; width: auto;">
                         </a>
                         <div class="d-flex gap-4">
                             <div class="search-button-head d-lg-none">
@@ -159,7 +165,8 @@
                         <div
                             class="d-flex gap-5 flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between mt-4 mt-lg-0">
                             <a href="{{ url('/') }}" class="navbar-brand d-lg-block d-none d-xl-none">
-                                <img src="{{ asset('assets/img/logo.png') }}" alt="logo" style="max-height: 35px; width: auto;">
+                                <img src="{{ asset('assets/img/logo.png') }}" alt="logo"
+                                    style="max-height: 35px; width: auto;">
                             </a>
                             <ul class="custom-nav d-lg-flex d-grid">
                                 {{-- <li class="menu-item position-relative">
@@ -182,12 +189,12 @@
                                     </a>
                                 </li>
                                 <li class="menu-item itembg__1 position-relative">
-                                    <a href="#about" class="fw_500">
+                                    <a href="{{ url('/') }}#about" class="fw_500">
                                         Tentang Kami
                                     </a>
                                 </li>
                                 <li class="menu-item itembg__1 position-relative">
-                                    <a href="#service" class="fw_500">
+                                    <a href="{{ url('/') }}#service" class="fw_500">
                                         Servis
                                     </a>
                                 </li>
@@ -197,7 +204,7 @@
                                     </a>
                                 </li>
                                 <li class="menu-item itembg__1 position-relative">
-                                    <a href="#contact" class="fw_500">
+                                    <a href="{{ url('/') }}#contact" class="fw_500">
                                         Kontak Kami
                                     </a>
                                 </li>

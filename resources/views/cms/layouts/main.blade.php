@@ -1,27 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
-
     <base href="https://sipembantu.com/">
-    <meta charset="utf-8">
+    <!-- Meta Data Wajib -->
+    <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="keywords" content="pembantu rumah tangga, babysitter, penyalur pembantu, yayasan pembantu, perawat lansia, sopir">
-    <meta name="description"
-        content="Sipembantu.com menyediakan jasa pembantu rumah tangga profesional dan terpercaya. Cari pembantu harian, bulanan, atau perawat lansia dengan mudah dan aman. Hubungi kami sekarang!">
-    <meta name="author" content="Sipembantu">
-    <meta property="og:title" content="Jasa Pembantu Rumah Tangga Profesional | Sipembantu.com">
-    <meta property="og:description" content="Sipembantu.com menyediakan jasa pembantu rumah tangga profesional dan terpercaya. Cari pembantu harian, bulanan, atau perawat lansia dengan mudah dan aman. Hubungi kami sekarang!">
-    <meta property="og:image" content="https://sipembantu.com/assets/img/logo.png">
-    <meta property="og:url" content="https://sipembantu.com/">
-    <meta property="og:site_name" content="sipembantu.com/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    {{-- Twitter --}}
+    <!-- SEO Meta Tags -->
+    <meta name="keywords"
+        content="jasa pembantu rumah tangga, babysitter, perawat lansia, penyalur pembantu terpercaya, yayasan pembantu profesional, cari pembantu harian, sopir pribadi">
+    <meta name="description"
+        content="Sipembantu.com menyediakan jasa pembantu rumah tangga, babysitter, dan perawat lansia yang profesional dan terpercaya. Dapatkan tenaga kerja rumah tangga terbaik dengan mudah dan aman. Hubungi kami sekarang!">
+    <meta name="author" content="Sipembantu">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://sipembantu.com/">
+
+    <!-- Open Graph Meta Tags (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Jasa Pembantu Rumah Tangga Profesional | Sipembantu.com">
+    <meta property="og:description"
+        content="Cari pembantu rumah tangga, babysitter, atau perawat lansia yang terpercaya dan profesional? Temukan tenaga kerja terbaik hanya di Sipembantu.com.">
+    <meta property="og:image" content="https://sipembantu.com/images/logo.png">
+    <meta property="og:url" content="https://sipembantu.com/">
+    <meta property="og:site_name" content="Sipembantu">
+    <meta property="og:locale" content="id_ID">
+
+    <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Jasa Pembantu Rumah Tangga Profesional | Sipembantu.com">
-    <meta name="twitter:description" content="Sipembantu.com menyediakan jasa pembantu rumah tangga profesional dan terpercaya. Cari pembantu harian, bulanan, atau perawat lansia dengan mudah dan aman. Hubungi kami sekarang!">
-    <meta name="twitter:image" content="https://sipembantu.com/assets/img/logo.png">
+    <meta name="twitter:description"
+        content="Cari pembantu rumah tangga, babysitter, atau perawat lansia yang terpercaya dan profesional? Temukan tenaga kerja terbaik hanya di Sipembantu.com.">
+    <meta name="twitter:image" content="https://sipembantu.com/images/logo.png">
+    <meta name="twitter:site" content="@Sipembantu">
 
     <title>{{ $title }} | {{ env('APP_NAME') }}</title>
 
@@ -31,9 +43,7 @@
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
-    <link rel="canonical" href="https://sipembantu.com/">
-
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/img/logo.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('assets/img/logo.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/logo.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/img/logo.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/img/logo.png') }}">
@@ -177,6 +187,19 @@
     <script src="{{ asset('assets/js/demo/chart-area-demo.js') }}"></script>
     <script src="{{ asset('assets/js/demo/chart-pie-demo.js') }}"></script>
     <script src="{{ asset('assets/js/demo/datatables-demo.js') }}"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-93SYV6YRRW"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-93SYV6YRRW');
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

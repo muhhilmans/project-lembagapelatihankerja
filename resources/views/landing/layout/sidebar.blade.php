@@ -24,7 +24,7 @@
                         24/7 Support
                     </span>
                 </a>
-                <a href="https://wa.link/9ab2ix" class="textp">
+                <a href="https://wa.link/x5uy9m" class="textp">
                     (+62) 851-1700-9996
                 </a>
             </div>

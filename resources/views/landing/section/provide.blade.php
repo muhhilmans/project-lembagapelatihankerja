@@ -59,7 +59,7 @@
                         <img src="{{ asset('landing/assets/images/icon/tung.png') }}" alt="img" class="cp-tung2">
                         <img src="{{ asset('landing/assets/images/icon/working-ball.png') }}" alt="img" class="cp-working">
                         <div class="thumb">
-                           <img src="{{ asset('landing/assets/images/service/prt.png') }}" alt="img" style="max-height: 420px; width: auto;">
+                           <img src="{{ asset('landing/assets/images/service/prt.png') }}" alt="img" style="max-height: 420px; width: auto;" class="img-fluid">
                         </div>
                         <p>
                            Pekerja Rumah Tangga (PRT) membantu pekerjaan rumah seperti bersih-bersih, mencuci, memasak, dan menjaga anak. Dengan tenaga kerja terlatih, profesional, dan perlindungan BPJS, kami siap memenuhi kebutuhan rumah tangga Anda secara mudah dan terpercaya.
@@ -80,7 +80,7 @@
                         <img src="{{ asset('landing/assets/images/icon/tung.png') }}" alt="img" class="cp-tung2">
                         <img src="{{ asset('landing/assets/images/icon/working-ball.png') }}" alt="img" class="cp-working">
                         <div class="thumb">
-                           <img src="{{ asset('landing/assets/images/service/baby-sitter.png') }}" alt="img" style="max-height: 420px; width: auto;">
+                           <img src="{{ asset('landing/assets/images/service/baby-sitter.png') }}" alt="img" style="max-height: 420px; width: auto;" class="img-fluid">
                         </div>
                         <p>
                            Baby sitter kami berpengalaman dan terlatih dalam merawat anak dengan penuh kasih sayang dan profesionalisme, memastikan kebutuhan si kecil terpenuhi dengan aman dan nyaman.
