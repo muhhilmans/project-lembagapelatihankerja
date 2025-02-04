@@ -147,11 +147,11 @@
                                 style="max-height: 35px; width: auto;">
                         </a>
                         <div class="d-flex gap-4">
-                            <div class="search-button-head d-lg-none">
+                            {{-- <div class="search-button-head d-lg-none">
                                 <a href="#search">
                                     <i class="bi bi-search fz-20 text-white"></i>
                                 </a>
-                            </div>
+                            </div> --}}
                             <!-- <div class="switch-wrapper-top d-flex d-lg-none"></div> -->
                             <button class="navbar-toggle-btn d-block d-lg-none" type="button">
                                 <span></span>
@@ -208,18 +208,67 @@
                                         Kontak Kami
                                     </a>
                                 </li>
+                                <li class="search-bars-menu d-block d-lg-none">
+                                    @if (auth()->check())
+                                        @if (auth()->user()->roles->first()->name == 'pembantu')
+                                            <a href="{{ route('dashboard-servant') }}"
+                                                class="cmn--btn cmn-alt2 fw_500">
+                                                <span>
+                                                    Dashboard
+                                                </span>
+                                            </a>
+                                        @elseif (auth()->user()->roles->first()->name == 'majikan')
+                                            <a href="{{ route('dashboard-employe') }}"
+                                                class="cmn--btn cmn-alt2 fw_500">
+                                                <span>
+                                                    Dashboard
+                                                </span>
+                                            </a>
+                                        @else
+                                            <a href="{{ route('dashboard') }}" class="cmn--btn cmn-alt2 fw_500">
+                                                <span>
+                                                    Dashboard
+                                                </span>
+                                            </a>
+                                        @endif
+                                    @else
+                                        <a href="{{ route('login') }}" class="cmn--btn cmn-alt2 fw_500">
+                                            <span>
+                                                Login
+                                            </span>
+                                        </a>
+                                    @endif
+                                </li>
                             </ul>
-                            <div class="search-bars-menu d-none d-lg-block">
-                                {{-- <form action="#">
-                                    <input type="text" placeholder="Search">
-                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9.16663 1.66666C13.3066 1.66666 16.6666 5.02666 16.6666 9.16666C16.6666 13.3067 13.3066 16.6667 9.16663 16.6667C5.02663 16.6667 1.66663 13.3067 1.66663 9.16666C1.66663 5.02666 5.02663 1.66666 9.16663 1.66666ZM9.16663 15C12.3895 15 15 12.3896 15 9.16666C15 5.94375 12.3895 3.33333 9.16663 3.33333C5.94371 3.33333 3.33329 5.94375 3.33329 9.16666C3.33329 12.3896 5.94371 15 9.16663 15ZM16.2377 15.0592L18.5947 17.4162L17.4162 18.5947L15.0592 16.2377L16.2377 15.0592Z"
-                                            fill="white" />
-                                    </svg>
-                                </form> --}}
-                            </div>
+                            {{-- <div class="search-bars-menu d-block d-lg-none">
+                                @if (auth()->check())
+                                    @if (auth()->user()->roles->first()->name == 'pembantu')
+                                        <a href="{{ route('dashboard-servant') }}" class="cmn--btn cmn-alt2">
+                                            <span>
+                                                Dashboard
+                                            </span>
+                                        </a>
+                                    @elseif (auth()->user()->roles->first()->name == 'majikan')
+                                        <a href="{{ route('dashboard-employe') }}" class="cmn--btn cmn-alt2">
+                                            <span>
+                                                Dashboard
+                                            </span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('dashboard') }}" class="cmn--btn cmn-alt2">
+                                            <span>
+                                                Dashboard
+                                            </span>
+                                        </a>
+                                    @endif
+                                @else
+                                    <a href="{{ route('login') }}" class="cmn--btn cmn-alt2">
+                                        <span>
+                                            Login
+                                        </span>
+                                    </a>
+                                @endif
+                            </div> --}}
                         </div>
                     </div>
                 </nav>

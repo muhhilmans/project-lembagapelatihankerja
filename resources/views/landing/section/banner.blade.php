@@ -10,14 +10,14 @@
                </a>
                <h1>
                   <span class="d-block wow fadeInDown" data-wow-delay="0.7s">
-                     Platform Penyalur ART <span class="clearning" data-text="Terpercaya">Terpercaya</span>
+                     Platform Penyalur Pembantu <span class="clearning" data-text="Terpercaya">Terpercaya</span>
                   </span>
                   <!--<span class="d-block wow fadeInDown" data-wow-delay="0.9s">-->
                   <!--   Services Company-->
                   <!--</span>-->
                </h1>
                <p class="wow fadeIn" data-wow-delay="1s">
-                 Kini hadir untuk mempermudah Anda menemukan ART profesional yang transparan dan terpercaya, tanpa biaya admin di awal.
+                 Kini hadir untuk mempermudah Anda menemukan pembantu profesional yang transparan dan terpercaya, tanpa biaya admin di awal.
                </p>
                <div class="d-flex bn-vid wow fadeInDown" data-wow-delay="1.2s">
                   <a href="#about" class="cmn--btn">
@@ -25,12 +25,17 @@
                         Lihat Selengkapnya
                      </span>
                   </a>
+                  <a href="{{ route('select-register') }}" class="cmn--btn cmn-alt1">
+                     <span class="text-black fw-bold">
+                        Daftar Sekarang
+                     </span>
+                  </a>
                   {{-- <div class="d-flex bn-main-vid align-items-center">
                      <a href="https://www.youtube.com/watch?v=r5cJSGcNisw" class="circle-video video-btn">
                         <i class="bi bi-play-fill base"></i>
                      </a>
-                     <span class="hows">
-                        How It Works
+                     <span class="hows text-primary">
+                        Daftar Sekarang
                      </span>
                   </div> --}}
                </div>
