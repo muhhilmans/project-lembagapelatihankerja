@@ -103,18 +103,13 @@
                                     <th scope="row">Nomor Darurat</th>
                                     <td>:</td>
                                     <td>{{ $d->servant->servantDetails->emergency_number ?? '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Alamat</th>
-                                    <td>:</td>
-                                    <td>{{ $d->servant->servantDetails->address }} RT
-                                        {{ $d->servant->servantDetails->rt }} RW
-                                        {{ $d->servant->servantDetails->rw }},
-                                        {{ $d->servant->servantDetails->village }},
-                                        {{ $d->servant->servantDetails->district }},
-                                        {{ $d->servant->servantDetails->regency }},
-                                        {{ $d->servant->servantDetails->province }}</td>
                                 </tr> --}}
+                                <tr>
+                                    <th scope="row">Asal Kota</th>
+                                    <td>:</td>
+                                    <td>{{ $d->servant->servantDetails->regency }},
+                                        {{ $d->servant->servantDetails->province }}</td>
+                                </tr>
                                 <tr>
                                     <th scope="row">Pengalaman Kerja</th>
                                     <td>:</td>

@@ -55,7 +55,7 @@
                 </li>
             </ul>
             </p>
-            <p class="card-text"><strong>Deskripsi:</strong> {!! $data->description !!}</p>
+            <p class="card-text"><strong>Job Desc:</strong> {!! $data->description !!}</p>
             <p class="card-text"><strong>Spesifikasi:</strong> {!! $data->requirements !!}</p>
             @if ($data->benefits != null)
                 <p class="card-text"><strong>Keuntungan:</strong> {!! $data->benefits !!}</p>

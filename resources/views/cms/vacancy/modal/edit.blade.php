@@ -63,7 +63,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="description-editor-{{ $data->id }}">Deskripsi <span
+                        <label for="description-editor-{{ $data->id }}">Job Desc <span
                                 class="text-danger">*</span></label>
                         <textarea id="description-editor-{{ $data->id }}" name="description" class="form-control" required>{{ $data->description }}</textarea>
                     </div>

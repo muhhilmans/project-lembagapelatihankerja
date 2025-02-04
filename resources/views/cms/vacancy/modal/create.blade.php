@@ -58,7 +58,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Deskripsi <span class="text-danger">*</span></label>
+                        <label for="description">Job Desc <span class="text-danger">*</span></label>
                         <textarea id="description-editor" name="description" class="form-control" required></textarea>
                     </div>
 

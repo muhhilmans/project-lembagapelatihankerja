@@ -180,6 +180,14 @@
                                         {{ $data->servantDetails->province }}</td>
                                 </tr>
                             @endhasrole
+                            @hasrole('majikan')
+                            <tr>
+                                <th scope="row">Asal Kota</th>
+                                <td>:</td>
+                                <td>{{ $data->servantDetails->regency }},
+                                    {{ $data->servantDetails->province }}</td>
+                            </tr>
+                            @endhasrole
                             <tr>
                                 <th scope="row">Pengalaman Kerja</th>
                                 <td>:</td>

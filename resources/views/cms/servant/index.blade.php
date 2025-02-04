@@ -100,6 +100,10 @@
                                     {{ \Carbon\Carbon::parse($data->servantDetails->date_of_birth)->age }} Tahun
                                 </li>
                                 <li class="mb-2">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <strong>Asal Kota:</strong> {{ $data->servantDetails->regency }}, {{ $data->servantDetails->province }}
+                                </li>
+                                <li class="mb-2">
                                     <i class="fas fa-praying-hands"></i>
                                     <strong>Agama:</strong> {{ $data->servantDetails->religion }}
                                 </li>
