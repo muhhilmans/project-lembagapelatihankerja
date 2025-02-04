@@ -142,11 +142,11 @@
                                     @endif
                                 </td>
                             </tr>
-                            @if ($user->servantDetails->children > 0)
+                            @if ($user->servantDetails->marital_status != 'single')
                                 <tr>
                                     <th scope="row">Anak</th>
                                     <td>:</td>
-                                    <td>{{ $user->servantDetails->children }}</td>
+                                    <td>{{ $user->servantDetails->children == 0 ? 'Tidak Ada' : 'Ada' }}</td>
                                 </tr>
                             @endif
                             <tr>

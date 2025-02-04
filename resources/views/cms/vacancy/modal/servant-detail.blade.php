@@ -76,11 +76,11 @@
                                     <td>{{ $d->servant->servantDetails->marital_status == 'married' ? 'Menikah' : ($d->servant->servantDetails->marital_status == 'single' ? 'Lajang' : ($d->servant->servantDetails->marital_status == 'divorced' ? 'Cerai' : '-')) }}
                                     </td>
                                 </tr>
-                                @if ($d->servant->servantDetails->children > 0)
+                                @if ($d->servant->servantDetails->marital_status != 'single')
                                     <tr>
                                         <th scope="row">Anak</th>
                                         <td>:</td>
-                                        <td>{{ $d->servant->servantDetails->children }}</td>
+                                        <td>{{ $d->servant->servantDetails->children == 0 ? 'Tidak Ada' : 'Ada' }}</td>
                                     </tr>
                                 @endif
                                 <tr>

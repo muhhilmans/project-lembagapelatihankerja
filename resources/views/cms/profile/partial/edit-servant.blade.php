@@ -140,9 +140,12 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="children">Banyak Anak <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="children" name="children"
-                                value="{{ old('children', $data->servantDetails->children) }}">
+                            <label for="children">Memiliki Anak <span class="text-danger">*</span></label>
+                            <select name="children" id="children" class="custom-select" required>
+                                <option selected disabled>Pilih Kepemilikan Anak...</option>
+                                <option value="1" {{ $data->servantDetails->children != 0 ? 'selected' : '' }}>Ada</option>
+                                <option value="0" {{ $data->servantDetails->children == 0 ? 'selected' : '' }}>Tidak</option>
+                            </select>
                             @error('children')
                                 <div class="invalid-feedback">
                                     {{ $message }}
