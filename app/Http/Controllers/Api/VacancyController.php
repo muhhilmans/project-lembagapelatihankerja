@@ -243,4 +243,39 @@ class VacancyController extends Controller
             ], 500);
         }
     }
+
+    public function seekVacancy()
+    {
+        $vacancies = Vacancy::where('closing_date', '>=', now())->where('status', true)->get();
+
+        $professions = Profession::all();
+
+        if ($vacancies->isEmpty()) {
+            return response()->json([
+                'success'   => 'success',
+                'message'   => 'Tidak ada lowongan!',
+            ], 200);
+        }
+
+        $datas = [
+            'professions' => $professions,
+            'vacancies' => $vacancies
+        ];
+
+        return new VacancyResource(200, 'Data semua lowongan', $datas);
+    }
+
+    public function showVacancy($id)
+    {
+        $detail = Vacancy::with('profession')->find($id);
+
+        if (!$detail) {
+            return response()->json([
+                'success'   => 'failed',
+                'message'   => 'Data lowongan tidak ditemukan!',
+            ], 404);
+        }
+
+        return new VacancyResource(200, 'Data detail lowongan', $detail);
+    }
 }

@@ -24,6 +24,8 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('jwt.auth')->group(function () {
     Route::apiResource('vacancy', VacancyController::class);
+    Route::get('/seek-vacancy', [VacancyController::class, 'seekVacancy']);
+    Route::get('/seek-vacancy/{id}', [VacancyController::class, 'showVacancy']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
