@@ -71,7 +71,7 @@ class ProfessionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id): RedirectResponse
+    public function update(Request $request, string $id)
     {
         $dataUpdate = Profession::findOrFail($id);
 
@@ -88,18 +88,22 @@ class ProfessionController extends Controller
 
         try {
             $directory = "professions";
-            $fileName = "tc_{$data['name']}." . $request->file('file_draft')->getClientOriginalExtension();
             $storagePath = "public/{$directory}";
+            $fileName = $dataUpdate->file_draft;
 
-            if (!Storage::exists($storagePath)) {
-                Storage::makeDirectory($storagePath);
+            if ($request->hasFile('file_draft')) {
+                $fileName = "tc_{$data['name']}." . $request->file('file_draft')->getClientOriginalExtension();
+
+                if (!Storage::exists($storagePath)) {
+                    Storage::makeDirectory($storagePath);
+                }
+
+                if ($dataUpdate->file_draft && Storage::exists("{$storagePath}/{$dataUpdate->file_draft}")) {
+                    Storage::delete("{$storagePath}/{$dataUpdate->file_draft}");
+                }
+
+                $request->file('file_draft')->storeAs($storagePath, $fileName);
             }
-
-            if ($dataUpdate->file_draft && Storage::exists("{$storagePath}{$dataUpdate->file_draft}")) {
-                Storage::delete("{$storagePath}{$dataUpdate->file_draft}");
-            }
-
-            $path = $request->file('file_draft')->storeAs($storagePath, $fileName);
 
             DB::transaction(function () use ($data, $dataUpdate, $fileName) {
                 $dataUpdate->update([
