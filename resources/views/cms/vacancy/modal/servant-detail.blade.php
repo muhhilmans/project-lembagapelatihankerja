@@ -94,6 +94,22 @@
                                     <td>{{ $d->servant->servantDetails->last_education == 'not_filled' ? '-' : $d->servant->servantDetails->last_education }}
                                     </td>
                                 </tr>
+                                <tr>
+                                    <th scope="row">Inval</th>
+                                    <td>:</td>
+                                    <td>
+                                        <span
+                                            class="p-2 badge badge-{{ $d->servant->servantDetails->is_inval == 1 ? 'success' : 'danger' }}">{{ $d->servant->servantDetails->is_inval == 1 ? 'Bersedia' : 'Tidak' }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Pulang Pergi</th>
+                                    <td>:</td>
+                                    <td>
+                                        <span
+                                            class="p-2 badge badge-{{ $d->servant->servantDetails->is_stay == 1 ? 'success' : 'danger' }}">{{ $d->servant->servantDetails->is_stay == 1 ? 'Bersedia' : 'Tidak' }}</span>
+                                    </td>
+                                </tr>
                                 {{-- <tr>
                                     <th scope="row">Nomor Telepon</th>
                                     <td>:</td>

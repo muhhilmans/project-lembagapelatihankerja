@@ -60,6 +60,22 @@
                                         class="p-2 badge badge-{{ $data->servantDetails->working_status == 1 ? 'success' : 'danger' }}">{{ $data->servantDetails->working_status == 1 ? 'Bekerja' : 'Tidak Bekerja' }}</span>
                                 </td>
                             </tr>
+                            <tr>
+                                <th scope="row">Inval</th>
+                                <td>:</td>
+                                <td>
+                                    <span
+                                        class="p-2 badge badge-{{ $data->servantDetails->is_inval == 1 ? 'success' : 'danger' }}">{{ $data->servantDetails->is_inval == 1 ? 'Bersedia' : 'Tidak' }}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Pulang Pergi</th>
+                                <td>:</td>
+                                <td>
+                                    <span
+                                        class="p-2 badge badge-{{ $data->servantDetails->is_stay == 1 ? 'success' : 'danger' }}">{{ $data->servantDetails->is_stay == 1 ? 'Bersedia' : 'Tidak' }}</span>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

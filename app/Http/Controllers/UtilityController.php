@@ -115,7 +115,7 @@ class UtilityController extends Controller
         } else {
             $employes = User::whereHas('roles', function ($query) {
                 $query->where('name', 'majikan');
-            })->get();
+            })->where('is_active', true)->get();
             return view('cms.servant.partial.detail', compact(['data', 'employes']));
         }
     }

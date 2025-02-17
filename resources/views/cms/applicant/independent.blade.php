@@ -16,11 +16,11 @@
                         <!-- Photo -->
                         @if (isset($d->servant->servantDetails) && $d->servant->servantDetails->photo)
                             <img src="{{ route('getImage', ['path' => 'photo', 'imageName' => $d->servant->servantDetails->photo]) }}"
-                                class="card-img-top img-fluid" style="max-height: 150px;"
+                                class="card-img-top img-fluid"
                                 alt="Pembantu {{ $d->servant->name }}">
                         @else
                             <img src="{{ asset('assets/img/undraw_rocket.svg') }}" class="card-img-top img-fluid p-3"
-                                style="max-height: 150px;" alt="Pembantu {{ $d->servant->name }}">
+                                alt="Pembantu {{ $d->servant->name }}">
                         @endif
 
                         <!-- Card Content -->

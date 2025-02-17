@@ -50,6 +50,22 @@
                                         class="p-2 badge badge-{{ $user->is_active == 1 ? 'success' : 'danger' }}">{{ $user->is_active == 1 ? 'Aktif' : 'Tidak Aktif' }}</span>
                                 </td>
                             </tr>
+                            <tr>
+                                <th scope="row">Inval</th>
+                                <td>:</td>
+                                <td>
+                                    <span
+                                        class="p-2 badge badge-{{ $user->servantDetails->is_inval == 1 ? 'success' : 'danger' }}">{{ $user->servantDetails->is_inval == 1 ? 'Bersedia' : 'Tidak' }}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Pulang Pergi</th>
+                                <td>:</td>
+                                <td>
+                                    <span
+                                        class="p-2 badge badge-{{ $user->servantDetails->is_stay == 1 ? 'success' : 'danger' }}">{{ $user->servantDetails->is_stay == 1 ? 'Bersedia' : 'Tidak' }}</span>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

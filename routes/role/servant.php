@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UtilityController;
 
@@ -13,4 +14,7 @@ Route::group(['middleware' => ['role:pembantu|admin|superadmin']], function () {
     Route::get('/application-hire', [UtilityController::class, 'hireApplication'])->name('application-hire');
     Route::put('/applicant-hire/{id}/change', [ApplicationController::class, 'changeStatusHire'])->name('applicant-hire.change');
     Route::get('/application-indie', [UtilityController::class, 'indieApplication'])->name('application-indie');
+    
+    Route::put('profile/{user}/change-inval', [ProfileController::class, 'changeInval'])->name('profile.change-inval');
+    Route::put('profile/{user}/change-stay', [ProfileController::class, 'changeStay'])->name('profile.change-stay');
 });
