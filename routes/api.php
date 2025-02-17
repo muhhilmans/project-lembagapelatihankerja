@@ -22,6 +22,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::post('/register-employe', [AuthController::class, 'storeEmployeRegister']);
+Route::get('/professions', [AuthController::class, 'getProfessions']);
+Route::post('/register-servant', [AuthController::class, 'storeServantRegister']);
+
 Route::middleware('jwt.auth')->group(function () {
     Route::apiResource('vacancy', VacancyController::class);
     Route::get('/seek-vacancy', [VacancyController::class, 'seekVacancy']);
