@@ -36,7 +36,7 @@ class ProfileController extends Controller
             return view('cms.profile.partial.edit-employe', compact('data'));
         }
     }
-    
+
     public function updateServant(Request $request, string $id)
     {
         $user = User::find($id);
@@ -74,28 +74,28 @@ class ProfileController extends Controller
             'identity_card' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             'family_card' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->route('profile', $user->id)->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         $data = $validator->validated();
-        
+
         $data['is_bank'] = $request->has('is_bank') ? $request->boolean('is_bank') : false;
         $data['is_bpjs'] = $request->has('is_bpjs') ? $request->boolean('is_bpjs') : false;
 
         try {
             DB::transaction(function () use ($data, $user) {
                 $filesToUpdate = ['photo', 'identity_card', 'family_card'];
-    
+
                 foreach ($filesToUpdate as $fileKey) {
                     if (isset($data[$fileKey])) {
                         $oldFile = $user->servantDetails->$fileKey;
-    
+
                         if ($oldFile && Storage::exists("public/img/$fileKey/$oldFile")) {
                             Storage::delete("public/img/$fileKey/$oldFile");
                         }
-    
+
                         $newFile = $data[$fileKey];
                         $newFileName = "{$fileKey}_{$user->username}." . $newFile->getClientOriginalExtension();
                         Storage::putFileAs("public/img/$fileKey", $newFile, $newFileName);
@@ -104,13 +104,13 @@ class ProfileController extends Controller
                         $data[$fileKey] = $user->servantDetails->$fileKey;
                     }
                 }
-    
+
                 $user->update([
                     'name' => $data['name'],
                     'username' => $data['username'],
                     'email' => $data['email'],
                 ]);
-    
+
                 $user->servantDetails()->update([
                     'place_of_birth' => $data['place_of_birth'],
                     'date_of_birth' => $data['date_of_birth'],
@@ -142,7 +142,7 @@ class ProfileController extends Controller
                     'family_card' => $data['family_card'],
                 ]);
             });
-    
+
             Alert::success('Berhasil', 'Profile berhasil diperbarui!');
             return redirect()->route('profile', $user->id);
         } catch (\Throwable $th) {
@@ -158,7 +158,7 @@ class ProfileController extends Controller
     public function storeSkill(Request $request, string $id): RedirectResponse
     {
         $user = User::findOrFail($id);
-        
+
         $validator = Validator::make($request->all(), [
             'skill' => ['required', 'string', 'max:255'],
             'level' => ['required', 'string', 'max:255'],
@@ -195,7 +195,7 @@ class ProfileController extends Controller
     {
         $user = User::findOrFail($id);
         $skill = ServantSkill::findOrFail($skill_id);
-        
+
         $validator = Validator::make($request->all(), [
             'skill' => ['required', 'string', 'max:255'],
             'level' => ['required', 'string', 'max:255'],
@@ -249,7 +249,7 @@ class ProfileController extends Controller
             'address' => ['required', 'string', 'max:255'],
             'identity_card' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
-        
+
         if ($validator->fails()) {
             return redirect()->route('profile', $user->id)->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
@@ -294,48 +294,81 @@ class ProfileController extends Controller
     }
 
     public function updateBank(Request $request, string $id)
-{
-    $oldData = Application::findOrFail($id);
+    {
+        $oldData = Application::findOrFail($id);
 
-    $validator = Validator::make($request->all(), [
-        'is_bank' => ['sometimes', 'boolean'],
-        'bank_name' => ['required_if:is_bank,1', 'nullable', 'string', 'max:255'],
-        'account_number' => ['required_if:is_bank,1', 'nullable', 'string', 'max:255'],
-        'is_bpjs' => ['sometimes', 'boolean'],
-        'type_bpjs' => ['required_if:is_bpjs,1', 'nullable', 'string', 'max:255'],
-        'number_bpjs' => ['required_if:is_bpjs,1', 'nullable', 'string', 'max:255'],
-    ]);
+        $validator = Validator::make($request->all(), [
+            'is_bank' => ['sometimes', 'boolean'],
+            'bank_name' => ['required_if:is_bank,1', 'nullable', 'string', 'max:255'],
+            'account_number' => ['required_if:is_bank,1', 'nullable', 'string', 'max:255'],
+            'is_bpjs' => ['sometimes', 'boolean'],
+            'type_bpjs' => ['required_if:is_bpjs,1', 'nullable', 'string', 'max:255'],
+            'number_bpjs' => ['required_if:is_bpjs,1', 'nullable', 'string', 'max:255'],
+        ]);
 
-    if ($validator->fails()) {
-        return redirect()->route('worker-all')->with('toast_error', $validator->messages()->all()[0])->withInput();
+        if ($validator->fails()) {
+            return redirect()->route('worker-all')->with('toast_error', $validator->messages()->all()[0])->withInput();
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::transaction(function () use ($data, $oldData) {
+                $update = User::where('id', $oldData->servant_id)->first();
+
+                $update->servantDetails()->update([
+                    'is_bank' => $data['is_bank'] ?? 0,
+                    'bank_name' => $data['bank_name'] ?? null,
+                    'account_number' => $data['account_number'] ?? null,
+                    'is_bpjs' => $data['is_bpjs'] ?? 0,
+                    'type_bpjs' => $data['type_bpjs'] ?? null,
+                    'number_bpjs' => $data['number_bpjs'] ?? null,
+                ]);
+            });
+
+            Alert::success('Berhasil', 'Akun rekening berhasil diperbarui!');
+            return redirect()->route('worker-all');
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
     }
 
-    $data = $validator->validated();
+    public function changeInval(Request $request)
+    {
+        $user = User::findOrFail($request->data_id);
 
-    try {
-        DB::transaction(function () use ($data, $oldData) {
-            $update = User::where('id', $oldData->servant_id)->first();
+        if (!$user->servantDetails) {
+            return redirect()->route('profile', $user->id)->with('error', 'Data servant tidak ditemukan.');
+        }
 
-            $update->servantDetails()->update([
-                'is_bank' => $data['is_bank'] ?? 0,
-                'bank_name' => $data['bank_name'] ?? null,
-                'account_number' => $data['account_number'] ?? null,
-                'is_bpjs' => $data['is_bpjs'] ?? 0,
-                'type_bpjs' => $data['type_bpjs'] ?? null,
-                'number_bpjs' => $data['number_bpjs'] ?? null,
-            ]);
-        });
+        $user->servantDetails->is_inval = $user->servantDetails->is_inval == 1 ? 0 : 1;
+        $user->servantDetails->save();
 
-        Alert::success('Berhasil', 'Akun rekening berhasil diperbarui!');
-        return redirect()->route('worker-all');
-    } catch (\Throwable $th) {
-        $data = [
-            'message' => $th->getMessage(),
-            'status' => 400
-        ];
+        $statusMessage = $user->servantDetails->is_inval == 1 ? 'Bersedia' : 'Tidak Bersedia';
 
-        return view('cms.error', compact('data'));
+        Alert::success('Berhasil!', 'Anda ' . $statusMessage . ' melakukan inval!');
+        return redirect()->route('profile', $user->id);
     }
-}
 
+    public function changeStay(Request $request)
+    {
+        $user = User::findOrFail($request->data_id);
+
+        if (!$user->servantDetails) {
+            return redirect()->route('profile', $user->id)->with('error', 'Data servant tidak ditemukan.');
+        }
+
+        $user->servantDetails->is_stay = $user->servantDetails->is_stay == 1 ? 0 : 1;
+        $user->servantDetails->save();
+
+        $statusMessage = $user->servantDetails->is_stay == 1 ? 'Bersedia' : 'Tidak Bersedia';
+
+        Alert::success('Berhasil!', 'Anda ' . $statusMessage . ' melakukan pulang pergi!');
+        return redirect()->route('profile', $user->id);
+    }
 }

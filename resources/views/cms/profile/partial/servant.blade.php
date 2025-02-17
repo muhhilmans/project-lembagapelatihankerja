@@ -35,6 +35,36 @@
                                     class="p-2 badge badge-{{ $data->servantDetails->working_status == 1 ? 'success' : 'danger' }}">{{ $data->servantDetails->working_status == 1 ? 'Bekerja' : 'Tidak Bekerja' }}</span>
                             </td>
                         </tr>
+                        <tr>
+                            <th scope="row">Inval</th>
+                            <td>:</td>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                        value="{{ $data->servantDetails->is_inval }}" id="is_inval" {{ $data->servantDetails->is_inval == 1 ? 'checked' : '' }} data-toggle="modal"
+                                        data-target="#invalModal-{{ $data->id }}">
+                                    <label class="form-check-label" for="is_inval">
+                                        {{ $data->servantDetails->is_inval == 1 ? 'Bersedia' : 'Tidak' }}
+                                    </label>
+                                    @include('cms.profile.partial.modal.inval', ['data' => $data])
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Pulang Pergi</th>
+                            <td>:</td>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                        value="{{ $data->servantDetails->is_stay }}" id="is_stay" {{ $data->servantDetails->is_stay == 1 ? 'checked' : '' }} data-toggle="modal"
+                                        data-target="#stayModal-{{ $data->id }}">
+                                    <label class="form-check-label" for="is_stay">
+                                        {{ $data->servantDetails->is_stay == 1 ? 'Bersedia' : 'Tidak' }}
+                                    </label>
+                                    @include('cms.profile.partial.modal.stay', ['data' => $data])
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -44,13 +74,13 @@
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <h1 class="h5 font-weight-bold">Keahlian</h1>
-                        <a class="btn btn-primary mb-2 mb-lg-0" href="#" data-toggle="modal"
-                            data-target="#createSkillModal-{{ $data->id }}">
-                            <i class="fas fa-plus"></i>
-                        </a>
-                        @include('cms.profile.partial.skill.create', [
-                            'data' => $data,
-                        ])
+                    <a class="btn btn-primary mb-2 mb-lg-0" href="#" data-toggle="modal"
+                        data-target="#createSkillModal-{{ $data->id }}">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                    @include('cms.profile.partial.skill.create', [
+                        'data' => $data,
+                    ])
                 </div>
             </div>
             <div class="card-body">
@@ -153,7 +183,8 @@
                             <td>:</td>
                             <td>
                                 @if ($data->servantDetails->is_bank == 1)
-                                    {{ $data->servantDetails->account_number }} ({{ $data->servantDetails->bank_name }})
+                                    {{ $data->servantDetails->account_number }}
+                                    ({{ $data->servantDetails->bank_name }})
                                 @else
                                     Belum memiliki rekening
                                 @endif
@@ -183,7 +214,10 @@
                         <tr>
                             <th scope="row">Alamat</th>
                             <td>:</td>
-                            <td>{{ $data->servantDetails->address }} RT {{ $data->servantDetails->rt }} RW {{ $data->servantDetails->rw }}, {{ $data->servantDetails->village }}, {{ $data->servantDetails->district }}, {{ $data->servantDetails->regency }}, {{ $data->servantDetails->province }}</td>
+                            <td>{{ $data->servantDetails->address }} RT {{ $data->servantDetails->rt }} RW
+                                {{ $data->servantDetails->rw }}, {{ $data->servantDetails->village }},
+                                {{ $data->servantDetails->district }}, {{ $data->servantDetails->regency }},
+                                {{ $data->servantDetails->province }}</td>
                         </tr>
                         <tr>
                             <th scope="row">Pengalaman Kerja</th>

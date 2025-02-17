@@ -3,7 +3,12 @@
 @section('content')
     <!-- Page Heading -->
     <div class="mb-4 d-flex justify-content-between align-items-baseline">
-        <h1 class="h3 text-gray-800">Daftar Pembantu Bekerja</h1>
+        @hasrole('superadmin|admin|owner|majikan')
+            <h1 class="h3 text-gray-800">Daftar Pembantu Bekerja</h1>
+        @endhasrole
+        @hasrole('pembantu')
+            <h1 class="h3 text-gray-800">Daftar Pekerjaan</h1>
+        @endhasrole
         @hasrole('superadmin|admin|owner')
             <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#downloadModal"><i
                     class="fas fa-download"></i></a>
@@ -19,23 +24,29 @@
                     <thead>
                         <tr class="text-center">
                             <th>No</th>
-                            <th>Nama Pembantu</th>
-                            @hasrole('superadmin|admin|owner')
+                            @hasrole('superadmin|admin|owner|majikan')
+                                <th>Nama Pembantu</th>
+                            @endhasrole
+                            @hasrole('superadmin|admin|owner|pembantu')
                                 <th>Nama Majikan</th>
                             @endhasrole
                             <th>Tanggal Bekerja</th>
-                            @hasrole('majikan')
+                            {{-- @hasrole('majikan') --}}
+                            @hasrole('superadmin|admin')
                                 <th>Gaji (Dengan Tambahan 7,5%)</th>
                             @endhasrole
-                            @hasrole('superadmin|admin|owner|pembantu')
+                            {{-- @hasrole('superadmin|admin|owner|pembantu') --}}
+                            @hasrole('superadmin|admin')
                                 <th>Gaji (Dengan Potongan 2,5%)</th>
                             @endhasrole
                             <th>Status</th>
-                            <th>Bank</th>
+                            @hasrole('superadmin|admin|owner')
+                                <th>Bank</th>
+                            @endhasrole
                             @hasrole('superadmin|admin|owner')
                                 <th>BPJS</th>
                             @endhasrole
-                            @hasrole('superadmin|admin|majikan|owner')
+                            @hasrole('superadmin|admin|owner')
                                 <th>Aksi</th>
                             @endhasrole
                         </tr>
@@ -44,8 +55,10 @@
                         @foreach ($datas as $data)
                             <tr>
                                 <td class="text-center">{{ $loop->iteration }}</td>
-                                <td>{{ $data->servant->name }}</td>
-                                @hasrole('superadmin|admin|owner')
+                                @hasrole('superadmin|admin|owner|majikan')
+                                    <td>{{ $data->servant->name }}</td>
+                                @endhasrole
+                                @hasrole('superadmin|admin|owner|pembantu')
                                     <td>
                                         @if ($data->vacancy_id != null)
                                             {{ $data->vacancy->user->name }}
@@ -56,7 +69,8 @@
                                 @endhasrole
                                 <td class="text-center">{{ \Carbon\Carbon::parse($data->work_start_date)->format('d-M-Y') }}
                                 </td>
-                                @hasrole('majikan')
+                                {{-- @hasrole('majikan') --}}
+                                @hasrole('superadmin|admin')
                                     <td class="text-center">
                                         @php
                                             $workerSalaries = App\Models\WorkerSalary::where(
@@ -87,7 +101,8 @@
                                         @endif
                                     </td>
                                 @endhasrole
-                                @hasrole('superadmin|admin|owner|pembantu')
+                                {{-- @hasrole('superadmin|admin|owner|pembantu') --}}
+                                @hasrole('superadmin|admin')
                                     <td class="text-center">
                                         @php
                                             $workerSalaries = App\Models\WorkerSalary::where(
@@ -146,11 +161,11 @@
                                         } }}
                                     </span>
                                 </td>
-                                @hasrole('majikan')
+                                {{-- @hasrole('majikan')
                                     <td class="text-center">
                                         123123123 (BCA)
                                     </td>
-                                @endhasrole
+                                @endhasrole --}}
                                 @hasrole('superadmin|admin|owner')
                                     <td class="text-center">
                                         @if ($data->servant->servantDetails->is_bank == 1)
@@ -169,38 +184,46 @@
                                         @endif
                                     </td>
                                 @endhasrole
-                                <td class="text-center">
-                                    <a href="{{ route('worker.show', $data->id) }}" class="btn btn-sm btn-info mb-1"><i
-                                            class="fas fa-eye"></i></a>
-                                    @hasrole('superadmin|admin|majikan')
+                                @hasrole('superadmin|admin|owner')
+                                    <td class="text-center">
                                         @hasrole('superadmin|admin')
-                                            @if ($data->servant->servantDetails->is_bank == 0 || $data->servant->servantDetails->is_bpjs == 0)
-                                                <a href="#" class="btn btn-sm btn-warning mb-1" data-toggle="modal"
-                                                    data-target="#editBankModal-{{ $data->id }}"><i
-                                                        class="fas fa-edit"></i></a>
-                                                @include('cms.servant.modal.edit-bank', ['data' => $data])
-                                            @endif
+                                            <a href="{{ route('worker.show', $data->id) }}" class="btn btn-sm btn-info mb-1"><i
+                                                    class="fas fa-eye"></i></a>
+                                        @endhasrole
+                                        @hasrole('superadmin|admin|majikan')
+                                            @hasrole('superadmin|admin')
+                                                @if ($data->servant->servantDetails->is_bank == 0 || $data->servant->servantDetails->is_bpjs == 0)
+                                                    <a href="#" class="btn btn-sm btn-warning mb-1" data-toggle="modal"
+                                                        data-target="#editBankModal-{{ $data->id }}"><i
+                                                            class="fas fa-edit"></i></a>
+                                                    @include('cms.servant.modal.edit-bank', [
+                                                        'data' => $data,
+                                                    ])
+                                                @endif
 
-                                            @if ($data->status == 'review')
-                                                <a href="#" class="btn btn-sm btn-success mb-1" data-toggle="modal"
-                                                    data-target="#laidoffModal-{{ $data->id }}"><i
-                                                        class="fas fa-check"></i></a>
-                                                @include('cms.servant.modal.laidoff', ['data' => $data])
+                                                @if ($data->status == 'review')
+                                                    <a href="#" class="btn btn-sm btn-success mb-1" data-toggle="modal"
+                                                        data-target="#laidoffModal-{{ $data->id }}"><i
+                                                            class="fas fa-check"></i></a>
+                                                    @include('cms.servant.modal.laidoff', [
+                                                        'data' => $data,
+                                                    ])
 
+                                                    <a href="#" class="btn btn-sm btn-danger mb-1" data-toggle="modal"
+                                                        data-target="#rejectModal-{{ $data->id }}"><i class="fas fa-times"></i></a>
+                                                    @include('cms.servant.modal.reject', ['data' => $data])
+                                                @endif
+                                            @endhasrole
+
+                                            @if ($data->status == 'accepted')
                                                 <a href="#" class="btn btn-sm btn-danger mb-1" data-toggle="modal"
-                                                    data-target="#rejectModal-{{ $data->id }}"><i class="fas fa-times"></i></a>
-                                                @include('cms.servant.modal.reject', ['data' => $data])
+                                                    data-target="#reviewModal-{{ $data->id }}"><i
+                                                        class="fas fa-user-times"></i></a>
+                                                @include('cms.servant.modal.review', ['data' => $data])
                                             @endif
                                         @endhasrole
-
-                                        @if ($data->status == 'accepted')
-                                            <a href="#" class="btn btn-sm btn-danger mb-1" data-toggle="modal"
-                                                data-target="#reviewModal-{{ $data->id }}"><i
-                                                    class="fas fa-user-times"></i></a>
-                                            @include('cms.servant.modal.review', ['data' => $data])
-                                        @endif
-                                    @endhasrole
-                                </td>
+                                    </td>
+                                @endhasrole
                             </tr>
                         @endforeach
                     </tbody>

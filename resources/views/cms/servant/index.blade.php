@@ -42,8 +42,8 @@
                 <label class="font-weight-bold">Usia</label>
                 <div class="d-flex align-items-center">
                     <input type="range" id="filterMinAge" class="form-control-range" min="18" max="60"
-                        value="19">
-                    <span class="ml-2 mr-2">Min <span id="minAgeLabel">19</span> Tahun</span>
+                        value="18">
+                    <span class="ml-2 mr-2">Min <span id="minAgeLabel">18</span> Tahun</span>
                     <input type="range" id="filterMaxAge" class="form-control-range" min="18" max="60"
                         value="45">
                     <span class="ml-2">Max <span id="maxAgeLabel">45</span> Tahun</span>
@@ -72,7 +72,7 @@
             </div>
         @else
             @foreach ($datas as $data)
-                <div class="col-lg-3 mb-3 mb-lg-0 servant-item"
+                <div class="col-lg-3 mb-4 servant-item"
                     data-profession="{{ $data->servantDetails->profession->name }}"
                     data-age="{{ \Carbon\Carbon::parse($data->servantDetails->date_of_birth)->age }}"
                     data-religion="{{ $data->servantDetails->religion }}"
@@ -113,7 +113,7 @@
                                 </li>
                                 <li>
                                     <i class="fas fa-briefcase"></i>
-                                    <strong>Pengalaman:</strong> {{ $data->servantDetails->experience }}
+                                    <strong>Pengalaman:</strong> {{ $data->servantDetails->experience }} Tahun
                                 </li>
                             </ul>
                             <p class="card-text text-muted">
