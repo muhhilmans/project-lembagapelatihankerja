@@ -61,7 +61,7 @@
                                 <ol type="a" class="font-weight-normal">
                                     <li>Aplikasi Sipembantu tidak bertanggung jawab atas tindak pidana atau
                                         kerugian yang disebabkan oleh PRT/ART selama bekerja di rumah pengguna
-                                        jasa.</li>
+                                        jasa. Namun, kami bersedia membantu menyediakan data yang diperlukan jika terjadi hal yang tidak diinginkan.</li>
                                     <li>PRT/ART telah melalui proses verifikasi data, meliputi foto terbaru, KTP,
                                         KK, lokasi tempat tinggal, nomor telepon keluarga, dan sidik jari.</li>
                                 </ol>
@@ -78,7 +78,7 @@
                                             <li>Bogor: Rp 350.000</li>
                                         </ul> --}}
                                     </li>
-                                    <li>Biaya BPJS Ketenagakerjaan sebesar Rp. 20.000,- per bulan.</li>
+                                    <li>Besaran biaya BPJS Ketenagakerjaan akan ditentukan berdasarkan kesepakatan antara pihak-pihak terkait pada saat wawancara.</li>
                                 </ol>
                             </li>
                             <li>Ketentuan Pembayaran yang Terlambat:

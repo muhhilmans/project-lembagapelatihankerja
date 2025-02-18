@@ -30,6 +30,7 @@
                             @hasrole('superadmin|admin|owner|pembantu')
                                 <th>Nama Majikan</th>
                             @endhasrole
+                            <th>Gaji Pokok</th>
                             <th>Tanggal Bekerja</th>
                             {{-- @hasrole('majikan') --}}
                             @hasrole('superadmin|admin')
@@ -67,6 +68,7 @@
                                         @endif
                                     </td>
                                 @endhasrole
+                                <td class="text-center">Rp. {{ number_format($data->salary, 0, ',', '.') }}</td>
                                 <td class="text-center">{{ \Carbon\Carbon::parse($data->work_start_date)->format('d-M-Y') }}
                                 </td>
                                 {{-- @hasrole('majikan') --}}
