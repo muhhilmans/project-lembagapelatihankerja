@@ -11,13 +11,12 @@
             </div>
         @else
             @foreach ($datas as $d)
-                <div class="col-lg-3 mb-3 mb-lg-0">
+                <div class="col-lg-3 mb-4">
                     <div class="card shadow-sm">
                         <!-- Photo -->
                         @if (isset($d->servant->servantDetails) && $d->servant->servantDetails->photo)
                             <img src="{{ route('getImage', ['path' => 'photo', 'imageName' => $d->servant->servantDetails->photo]) }}"
-                                class="card-img-top img-fluid"
-                                alt="Pembantu {{ $d->servant->name }}">
+                                class="card-img-top img-fluid" alt="Pembantu {{ $d->servant->name }}">
                         @else
                             <img src="{{ asset('assets/img/undraw_rocket.svg') }}" class="card-img-top img-fluid p-3"
                                 alt="Pembantu {{ $d->servant->name }}">
@@ -91,13 +90,31 @@
                                         <span class="text-muted">-</span>
                                     @endif
                                 </li>
-                                <li>
+                                <li class="mb-2">
                                     <i class="fas fa-briefcase"></i>
                                     <strong>Pengalaman:</strong>
                                     @if (optional($d->servant->servantDetails)->experience)
                                         {{ $d->servant->servantDetails->experience }}
                                     @else
                                         <span class="text-muted">-</span>
+                                    @endif
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-cogs"></i>
+                                    <strong>Inval:</strong>
+                                    @if ($d->servant->servantDetails->is_inval)
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    @else
+                                        <i class="fas fa-times-circle text-danger"></i>
+                                    @endif
+                                </li>
+                                <li>
+                                    <i class="fas fa-home"></i>
+                                    <strong>Pulang Pergi:</strong>
+                                    @if ($d->servant->servantDetails->is_stay)
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    @else
+                                        <i class="fas fa-times-circle text-danger"></i>
                                     @endif
                                 </li>
                             </ul>

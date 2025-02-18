@@ -61,6 +61,24 @@
                     <span class="ml-2">Max <span id="maxExperienceLabel">45</span> Tahun</span>
                 </div>
             </div>
+            <!-- Inval -->
+            <div class="col-md-6 mb-3">
+                <label for="filterInval" class="font-weight-bold">Inval</label>
+                <select id="filterInval" class="form-control">
+                    <option value="">Pilih inval...</option>
+                    <option value="1">Bersedia</option>
+                    <option value="0">Tidak Bersedia</option>
+                </select>
+            </div>
+            <!-- Stay -->
+            <div class="col-md-6 mb-3">
+                <label for="filterStay" class="font-weight-bold">Pulang Pergi</label>
+                <select id="filterStay" class="form-control">
+                    <option value="">Pilih pulang pergi...</option>
+                    <option value="1">Bersedia</option>
+                    <option value="0">Tidak Bersedia</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -72,11 +90,11 @@
             </div>
         @else
             @foreach ($datas as $data)
-                <div class="col-lg-3 mb-4 servant-item"
-                    data-profession="{{ $data->servantDetails->profession->name }}"
+                <div class="col-lg-3 mb-4 servant-item" data-profession="{{ $data->servantDetails->profession->name }}"
                     data-age="{{ \Carbon\Carbon::parse($data->servantDetails->date_of_birth)->age }}"
                     data-religion="{{ $data->servantDetails->religion }}"
-                    data-experience="{{ $data->servantDetails->experience }}">
+                    data-experience="{{ $data->servantDetails->experience }}"
+                    data-inval="{{ $data->servantDetails->is_inval }}" data-stay="{{ $data->servantDetails->is_stay }}">
                     <div class="card shadow-sm h-100">
                         <!-- Photo -->
                         @if ($data->servantDetails->photo)
@@ -101,7 +119,8 @@
                                 </li>
                                 <li class="mb-2">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    <strong>Asal Kota:</strong> {{ $data->servantDetails->regency }}, {{ $data->servantDetails->province }}
+                                    <strong>Asal Kota:</strong> {{ $data->servantDetails->regency }},
+                                    {{ $data->servantDetails->province }}
                                 </li>
                                 <li class="mb-2">
                                     <i class="fas fa-praying-hands"></i>
@@ -111,9 +130,27 @@
                                     <i class="fas fa-user-tie"></i>
                                     <strong>Profesi:</strong> {{ $data->servantDetails->profession->name }}
                                 </li>
-                                <li>
+                                <li class="mb-2">
                                     <i class="fas fa-briefcase"></i>
                                     <strong>Pengalaman:</strong> {{ $data->servantDetails->experience }} Tahun
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-cogs"></i>
+                                    <strong>Inval:</strong>
+                                    @if ($data->servantDetails->is_inval)
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    @else
+                                        <i class="fas fa-times-circle text-danger"></i>
+                                    @endif
+                                </li>
+                                <li>
+                                    <i class="fas fa-home"></i>
+                                    <strong>Pulang Pergi:</strong>
+                                    @if ($data->servantDetails->is_stay)
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    @else
+                                        <i class="fas fa-times-circle text-danger"></i>
+                                    @endif
                                 </li>
                             </ul>
                             <p class="card-text text-muted">
@@ -139,7 +176,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const servantList = document.getElementById('servantList');
             const filterInputs = document.querySelectorAll(
-                '#filterProfession, #filterReligion, #filterMinAge, #filterMaxAge, #filterMinExperience, #filterMaxExperience, #searchInput'
+                '#filterProfession, #filterReligion, #filterMinAge, #filterMaxAge, #filterMinExperience, #filterMaxExperience, #filterInval, #filterStay, #searchInput'
             );
 
             // Apply filters to servant list
@@ -151,6 +188,11 @@
                 const maxAge = parseInt(document.getElementById('filterMaxAge').value);
                 const minExperience = parseInt(document.getElementById('filterMinExperience').value);
                 const maxExperience = parseInt(document.getElementById('filterMaxExperience').value);
+                const invalValue = document.getElementById('filterInval').value;
+                const stayValue = document.getElementById('filterStay').value;
+
+                const filterInval = invalValue !== "" ? parseInt(invalValue) : null;
+                const filterStay = stayValue !== "" ? parseInt(stayValue) : null;
 
                 const items = Array.from(servantList.getElementsByClassName('servant-item'));
                 items.forEach(item => {
@@ -159,6 +201,8 @@
                     const itemProfession = item.dataset.profession.toLowerCase();
                     const age = parseInt(item.dataset.age);
                     const experience = parseInt(item.dataset.experience);
+                    const itemInval = parseInt(item.dataset.inval);
+                    const itemStay = parseInt(item.dataset.stay);
 
                     const matchesSearch = searchValue ?
                         name.includes(searchValue) || itemProfession.includes(searchValue) :
@@ -168,9 +212,11 @@
                         religion) : true;
                     const matchesAge = age >= minAge && age <= maxAge;
                     const matchesExperience = experience >= minExperience && experience <= maxExperience;
+                    const matchesInval = filterInval !== null ? itemInval === filterInval : true;
+                    const matchesStay = filterStay !== null ? itemStay === filterStay : true;
 
                     item.style.display = matchesSearch && matchesProfession && matchesReligion &&
-                        matchesAge && matchesExperience ?
+                        matchesAge && matchesExperience && matchesInval && matchesStay ?
                         '' :
                         'none';
                 });

@@ -2,7 +2,7 @@
 
 @section('main')
     <div class="col-lg-8 text-right">
-        <a href="{{ route('register-tc-servant') }}" class="btn btn-secondary mb-3 shadow"><i
+        <a href="{{ route('select-register') }}" class="btn btn-secondary mb-3 shadow"><i
                 class="fas fa-fw fa-arrow-left"></i></a>
 
         <div class="row text-center">
@@ -12,7 +12,7 @@
                             class="img-fluid mb-2" style="max-height: 100px; width: auto;"></a>
                     <h3 class="card-title font-weight-bold">Registrasi Akun</h3>
                     <div class="card-body text-start">
-                        <form action="{{ route('store-servant-register') }}" method="POST">
+                        <form action="{{ route('store-servant-register') }}" method="POST" id="servantRegisterForm">
                             @csrf
                             <div class="mb-3 text-left">
                                 <div class="form-row">
@@ -45,7 +45,8 @@
                                     </select>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block">Daftar</button>
+                            <button type="button" id="openTermsModal" class="btn btn-primary btn-block">Daftar</button>
+                            @include('auth.modal.tc-servant')
                         </form>
                     </div>
                 </div>
@@ -53,3 +54,27 @@
         </div>
     </div>
 @endsection
+
+@push('custom-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const openTermsModal = document.getElementById('openTermsModal');
+            const termsModal = new bootstrap.Modal(document.getElementById('termsModal'));
+            const agreeTerms = document.getElementById('agreeTerms');
+            const confirmRegistration = document.getElementById('confirmRegistration');
+            const servantRegisterForm = document.getElementById('servantRegisterForm');
+
+            openTermsModal.addEventListener('click', function() {
+                termsModal.show();
+            });
+
+            agreeTerms.addEventListener('change', function() {
+                confirmRegistration.disabled = !agreeTerms.checked;
+            });
+
+            confirmRegistration.addEventListener('click', function() {
+                servantRegisterForm.submit();
+            });
+        });
+    </script>
+@endpush
