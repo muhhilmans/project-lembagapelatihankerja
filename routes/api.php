@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\VacancyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,9 +28,18 @@ Route::get('/professions', [AuthController::class, 'getProfessions']);
 Route::post('/register-servant', [AuthController::class, 'storeServantRegister']);
 
 Route::middleware('jwt.auth')->group(function () {
-    Route::apiResource('vacancy', VacancyController::class);
-    Route::get('/seek-vacancy', [VacancyController::class, 'seekVacancy']);
-    Route::get('/seek-vacancy/{id}', [VacancyController::class, 'showVacancy']);
+    Route::middleware('role_api:majikan')->group(function () {
+        Route::apiResource('vacancy', VacancyController::class);
+        
+        Route::get('/profile/majikan/{id}', [ProfileController::class, 'profileMajikan']);
+        Route::put('/profile/majikan/{id}/edit', [ProfileController::class, 'updateMajikan']);
+    });
+    
+    Route::middleware('role_api:pembantu')->group(function () {
+        Route::get('/seek-vacancy', [VacancyController::class, 'seekVacancy']);
+        Route::get('/seek-vacancy/{id}', [VacancyController::class, 'showVacancy']);
+    });
+
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 

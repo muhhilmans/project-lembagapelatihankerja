@@ -32,7 +32,7 @@ class VacancyController extends Controller
             'vacancies' => $vacancies
         ];
 
-        return new VacancyResource(200, 'Data semua lowongan', $datas);
+        return new VacancyResource('success', 'Data semua lowongan', $datas);
     }
 
     public function show(string $id)
@@ -66,7 +66,7 @@ class VacancyController extends Controller
             'applications' => $applications,
         ];
 
-        return new VacancyResource(200, 'Detail lowongan', $datas);
+        return new VacancyResource('success', 'Detail lowongan', $datas);
     }
 
     public function store(Request $request)
@@ -116,7 +116,7 @@ class VacancyController extends Controller
 
             DB::commit();
 
-            return new VacancyResource(201, 'Lowongan berhasil ditambahkan', $store);
+            return new VacancyResource('success', 'Lowongan berhasil ditambahkan', $store);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
@@ -189,7 +189,7 @@ class VacancyController extends Controller
 
             DB::commit();
 
-            return new VacancyResource(200, 'Lowongan berhasil diperbarui', $update);
+            return new VacancyResource('success', 'Lowongan berhasil diperbarui', $update);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
@@ -233,7 +233,7 @@ class VacancyController extends Controller
 
             DB::commit();
 
-            return new VacancyResource(200, 'Lowongan berhasil dihapus!', true);
+            return new VacancyResource('success', 'Lowongan berhasil dihapus!', true);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
@@ -262,7 +262,7 @@ class VacancyController extends Controller
             'vacancies' => $vacancies
         ];
 
-        return new VacancyResource(200, 'Data semua lowongan', $datas);
+        return new VacancyResource('success', 'Data semua lowongan', $datas);
     }
 
     public function showVacancy($id)
@@ -276,6 +276,6 @@ class VacancyController extends Controller
             ], 404);
         }
 
-        return new VacancyResource(200, 'Data detail lowongan', $detail);
+        return new VacancyResource('success', 'Data detail lowongan', $detail);
     }
 }
