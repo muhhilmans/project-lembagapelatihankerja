@@ -27,8 +27,8 @@ class RoleMiddleware
             return response()->json([
                 'status' => 'error',
                 'message' => 'Akses ditolak. Anda tidak memiliki izin untuk mengakses resource ini.',
-                'required_role' => $role,
-                'your_role' => $request->user()->getRoleNames(), // Mengambil semua role user
+                // 'required_role' => $role,
+                // 'your_role' => $request->user()->getRoleNames(),
             ], 403);
         }
 
