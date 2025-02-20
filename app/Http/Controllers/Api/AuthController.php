@@ -22,8 +22,8 @@ class AuthController extends Controller
     {
         return response()->json([
             'status' => 'success',
-            'user' => $user,
-            'role' => $user->getRoleNames(),
+            'user' => $user->makeHidden(['roles', 'access_token']),
+            'role' => $user->roles->pluck('name')->toArray(),
             'access_token' => $token,
             'type' => 'bearer'
         ]);
@@ -43,30 +43,58 @@ class AuthController extends Controller
             'password' => $validated['password'],
         ];
 
-        $token = auth('api')->attempt($credentials);
-        $user = auth('api')->user();
+        $user = User::where($fieldType, $validated['account'])->first();
 
-        if ($token) {
-            if ($user->email_verified_at == null) {
+        if ($user && !empty($user->access_token)) {
+            $cekToken = auth('api')->setToken($user->access_token)->authenticate();
+            if ($cekToken) {
                 return response()->json([
-                    'status' => 'failed',
-                    'message' => 'Email belum diverifikasi! Silahkan verifikasi email terlebih dahulu..',
-                ], 401);
+                    'status' => 'success',
+                    'message' => 'Anda sudah login',
+                    'access_token' => $user->access_token,
+                    'type' => 'bearer'
+                ]);
             }
+        }
 
-            return $this->responseWithToken($token, auth('api')->user());
-        } else {
+        if (!$token = auth('api')->setTTL(43200)->attempt($credentials)) { // 30 hari = 43200 menit
             return response()->json([
                 'status' => 'failed',
                 'message' => 'Akun yang dimasukkan salah',
             ], 401);
         }
+
+        $user = auth('api')->user();
+
+        if ($user->email_verified_at == null) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Email belum diverifikasi! Silahkan verifikasi email terlebih dahulu.',
+            ], 401);
+        }
+
+        $user->access_token = $token;
+        $user->save();
+
+        return $this->responseWithToken($token, $user);
     }
 
     public function logout()
     {
         try {
-            auth('api')->invalidate(true); // Masukkan token ke blacklist
+            $user = auth('api')->user();
+
+            if (!$user) {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+
+            auth('api')->invalidate(true);
+
+            $user->access_token = null;
+            $user->save();
 
             return response()->json([
                 'status' => 'success',

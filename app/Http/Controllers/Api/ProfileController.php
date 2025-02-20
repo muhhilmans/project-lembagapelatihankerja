@@ -140,7 +140,7 @@ class ProfileController extends Controller
         return response()->json([
             'success'   => 'success',
             'message'   => 'Data profile pembantu',
-            'data'      => $data
+            'data'      => $data->makeHidden(['access_token'])
         ]);
     }
 
