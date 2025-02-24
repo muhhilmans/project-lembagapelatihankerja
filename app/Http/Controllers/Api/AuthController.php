@@ -45,16 +45,20 @@ class AuthController extends Controller
 
         $user = User::where($fieldType, $validated['account'])->first();
 
-        if ($user && !empty($user->access_token)) {
-            $cekToken = auth('api')->setToken($user->access_token)->authenticate();
-            if ($cekToken) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Anda sudah login',
-                    'access_token' => $user->access_token,
-                    'type' => 'bearer'
-                ]);
-            }
+        // if ($user && !empty($user->access_token)) {
+        //     $cekToken = auth('api')->setToken($user->access_token)->authenticate();
+        //     if ($cekToken) {
+        //         return response()->json([
+        //             'status' => 'success',
+        //             'message' => 'Anda sudah login',
+        //             'access_token' => $user->access_token,
+        //             'type' => 'bearer'
+        //         ]);
+        //     }
+        // }
+
+        if (!empty($user->access_token)) {
+            auth('api')->setToken($user->access_token)->invalidate();
         }
 
         if (!$token = auth('api')->setTTL(43200)->attempt($credentials)) { // 30 hari = 43200 menit
@@ -73,6 +77,10 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // if ($user->access_token !== $token) {
+        //     $user->access_token = $token;
+        //     $user->save();
+        // }
         $user->access_token = $token;
         $user->save();
 
