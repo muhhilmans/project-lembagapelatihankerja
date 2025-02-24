@@ -45,6 +45,13 @@ class AuthController extends Controller
 
         $user = User::where($fieldType, $validated['account'])->first();
 
+        if (!$user) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Akun tidak terdaftar.',
+            ], 401);
+        }
+
         // if ($user && !empty($user->access_token)) {
         //     $cekToken = auth('api')->setToken($user->access_token)->authenticate();
         //     if ($cekToken) {
@@ -59,6 +66,8 @@ class AuthController extends Controller
 
         if (!empty($user->access_token)) {
             auth('api')->setToken($user->access_token)->invalidate();
+            $user->access_token = null;
+            $user->save();
         }
 
         if (!$token = auth('api')->setTTL(43200)->attempt($credentials)) { // 30 hari = 43200 menit
