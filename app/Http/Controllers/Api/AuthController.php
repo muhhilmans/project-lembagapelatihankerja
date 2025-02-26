@@ -193,12 +193,29 @@ class AuthController extends Controller
 
     public function getProfessions()
     {
-        $data = Profession::all();
+        try {
+            $data = Profession::all();
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $data
-        ], 200);
+            if ($data->isEmpty()) {
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => 'Belum ada profesi!',
+                    'data'    => []
+                ], 200);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Semua data profesi',
+                'data' => $data
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status'  => 'failed',
+                'message' => 'Terjadi kesalahan saat pengambilan data, silahkan coba lagi.',
+                'error'   => $th->getMessage()
+            ], 500);
+        }
     }
 
     public function storeServantRegister(Request $request)
