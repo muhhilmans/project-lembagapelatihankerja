@@ -161,7 +161,7 @@ class AuthController extends Controller
                 'status' => 400
             ];
 
-            return view('error', compact('data'));
+            return view('auth.error', compact('data'));
         }
     }
 
@@ -231,7 +231,7 @@ class AuthController extends Controller
                 'status' => 400
             ];
 
-            return view('cms.error', compact('data'));
+            return view('auth.error', compact('data'));
         }
     }
 
