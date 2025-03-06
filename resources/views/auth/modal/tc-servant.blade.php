@@ -11,21 +11,20 @@
                 <ol class="font-weight-bold text-justify">
                     <li>Persyaratan Umum:
                         <ol type="a" class="font-weight-normal">
-                            <li>Calon Mitra ART adalah warga negara Indonesia dengan usia minimal 18
+                            <li>Calon Mitra adalah warga negara Indonesia dengan usia minimal 18
                                 tahun.</li>
                             <li>Memiliki KTP atau identitas resmi lainnya yang masih berlaku.</li>
                             <li>Bersedia mengikuti proses pendaftaran dan wawancara yang dilakukan melalui aplikasi
                                 atau video call.</li>
-                            <li>Memiliki kemampuan dan pengalaman kerja di bidang asisten rumah tangga
-                                (ART) atau babysitter (jika ada).</li>
+                            <li>Memiliki kemampuan dan pengalaman kerja di bidang profesi yang ditekuni.</li>
                         </ol>
                     </li>
                     <li>Proses Pendaftaran:
                         <ol type="a" class="font-weight-normal">
-                            <li>Calon Mitra ART dapat mendaftar secara online melalui link pendaftaran yang
+                            <li>Calon Mitra dapat mendaftar secara online melalui link pendaftaran yang
                                 disediakan oleh Aplikasi Sipembantu.</li>
                             <li>Pendaftaran akan dibantu oleh Tim Sipembantu untuk mempermudah proses.</li>
-                            <li>Calon Mitra ART wajib menyertakan dokumen pendukung seperti:
+                            <li>Calon Mitra wajib menyertakan dokumen pendukung seperti:
                                 <ul type="disc">
                                     <li>KTP atau identitas resmi lainnya.</li>
                                     <li>Pas foto terbaru.</li>
@@ -34,19 +33,19 @@
                             </li>
                         </ol>
                     </li>
-                    <li>Fasilitas yang Diterima Mitra ART:
+                    <li>Fasilitas yang Diterima Mitra:
                         <ol type="a" class="font-weight-normal">
                             <li>Buku rekening tabungan/ATM Bank yang dibuatkan secara gratis.</li>
                             <li>Kartu BPJS Ketenagakerjaan untuk perlindungan kecelakaan kerja dan
                                 perlindungan kematian.</li>
-                            <li>Gaji bulanan yang ditransfer langsung ke rekening Mitra ART setiap tanggal 1.</li>
+                            <li>Gaji bulanan yang ditransfer langsung ke rekening Mitra setiap tanggal 1.</li>
                             <li>Proses antar ke rumah majikan yang difasilitasi oleh pihak Aplikasi
                                 Sipembantu.</li>
                         </ol>
                     </li>
-                    <li>Hak dan Kewajiban Mitra ART:
+                    <li>Hak dan Kewajiban Mitra:
                         <ol type="a">
-                            <li>Hak Mitra ART:
+                            <li>Hak Mitra:
                                 <ul type="disc" class="font-weight-normal">
                                     <li>Gaji bersih diterima setiap bulan setelah dikurangi biaya jasa aplikasi
                                         sebesar 2,5%.</li>
@@ -55,7 +54,7 @@
                                         majikan saat ini.</li>
                                 </ul>
                             </li>
-                            <li>Kewajiban Mitra ART:
+                            <li>Kewajiban Mitra:
                                 <ul type="disc" class="font-weight-normal">
                                     <li>Mematuhi semua peraturan yang telah disepakati dengan Aplikasi
                                         Sipembantu dan majikan.</li>
@@ -70,16 +69,16 @@
                     <li>Biaya Jasa Aplikasi:
                         <ol type="a" class="font-weight-normal">
                             <li>Pihak Aplikasi Sipembantu membebankan biaya jasa sebesar 2,5% dari gaji
-                                bulanan Mitra ART.</li>
+                                bulanan Mitra.</li>
                             <li>Contoh perhitungan: Jika gaji Rp. 2.500.000, maka gaji bersih yang diterima Mitra
-                                ART adalah Rp. 2.437.500.</li>
+                                adalah Rp. 2.437.500.</li>
                         </ol>
                     </li>
                     <li>Kebijakan Legalitas dan Keamanan:
                         <ol type="a" class="font-weight-normal">
-                            <li>Identitas asli calon Mitra ART tidak akan ditahan oleh pihak Aplikasi
+                            <li>Identitas asli calon Mitra tidak akan ditahan oleh pihak Aplikasi
                                 Sipembantu.</li>
-                            <li>Pihak majikan diperbolehkan menahan identitas asli Mitra ART (seperti KTP) sebagai
+                            <li>Pihak majikan diperbolehkan menahan identitas asli Mitra (seperti KTP) sebagai
                                 jaminan selama masa kerja.</li>
                             <li>Aplikasi Sipembantu dikelola oleh PT Purwa Sentosa Gemilang yang memiliki
                                 izin resmi dan menjamin legalitas.</li>
@@ -87,19 +86,19 @@
                     </li>
                     <li>Sanksi dan Pelanggaran:
                         <ol type="a" class="font-weight-normal">
-                            <li>Jika Mitra ART melanggar peraturan yang disepakati, Aplikasi Sipembantu
+                            <li>Jika Mitra melanggar peraturan yang disepakati, Aplikasi Sipembantu
                                 berhak memberikan sanksi sesuai ketentuan.</li>
-                            <li>Apabila terjadi tindak kejahatan oleh Mitra ART, pihak majikan dapat
+                            <li>Apabila terjadi tindak kejahatan oleh Mitra, pihak majikan dapat
                                 melaporkannya ke pihak berwajib.</li>
                         </ol>
                     </li>
                     <li>Ketentuan Tambahan:
                         <ol type="a" class="font-weight-normal">
-                            <li>Pihak Mitra ART wajib menghadiri wawancara dan proses verifikasi dengan
+                            <li>Pihak Mitra wajib menghadiri wawancara dan proses verifikasi dengan
                                 tepat waktu.</li>
                             <li>Segala aktivitas pendaftaran dan kerja sama akan diawasi oleh pihak Aplikasi
                                 Sipembantu untuk menjamin kepercayaan dan keamanan semua pihak.</li>
-                            <li>Pihak Mitra ART memiliki kewajiban untuk membayarkan iuran BPJS Ketenagakerjaan dengan
+                            <li>Pihak Mitra memiliki kewajiban untuk membayarkan iuran BPJS Ketenagakerjaan dengan
                                 besaran yang telah disepakati pada saat proses wawancara.</li>
                         </ol>
                     </li>

@@ -53,6 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
         'password' => 'hashed',
     ];
 
+<<<<<<< HEAD
     // Rest omitted for brevity
 
     /**
@@ -73,6 +74,11 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+=======
+    public function otpCode()
+    {
+        return $this->hasOne(Otp::class, 'user_id');
+>>>>>>> b064c56799af315d80254d411c583a51f248ffe4
     }
 
     public function employeDetails()

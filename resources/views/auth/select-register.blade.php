@@ -10,7 +10,7 @@
                     <div class="card o-hidden border-0 shadow-lg mb-3 mb-lg-0">
                         <div class="card-body">
                             <h1 class="display-1 card-title"><i class="fas fa-fw fa-building"></i></h1>
-                            <p class="card-text"><strong>Majikan</strong></p>
+                            <p class="card-text"><strong>Client</strong></p>
                         </div>
                     </div>
                 </a>
@@ -20,7 +20,7 @@
                     <div class="card o-hidden border-0 shadow-lg">
                         <div class="card-body">
                             <h1 class="display-1 card-title"><i class="fas fa-fw fa-user-tie"></i></h1>
-                            <p class="card-text"><strong>Pembantu</strong></p>
+                            <p class="card-text"><strong>Mitra</strong></p>
                         </div>
                     </div>
                 </a>

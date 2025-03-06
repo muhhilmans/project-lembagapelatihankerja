@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\Otp;
 use App\Models\User;
 use App\Models\Profession;
 use Illuminate\Support\Str;
@@ -55,10 +57,11 @@ class AuthController extends Controller
             $user = Auth::user();
 
             if ($user->email_verified_at == null) {
-                $this->sendVerificationEmail($user);
+                // $this->sendOtpEmail($user, $otp);
 
                 Alert::error('Email belum diverifikasi!', 'Silahkan verifikasi email terlebih dahulu..');
-                return redirect()->route('verification.notice');;
+                // return redirect()->route('verification.notice');
+                return redirect()->route('verify.otp', ['email' => $user->email]);
             } else {
                 if ($user->is_active == 1) {
                     if ($user->roles->first()->name == 'pembantu') {
@@ -101,7 +104,7 @@ class AuthController extends Controller
         return view('auth.register-employe');
     }
 
-    public function storeEmployeRegister(Request $request): RedirectResponse
+    public function storeEmployeRegister(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
@@ -134,12 +137,21 @@ class AuthController extends Controller
                     'address' => $request->address
                 ]);
 
-                $this->sendVerificationEmail($store);
+                $otp = rand(100000, 999999);
+                $expiresAt = Carbon::now()->addMinutes(5);
+
+                Otp::create([
+                    'user_id' => $store->id,
+                    'otp_code' => $otp,
+                    'expires_at' => $expiresAt,
+                ]);
+
+                $this->sendOtpEmail($store, $otp);
             });
 
             if ($store) {
                 Alert::success('Berhasil!', 'Silahkan verifikasi email terlebih dahulu!');
-                return redirect()->route('login');
+                return redirect()->route('verify.otp', ['email' => $store->email]);
             } else {
                 return back()->with('toast_error', 'Registrasi majikan gagal!');
             }
@@ -165,7 +177,7 @@ class AuthController extends Controller
         return view('auth.register-servant', compact('professions'));
     }
 
-    public function storeServantRegister(Request $request): RedirectResponse
+    public function storeServantRegister(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
@@ -196,11 +208,20 @@ class AuthController extends Controller
                     'profession_id' => $request->profession_id
                 ]);
 
-                $this->sendVerificationEmail($store);
+                $otp = rand(100000, 999999);
+                $expiresAt = Carbon::now()->addMinutes(5);
+
+                Otp::create([
+                    'user_id' => $store->id,
+                    'otp_code' => $otp,
+                    'expires_at' => $expiresAt,
+                ]);
+
+                $this->sendOtpEmail($store, $otp);
             });
             if ($store) {
                 Alert::success('Berhasil!', 'Silahkan verifikasi email terlebih dahulu!');
-                return redirect()->route('login');
+                return redirect()->route('verify.otp', ['email' => $store->email]);
             } else {
                 return back()->with('toast_error', 'Registrasi pembantu gagal!');
             }
@@ -214,45 +235,117 @@ class AuthController extends Controller
         }
     }
 
-    protected function sendVerificationEmail($user)
+    protected function sendOtpEmail($user, $otp)
     {
-        $verificationLink = route('verification.verify', [
-            'id' => $user->id,
-            'hash' => sha1($user->email),
-        ]);
-
-        Mail::send('auth.verify', ['link' => $verificationLink], function ($message) use ($user) {
-            $message->to($user->email)->subject('Verifikasi Email Anda');
+        Mail::send('auth.otp-email', ['otp' => $otp], function ($message) use ($user) {
+            $message->to($user->email)->subject('Kode OTP Verifikasi Email');
         });
     }
 
-    // Verifikasi email
-    public function verifyEmail($id, $hash)
+    public function verifyOtpPage(Request $request)
     {
-        $user = User::find($id);
+        return view('auth.verify-otp', ['email' => $request->email]);
+    }
 
-        if (!$user || sha1($user->email) !== $hash) {
-            return redirect()->route('login')->with('error', 'Tautan verifikasi tidak valid.');
+    public function verifyOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+            'otp' => 'required|digits:6',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->with('toast_error', 'OTP tidak valid!')->withInput();
         }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->with('toast_error', 'Pengguna tidak ditemukan!')->withInput();
+        }
+        $otpRecord = Otp::where('user_id', $user->id)
+            ->where('otp_code', $request->otp)
+            ->first();
+
+        if (!$otpRecord || $otpRecord->isExpired()) {
+            return back()->with('toast_error', 'Kode OTP salah atau sudah kedaluwarsa!')->withInput();
+        }
+
+        $otpRecord->delete();
 
         $user->update(['email_verified_at' => now()]);
 
         return redirect()->route('login')->with('success', 'Email berhasil diverifikasi.');
     }
 
-    public function resendVerificationEmail(Request $request)
+    public function resendOtpVerification(Request $request)
     {
-        $user = Auth::user();
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
 
-        if ($user->email_verified_at) {
+        if ($validator->fails()) {
+            return back()->with('toast_error', 'Email tidak valid atau belum terdaftar!')->withInput();
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!is_null($user->email_verified_at)) {
             return redirect()->route('dashboard')->with('success', 'Email sudah diverifikasi.');
         }
 
-        $this->sendVerificationEmail($user);
+        $otp = rand(100000, 999999);
+        $expiresAt = Carbon::now()->addMinutes(5);
 
-        Alert::success('Email Verifikasi Dikirim', 'Silakan cek email Anda.');
-        return redirect()->route('verification.notice');
+        Otp::updateOrCreate(
+            ['user_id' => $user->id],
+            ['otp_code' => $otp, 'expires_at' => $expiresAt]
+        );
+
+        $this->sendOtpEmail($user, $otp);
+
+        Alert::success('OTP Dikirim Ulang', 'Silakan cek email Anda.');
+        return redirect()->back();
     }
+
+    // protected function sendVerificationEmail($user)
+    // {
+    //     $verificationLink = route('verification.verify', [
+    //         'id' => $user->id,
+    //         'hash' => sha1($user->email),
+    //     ]);
+
+    //     Mail::send('auth.verify', ['link' => $verificationLink], function ($message) use ($user) {
+    //         $message->to($user->email)->subject('Verifikasi Email Anda');
+    //     });
+    // }
+
+    // // Verifikasi email
+    // public function verifyEmail($id, $hash)
+    // {
+    //     $user = User::find($id);
+
+    //     if (!$user || sha1($user->email) !== $hash) {
+    //         return redirect()->route('login')->with('error', 'Tautan verifikasi tidak valid.');
+    //     }
+
+    //     $user->update(['email_verified_at' => now()]);
+
+    //     return redirect()->route('login')->with('success', 'Email berhasil diverifikasi.');
+    // }
+
+    // public function resendVerificationEmail(Request $request)
+    // {
+    //     $user = Auth::user();
+
+    //     if ($user->email_verified_at) {
+    //         return redirect()->route('dashboard')->with('success', 'Email sudah diverifikasi.');
+    //     }
+
+    //     $this->sendVerificationEmail($user);
+
+    //     Alert::success('Email Verifikasi Dikirim', 'Silakan cek email Anda.');
+    //     return redirect()->route('verification.notice');
+    // }
 
     public function logout(Request $request)
     {

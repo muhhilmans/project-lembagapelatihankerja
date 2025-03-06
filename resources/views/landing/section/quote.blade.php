@@ -1,6 +1,6 @@
 <section class="cleaning-quote position-relative" id="contact">
     <div class="cleaning-thumbing">
-        <img src="{{ asset('landing/assets/images/banner/banner.jpg') }}" alt="img">
+        <img src="{{ asset('landing/assets/images/banner/banner_contact.jpeg') }}" alt="img">
     </div>
     <div class="container">
         <div class="row g-4">
@@ -12,7 +12,7 @@
                                 Kontak Kami
                             </span>
                         </a>
-                        <h2 class="white mt-xxl-4 mt-2 mb-0 wow fadeInUp" data-wow-delay="0.6s">
+                        <h2 class="mt-xxl-4 mt-2 mb-0 wow fadeInUp text-black" data-wow-delay="0.6s">
                             Kami siap membantu menyelasaikan masalah.
                         </h2>
                     </div>

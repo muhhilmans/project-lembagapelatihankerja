@@ -2098,8 +2098,8 @@ ol, ul, li {
 }
 
 .bn1-bg {
-  background: url(../../assets/images/banner/banner.jpg) no-repeat center center;
-  background-size: cover;
+  background: url(../../assets/images/banner/banner_2.jpeg) no-repeat center center;
+  background-size: contain;
   padding-top: 325px;
   padding-bottom: 380px;
   overflow: hidden;
@@ -2112,18 +2112,21 @@ ol, ul, li {
 }
 @media (max-width: 1199px) {
   .bn1-bg {
+    background-size: cover;
     padding-top: 170px;
     padding-bottom: 330px;
   }
 }
 @media (max-width: 991px) {
   .bn1-bg {
+    background-size: cover;
     padding-top: 150px;
     padding-bottom: 310px;
   }
 }
 @media (max-width: 575px) {
   .bn1-bg {
+    background-size: cover;
     padding-top: 130px;
   }
 }

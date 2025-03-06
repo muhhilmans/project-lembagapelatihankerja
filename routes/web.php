@@ -37,8 +37,12 @@ Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])-
 Route::get('/email/verify', function () {
     return view('auth.verify-notice');
 })->middleware('auth')->name('verification.notice');
-Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
-    ->middleware('auth')
+// Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])
+//     ->middleware('auth')
+//     ->name('verification.resend');
+Route::get('/verify-otp', [AuthController::class, 'verifyOtpPage'])->name('verify.otp');
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('verify-otp');
+Route::post('/verify-otp/resend', [AuthController::class, 'resendOtpVerification'])
     ->name('verification.resend');
 
 Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('forgot.password');
