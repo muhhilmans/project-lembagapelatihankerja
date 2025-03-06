@@ -26,6 +26,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register-employe', [AuthController::class, 'storeEmployeRegister']);
 Route::get('/professions', [AuthController::class, 'getProfessions']);
 Route::post('/register-servant', [AuthController::class, 'storeServantRegister']);
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+Route::post('/verify-otp/resend', [AuthController::class, 'resendOtpVerification']);
 
 Route::middleware('jwt.auth')->group(function () {
     Route::middleware('role_api:majikan')->group(function () {
