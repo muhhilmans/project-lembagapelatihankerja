@@ -52,6 +52,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
     ];
 
+    public function otpCode()
+    {
+        return $this->hasOne(Otp::class, 'user_id');
+    }
+
     public function employeDetails()
     {
         return $this->hasOne(EmployeDetail::class, 'user_id');
