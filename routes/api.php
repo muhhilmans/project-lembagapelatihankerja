@@ -44,8 +44,10 @@ Route::middleware('jwt.auth')->group(function () {
         Route::get('/profile/pembantu/{id}', [ProfileController::class, 'profilePembantu']);
         Route::put('/profile/pembantu/{id}/edit', [ProfileController::class, 'updatePembantu']);
         Route::post('profile/pembantu/{id}/skill', [ProfileController::class, 'storeSkill']);
-        Route::put('profile/pembantu/{id}/skill/{skill_id}', [ProfileController::class, 'updateSkill']);
-        Route::delete('profile/pembantu/{id}/skill/{skill_id}', [ProfileController::class, 'destroySkill']);
+        Route::put('/profile/pembantu/{id}/skill/{skill_id}', [ProfileController::class, 'updateSkill']);
+        Route::delete('/profile/pembantu/{id}/skill/{skill_id}', [ProfileController::class, 'destroySkill']);
+        Route::put('/profile/pembantu/{id}/change-inval', [ProfileController::class, 'changeInval']);
+        Route::put('/profile/pembantu/{id}/change-stay', [ProfileController::class, 'changeStay']);
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);

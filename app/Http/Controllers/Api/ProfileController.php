@@ -402,9 +402,9 @@ class ProfileController extends Controller
                 'message' => 'Data pembantu tidak ditemukan!',
             ], 404);
         }
-        
+
         $skill = $user->servantSkills()->find($skill_id);
-    
+
         if (!$skill) {
             return response()->json([
                 'success' => 'failed',
@@ -462,9 +462,9 @@ class ProfileController extends Controller
                 'message' => 'Data pembantu tidak ditemukan!',
             ], 404);
         }
-    
+
         $skill = $user->servantSkills()->find($skill_id);
-    
+
         if (!$skill) {
             return response()->json([
                 'success' => 'failed',
@@ -498,6 +498,94 @@ class ProfileController extends Controller
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat menghapus keahlian.',
                 'error'   => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function changeInval(string $id)
+    {
+        $user = User::with('servantDetails')->find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data pengguna tidak ditemukan.'
+            ], 404);
+        }
+
+        if (!$user->servantDetails) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data servant tidak ditemukan.'
+            ], 404);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $user->servantDetails->is_inval = $user->servantDetails->is_inval == 1 ? 0 : 1;
+            $user->servantDetails->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => 'success',
+                'message' => 'Status inval berhasil diperbarui!',
+                'data' => [
+                    'is_inval' => $user->servantDetails->is_inval,
+                    'status' => $user->servantDetails->is_inval == 1 ? 'Bersedia' : 'Tidak Bersedia'
+                ]
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Terjadi kesalahan saat memperbarui status inval.',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function changeStay(string $id)
+    {
+        $user = User::with('servantDetails')->find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data pengguna tidak ditemukan.'
+            ], 404);
+        }
+
+        if (!$user->servantDetails) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data servant tidak ditemukan.'
+            ], 404);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $user->servantDetails->is_stay = $user->servantDetails->is_stay == 1 ? 0 : 1;
+            $user->servantDetails->save();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => 'success',
+                'message' => 'Status pulang-pergi berhasil diperbarui!',
+                'data' => [
+                    'is_stay' => $user->servantDetails->is_stay,
+                    'status' => $user->servantDetails->is_stay == 1 ? 'Bersedia' : 'Tidak Bersedia'
+                ]
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Terjadi kesalahan saat memperbarui status pulang-pergi.',
+                'error' => $th->getMessage()
             ], 500);
         }
     }
