@@ -28,8 +28,36 @@ class VacancyController extends Controller
         }
 
         $datas = [
-            'professions' => $professions,
-            'vacancies' => $vacancies
+            'professions' => $professions->map(function ($profession) {
+                return [
+                    'id' => $profession->id,
+                    'name' => $profession->name,
+                ];
+            }),
+            'vacancies' => [
+                'data' => $vacancies->map(function ($vacancy) {
+                    return [
+                        'id' => $vacancy->id,
+                        'title' => $vacancy->title,
+                        'description' => $vacancy->description,
+                        'requirements' => $vacancy->requirements,
+                        'benefits' => $vacancy->benefits,
+                        'closing_date' => $vacancy->closing_date,
+                        'limit' => $vacancy->limit,
+                        'status' => $vacancy->status,
+                        'user' => $vacancy->user->name,
+                        'profession' => $vacancy->profession->name,
+                    ];
+                }),
+                'pagination' => [
+                    'current_page' => $vacancies->currentPage(),
+                    'per_page' => $vacancies->perPage(),
+                    'total' => $vacancies->total(),
+                    'last_page' => $vacancies->lastPage(),
+                    'next_page_url' => $vacancies->nextPageUrl(),
+                    'prev_page_url' => $vacancies->previousPageUrl(),
+                ]
+            ]
         ];
 
         return new VacancyResource('success', 'Data semua lowongan', $datas);
@@ -246,7 +274,10 @@ class VacancyController extends Controller
 
     public function seekVacancy()
     {
-        $vacancies = Vacancy::where('closing_date', '>=', now())->where('status', true)->get();
+        $vacancies = Vacancy::with('user')
+            ->where('closing_date', '>=', now())
+            ->where('status', true)
+            ->paginate(5);
 
         $professions = Profession::all();
 
@@ -258,8 +289,36 @@ class VacancyController extends Controller
         }
 
         $datas = [
-            'professions' => $professions,
-            'vacancies' => $vacancies
+            'professions' => $professions->map(function ($profession) {
+                return [
+                    'id' => $profession->id,
+                    'name' => $profession->name,
+                ];
+            }),
+            'vacancies' => [
+                'data' => $vacancies->map(function ($vacancy) {
+                    return [
+                        'id' => $vacancy->id,
+                        'title' => $vacancy->title,
+                        'description' => $vacancy->description,
+                        'requirements' => $vacancy->requirements,
+                        'benefits' => $vacancy->benefits,
+                        'closing_date' => $vacancy->closing_date,
+                        'limit' => $vacancy->limit,
+                        'status' => $vacancy->status,
+                        'user' => $vacancy->user->name,
+                        'profession' => $vacancy->profession->name,
+                    ];
+                }),
+                'pagination' => [
+                    'current_page' => $vacancies->currentPage(),
+                    'per_page' => $vacancies->perPage(),
+                    'total' => $vacancies->total(),
+                    'last_page' => $vacancies->lastPage(),
+                    'next_page_url' => $vacancies->nextPageUrl(),
+                    'prev_page_url' => $vacancies->previousPageUrl(),
+                ]
+            ]
         ];
 
         return new VacancyResource('success', 'Data semua lowongan', $datas);
