@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use App\Models\ServantSkill;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -140,7 +141,61 @@ class ProfileController extends Controller
         return response()->json([
             'success'   => 'success',
             'message'   => 'Data profile pembantu',
-            'data'      => $data->makeHidden(['access_token'])
+            'data'    => [
+                'id'                => $data->id,
+                'name'              => $data->name,
+                'username'          => $data->username,
+                'email'             => $data->email,
+                'email_verified_at' => $data->email_verified_at,
+                'is_active'         => $data->is_active,
+                'created_at'        => $data->created_at,
+                'updated_at'        => $data->updated_at,
+                'servant_details'   => [
+                    'user_id'          => $data->servantDetails->user_id ?? null,
+                    'gender'           => $data->servantDetails->gender ?? 'not_filled',
+                    'place_of_birth'   => $data->servantDetails->place_of_birth ?? '-',
+                    'date_of_birth'    => $data->servantDetails->date_of_birth,
+                    'religion'         => $data->servantDetails->religion ?? '-',
+                    'marital_status'   => $data->servantDetails->marital_status ?? 'not_filled',
+                    'children'         => $data->servantDetails->children ?? 0,
+                    'last_education'   => $data->servantDetails->last_education ?? 'not_filled',
+                    'phone'            => $data->servantDetails->phone ?? '-',
+                    'emergency_number' => $data->servantDetails->emergency_number ?? '-',
+                    'address'          => $data->servantDetails->address ?? '-',
+                    'rt'               => $data->servantDetails->rt,
+                    'rw'               => $data->servantDetails->rw,
+                    'village'          => $data->servantDetails->village,
+                    'district'         => $data->servantDetails->district,
+                    'regency'          => $data->servantDetails->regency,
+                    'province'         => $data->servantDetails->province,
+                    'is_bank'          => $data->servantDetails->is_bank ?? 0,
+                    'bank_name'        => $data->servantDetails->bank_name ?? '-',
+                    'account_number'   => $data->servantDetails->account_number ?? '-',
+                    'is_bpjs'          => $data->servantDetails->is_bpjs ?? 0,
+                    'type_bpjs'        => $data->servantDetails->type_bpjs ?? 'Ketenagakerjaan',
+                    'number_bpjs'      => $data->servantDetails->number_bpjs ?? '-',
+                    'photo'            => $data->servantDetails->photo,
+                    'identity_card'    => $data->servantDetails->identity_card,
+                    'family_card'      => $data->servantDetails->family_card,
+                    'working_status'   => $data->servantDetails->working_status ?? 0,
+                    'experience'       => $data->servantDetails->experience ?? '-',
+                    'description'      => $data->servantDetails->description ?? '-',
+                    'created_at'       => $data->servantDetails->created_at,
+                    'updated_at'       => $data->servantDetails->updated_at,
+                    'is_inval'         => $data->servantDetails->is_inval ?? 0,
+                    'is_stay'          => $data->servantDetails->is_stay ?? 0,
+                    'profession'       => $data->servantDetails->profession->name ?? null,
+                ],
+                'servant_skills' => $data->servantSkills->map(function ($skill) {
+                    return [
+                        'id' => $skill->id,
+                        'user_id' => $skill->user_id,
+                        'skill' => $skill->skill,
+                        'keahlian' => $skill->level
+                    ];
+                }),
+                'roles' => $data->roles->pluck('name')->toArray(),
+            ]
         ]);
     }
 
@@ -280,6 +335,168 @@ class ProfileController extends Controller
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat memperbaiki profil',
+                'error'   => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function storeSkill(Request $request, string $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success'   => 'failed',
+                'message'   => 'Data pembantu tidak ditemukan!',
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'skill' => ['required', 'string', 'max:255'],
+            'level' => ['required', 'string', 'max:255'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::beginTransaction();
+
+            $store = ServantSkill::create([
+                'user_id' => $user->id,
+                'skill' => $data['skill'],
+                'level' => $data['level'],
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Data keahlian berhasil ditambahkan!',
+                'data'    => $store
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return response()->json([
+                'status'  => 'failed',
+                'message' => 'Terjadi kesalahan saat menambahkan keahlian.',
+                'error'   => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateSkill(Request $request, string $id, string $skill_id)
+    {
+        $user = User::with('servantSkills')->find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data pembantu tidak ditemukan!',
+            ], 404);
+        }
+        
+        $skill = $user->servantSkills()->find($skill_id);
+    
+        if (!$skill) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data keahlian tidak ditemukan atau tidak dimiliki oleh pengguna ini!',
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'skill' => ['required', 'string', 'max:255'],
+            'level' => ['required', 'string', 'max:255'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::beginTransaction();
+
+            $skill->update([
+                'skill' => $data['skill'],
+                'level' => $data['level'],
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Data keahlian berhasil diperbarui!',
+                'data'    => $skill
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return response()->json([
+                'status'  => 'failed',
+                'message' => 'Terjadi kesalahan saat memperbarui keahlian.',
+                'error'   => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroySkill(string $id, string $skill_id)
+    {
+        $user = User::with('servantSkills')->find($id);
+
+        if (!$user) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data pembantu tidak ditemukan!',
+            ], 404);
+        }
+    
+        $skill = $user->servantSkills()->find($skill_id);
+    
+        if (!$skill) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data keahlian tidak ditemukan atau tidak dimiliki oleh pengguna ini!',
+            ], 404);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $delete = $skill->delete();
+
+            if (!$delete) {
+                DB::rollBack();
+                return response()->json([
+                    'status'  => 'failed',
+                    'message' => 'Keahlian gagal dihapus. Silakan coba lagi.'
+                ], 502);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Data keahlian berhasil dihapus!',
+                'data'    => $delete
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 'failed',
+                'message' => 'Terjadi kesalahan saat menghapus keahlian.',
                 'error'   => $th->getMessage()
             ], 500);
         }
