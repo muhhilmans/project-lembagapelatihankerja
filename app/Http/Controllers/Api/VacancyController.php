@@ -75,23 +75,69 @@ class VacancyController extends Controller
             ], 404);
         }
 
-        if ($detail->user_id != $user->id) {
+        if ($detail->user_id !== $user->id) {
             return response()->json([
                 'status' => 'failed',
                 'message' => 'Unauthorized access. You do not have permission to view this vacancy.'
             ], 401);
         }
 
-        $recoms = RecomServant::where('vacancy_id', $id)
+        $applications = Application::with('servant')->where('vacancy_id', $id)->where('status', '!=', 'accepted')->get();
+        $appliedServantIds = $applications->pluck('servant_id')->toArray();
+        $recoms = RecomServant::with('servant.servantDetails')->where('vacancy_id', $id)
             ->whereHas('servant.servantDetails', function ($query) {
                 $query->where('working_status', false);
-            })->get();
-        $applications = Application::where('vacancy_id', $id)->where('status', '!=', 'accepted')->get();
+            })
+            ->whereNotIn('servant_id', $appliedServantIds)
+            ->get();
 
         $datas = [
-            'detail' => $detail,
-            'recoms' => $recoms,
-            'applications' => $applications,
+            'detail' => [
+                'id' => $detail->id,
+                'title' => $detail->title,
+                'description' => $detail->description,
+                'requirements' => $detail->requirements,
+                'benefits' => $detail->benefits,
+                'closing_date' => $detail->closing_date,
+                'limit' => $detail->limit,
+                'status' => $detail->status,
+                'client' => $detail->user->name,
+                'profession' => $detail->profession->name,
+            ],
+            'pelamar' => $applications->map(function ($application) {
+                return [
+                    'id' => $application->id,
+                    'status' => $application->status,
+                    'servant' => [
+                        'id' => $application->servant->id,
+                        'name' => $application->servant->name,
+                        'email' => $application->servant->email,
+                        'detail' => $application->servant->servantDetails->where('user_id', $application->servant->id)->first()->makeHidden(['id', 'servant_id', 'created_at', 'updated_at']),
+                    ],
+                    'salary' => $application->salary,
+                    'link_interview' => $application->link_interview,
+                    'interview_date' => $application->interview_date,
+                    'notes_interview' => $application->notes_interview,
+                    'notes_verify' => $application->notes_verify,
+                    'notes_accepted' => $application->notes_accepted,
+                    'notes_rejected' => $application->notes_rejected,
+                    'work_start_date' => $application->work_start_date,
+                    'work_end_date' => $application->work_end_date,
+                    'file_contract' => $application->file_contract,
+                ];
+            }),
+            'rekomendasi' => $recoms->map(function ($recom) {
+                return [
+                    'id' => $recom->id,
+                    'vacancy_id' => $recom->vacancy_id,
+                    'servant' => [
+                        'id' => $recom->servant->id,
+                        'name' => $recom->servant->name,
+                        'email' => $recom->servant->email,
+                        'detail' => $recom->servant->servantDetails->where('user_id', $recom->servant->id)->first()->makeHidden(['id', 'servant_id', 'created_at', 'updated_at']),
+                    ],
+                ];
+            }),
         ];
 
         return new VacancyResource('success', 'Detail lowongan', $datas);
@@ -326,7 +372,7 @@ class VacancyController extends Controller
 
     public function showVacancy($id)
     {
-        $detail = Vacancy::with('profession')->find($id);
+        $detail = Vacancy::with(['profession', 'user'])->find($id);
 
         if (!$detail) {
             return response()->json([
@@ -335,6 +381,30 @@ class VacancyController extends Controller
             ], 404);
         }
 
-        return new VacancyResource('success', 'Data detail lowongan', $detail);
+        $application = Application::where('vacancy_id', $id)
+            ->where('servant_id', auth()->id())
+            ->first();
+
+        $statusLamaran = $application
+            ? ['status' => 'Sudah melamar', 'applied_at' => $application->created_at]
+            : ['status' => 'Belum melamar', 'applied_at' => null];
+
+        $data = [
+            'detail' => [
+                'id' => $detail->id,
+                'title' => $detail->title,
+                'description' => $detail->description,
+                'requirements' => $detail->requirements,
+                'benefits' => $detail->benefits,
+                'closing_date' => $detail->closing_date,
+                'limit' => $detail->limit,
+                'status' => $detail->status,
+                'client' => $detail->user->name,
+                'profession' => $detail->profession->name,
+            ],
+            'status_lamaran' => $statusLamaran
+        ];
+
+        return new VacancyResource('success', 'Data detail lowongan', $data);
     }
 }
