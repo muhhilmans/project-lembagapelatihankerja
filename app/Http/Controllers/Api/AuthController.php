@@ -85,6 +85,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'failed',
                 'message' => 'Email belum diverifikasi! Silahkan verifikasi email terlebih dahulu.',
+                'email' => $user->email
             ], 401);
         }
 
