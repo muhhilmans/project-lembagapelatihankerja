@@ -96,6 +96,7 @@ class PartnerController extends Controller
                     'per_page' => $partners->perPage(),
                     'total' => $partners->total(),
                     'last_page' => $partners->lastPage(),
+                    'current_page_url' => $partners->url($partners->currentPage()),
                     'next_page_url' => $partners->nextPageUrl(),
                     'prev_page_url' => $partners->previousPageUrl(),
                 ],

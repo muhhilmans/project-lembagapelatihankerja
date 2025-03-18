@@ -55,6 +55,7 @@ class VacancyController extends Controller
                     'per_page' => $vacancies->perPage(),
                     'total' => $vacancies->total(),
                     'last_page' => $vacancies->lastPage(),
+                    'current_page_url' => $vacancies->url($vacancies->currentPage()),
                     'next_page_url' => $vacancies->nextPageUrl(),
                     'prev_page_url' => $vacancies->previousPageUrl(),
                 ]
@@ -377,6 +378,7 @@ class VacancyController extends Controller
                     'per_page' => $vacancies->perPage(),
                     'total' => $vacancies->total(),
                     'last_page' => $vacancies->lastPage(),
+                    'current_page_url' => $vacancies->url($vacancies->currentPage()),
                     'next_page_url' => $vacancies->nextPageUrl(),
                     'prev_page_url' => $vacancies->previousPageUrl(),
                 ]
