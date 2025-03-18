@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\VacancyController;
 use App\Http\Controllers\Api\ApplicationController;
+use App\Http\Controllers\Api\PartnerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,11 @@ Route::middleware('jwt.auth')->group(function () {
 
     // Client
     Route::middleware('role_api:majikan')->group(function () {
+        // Cari Mitra
+        Route::get('/seek-mitra', [PartnerController::class, 'allPartner']);
+        Route::get('/seek-mitra/detail/{id}', [PartnerController::class, 'showPartner']);
+        Route::post('/seek-mitra/detail/{id}/hire', [PartnerController::class, 'hirePartner']);
+
         // Kelola Lowongan
         Route::apiResource('vacancy', VacancyController::class);
         Route::post('/vacancy/{vacancy}/apply-recom/{recomServant}', [ApplicationController::class, 'applyRecom']);
