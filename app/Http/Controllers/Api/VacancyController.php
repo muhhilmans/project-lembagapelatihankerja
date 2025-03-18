@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\VacancyResource;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class VacancyController extends Controller
@@ -18,7 +19,7 @@ class VacancyController extends Controller
     {
         $professions = Profession::all();
         $user = auth()->user();
-        $vacancies = Vacancy::where('user_id', $user->id)->get();
+        $vacancies = Vacancy::where('user_id', $user->id)->paginate(10);
 
         if ($vacancies->isEmpty()) {
             return response()->json([
@@ -266,6 +267,7 @@ class VacancyController extends Controller
             return new VacancyResource('success', 'Lowongan berhasil diperbarui', $update);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat memperbaiki lowongan',
