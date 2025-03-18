@@ -9,6 +9,7 @@ use App\Models\RecomServant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ApplicationController extends Controller
@@ -69,10 +70,15 @@ class ApplicationController extends Controller
             ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat mengirimkan lamaran.',
-                'error' => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
@@ -143,10 +149,15 @@ class ApplicationController extends Controller
             ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat menyetujui rekomendasi.',
-                'error' => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }

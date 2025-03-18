@@ -194,10 +194,15 @@ class VacancyController extends Controller
             return new VacancyResource('success', 'Lowongan berhasil ditambahkan', $store);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat menambahkan lowongan',
-                'error'   => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
@@ -271,7 +276,11 @@ class VacancyController extends Controller
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat memperbaiki lowongan',
-                'error'   => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
@@ -312,10 +321,15 @@ class VacancyController extends Controller
             return new VacancyResource('success', 'Lowongan berhasil dihapus!', true);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat menghapus lowongan',
-                'error'   => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }

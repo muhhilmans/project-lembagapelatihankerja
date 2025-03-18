@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -116,10 +117,16 @@ class ProfileController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat memperbaiki profil',
-                'error'   => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
@@ -332,10 +339,16 @@ class ProfileController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat memperbaiki profil',
-                'error'   => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
@@ -384,10 +397,16 @@ class ProfileController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat menambahkan keahlian.',
-                'error'   => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
@@ -444,10 +463,16 @@ class ProfileController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat memperbarui keahlian.',
-                'error'   => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
@@ -494,10 +519,15 @@ class ProfileController extends Controller
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat menghapus keahlian.',
-                'error'   => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
@@ -538,10 +568,15 @@ class ProfileController extends Controller
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat memperbarui status inval.',
-                'error' => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
@@ -582,10 +617,15 @@ class ProfileController extends Controller
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat memperbarui status pulang-pergi.',
-                'error' => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }

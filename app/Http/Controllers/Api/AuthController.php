@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
@@ -195,10 +196,15 @@ class AuthController extends Controller
             ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat registrasi, silahkan coba lagi.',
-                'error'   => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
@@ -295,10 +301,15 @@ class AuthController extends Controller
             ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'status'  => 'failed',
                 'message' => 'Terjadi kesalahan saat registrasi, silahkan coba lagi.',
-                'error'   => $th->getMessage()
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
             ], 500);
         }
     }
