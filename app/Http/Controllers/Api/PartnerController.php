@@ -104,7 +104,7 @@ class PartnerController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Data semua mitra',
+            'message' => 'Data semua mitra.',
             'datas' => $datas
         ]);
     }
@@ -188,7 +188,7 @@ class PartnerController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Data detail mitra',
+            'message' => 'Data detail mitra.',
             'datas' => $datas
         ]);
     }

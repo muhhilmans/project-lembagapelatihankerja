@@ -40,6 +40,9 @@ Route::middleware('jwt.auth')->group(function () {
         Route::get('/seek-mitra/detail/{id}', [PartnerController::class, 'showPartner']);
         Route::post('/seek-mitra/detail/{id}/hire', [PartnerController::class, 'hirePartner']);
 
+        // Kelola Pelamar
+        Route::get('/all-applicant', [ApplicationController::class, 'allApplicant']);
+
         // Kelola Lowongan
         Route::apiResource('vacancy', VacancyController::class);
         Route::post('/vacancy/{vacancy}/apply-recom/{recomServant}', [ApplicationController::class, 'applyRecom']);
