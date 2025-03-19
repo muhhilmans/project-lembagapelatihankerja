@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use App\Models\Complaint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -180,6 +181,75 @@ class WorkerController extends Controller
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat memberhentikan pekerja.',
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
+            ], 500);
+        }
+    }
+
+    public function complaintWorker(Request $request, Application $application)
+    {
+        $validator = Validator::make($request->all(), [
+            'message' => ['required'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Validasi gagal!',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::beginTransaction();
+
+            $user = auth()->user();
+
+            $complaint = Complaint::where('application_id', $application->id)->where('employe_id', $user->id)->first();
+
+            if ($complaint) {
+                DB::rollBack();
+                return response()->json([
+                    'status'  => 'failed',
+                    'message' => 'Pengaduan pekerja sudah dikirimkan. Silakan coba lagi.',
+                    'data'    => $complaint
+                ], 409);
+            }
+
+            $store = Complaint::create([
+                'application_id' => $application->id,
+                'servant_id' => null,
+                'employe_id' => $user->id,
+                'message' => $data['message'],
+                'status' => 'pending',
+            ]);
+
+            if (!$store) {
+                DB::rollBack();
+                return response()->json([
+                    'status'  => 'failed',
+                    'message' => 'Pengaduan pekerja gagal disimpan. Silakan coba lagi.'
+                ], 502);
+            }
+            
+            DB::commit();
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Pengaduan pekerja berhasil dikirimkan!',
+                'data'    => $store
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Terjadi kesalahan saat mengirimkan aduan.',
                 'error'   => [
                     'message' => $th->getMessage(),
                     'file' => $th->getFile(),

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\VacancyController;
 use App\Http\Controllers\Api\ApplicationController;
+use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\WorkerController;
 
@@ -48,6 +49,8 @@ Route::middleware('jwt.auth')->group(function () {
         // Kelola Pekerja
         Route::get('/all-worker', [WorkerController::class, 'allWorker']);
         Route::put('/all-worker/{application}/reject', [WorkerController::class, 'rejectWorker']);
+        Route::post('/all-worker/{application}/complaint-worker', [WorkerController::class, 'complaintWorker']);
+        Route::get('/complaints', [ComplaintController::class, 'allComplaintWorkers']);
 
         // Kelola Lowongan
         Route::apiResource('vacancy', VacancyController::class);

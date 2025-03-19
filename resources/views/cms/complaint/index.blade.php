@@ -33,7 +33,7 @@
                                     <td>{{ $data->employe->name }}</td>
                                 @endhasrole
                                 @hasrole('superadmin|admin|owner|majikan')
-                                    <td>{{ $data->servant->name }}</td>
+                                    <td>{{ $data->application->servant->name }}</td>
                                 @endhasrole
                                 <td>{!! $data->message !!}</td>
                                 <td class="text-center">
