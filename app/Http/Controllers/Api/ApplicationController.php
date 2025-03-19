@@ -355,4 +355,77 @@ class ApplicationController extends Controller
             ], 500);
         }
     }
+
+    public function changeStatus(Request $request, Application $application)
+    {
+        $validator = Validator::make($request->all(), [
+            'status'          => ['required', 'string'],
+            'notes_interview' => ['nullable', 'string'],
+            'notes_rejected'  => ['nullable', 'string'],
+            'interview_date'  => ['nullable', 'date'],
+            'salary'          => ['nullable', 'numeric'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Validasi gagal!',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        if (in_array($application->status, ['accepted', 'rejected', 'laidoff'])) {
+            return response()->json([
+                'status'  => 'failed',
+                'message' => "Status pelamar sudah '{$application->status}' dan tidak dapat diubah lagi."
+            ], 403);
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::beginTransaction();
+
+            $updateData = ['status' => $data['status']];
+
+            if ($data['status'] === 'schedule') {
+                $updateData['notes_interview'] = $data['notes_interview'] ?? null;
+                $updateData['interview_date']  = $data['interview_date'] ?? null;
+            } elseif ($data['status'] === 'passed') {
+                $updateData['salary'] = $data['salary'] ?? null;
+            } elseif ($data['status'] === 'rejected') {
+                $updateData['notes_rejected'] = $data['notes_rejected'] ?? null;
+            }
+
+            $application->fill($updateData);
+
+            if (!$application->save()) {
+                DB::rollBack();
+                return response()->json([
+                    'status'  => 'failed',
+                    'message' => 'Perubahan status gagal disimpan. Silakan coba lagi.'
+                ], 502);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Data keahlian berhasil ditambahkan!',
+                'data'    => $application
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Terjadi kesalahan saat mengubah status.',
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
+            ], 500);
+        }
+    }
 }

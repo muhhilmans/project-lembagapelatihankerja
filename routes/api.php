@@ -42,6 +42,7 @@ Route::middleware('jwt.auth')->group(function () {
 
         // Kelola Pelamar
         Route::get('/all-applicant', [ApplicationController::class, 'allApplicant']);
+        Route::put('/all-applicant/{application}/change', [ApplicationController::class, 'changeStatus']);
 
         // Kelola Lowongan
         Route::apiResource('vacancy', VacancyController::class);
