@@ -69,6 +69,8 @@ Route::middleware('jwt.auth')->group(function () {
 
         // Lamaran
         Route::post('/apply-job', [ApplicationController::class, 'applyJob']);
+        Route::get('/all-application', [ApplicationController::class, 'allApplication']);
+        Route::put('/all-application/{application}/choose', [ApplicationController::class, 'chooseStatus']);
 
         // Kelola Profil
         Route::get('/profile/pembantu/{id}', [ProfileController::class, 'profilePembantu']);
