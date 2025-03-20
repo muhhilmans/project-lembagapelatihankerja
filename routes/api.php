@@ -72,6 +72,11 @@ Route::middleware('jwt.auth')->group(function () {
         Route::get('/all-application', [ApplicationController::class, 'allApplication']);
         Route::put('/all-application/{application}/choose', [ApplicationController::class, 'chooseStatus']);
 
+        // Kelola Pekerjaan
+        Route::get('/all-work', [WorkerController::class, 'allWork']);
+        Route::post('/all-work/{application}/complaint-work', [WorkerController::class, 'complaintWork']);
+        Route::get('/complaints-work', [ComplaintController::class, 'allComplaintWork']);
+
         // Kelola Profil
         Route::get('/profile/pembantu/{id}', [ProfileController::class, 'profilePembantu']);
         Route::put('/profile/pembantu/{id}/edit', [ProfileController::class, 'updatePembantu']);

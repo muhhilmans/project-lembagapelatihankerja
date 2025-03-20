@@ -16,9 +16,13 @@ class WorkerController extends Controller
     {
         $user = auth()->user();
         $workers = Application::with(['servant', 'employe', 'vacancy'])
-            ->where('employe_id', $user->id)
+            ->where(function ($query) use ($user) {
+                $query->where('employe_id', $user->id)
+                    ->orWhereHas('vacancy', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+            })
             ->where('status', 'accepted')
-            ->whereNotNull('employe_id')
             ->paginate(10);
 
         try {
@@ -115,7 +119,7 @@ class WorkerController extends Controller
                     ],
                 ],
             ];
-    
+
             return response()->json([
                 'success' => 'success',
                 'message' => 'Data semua pekerja.',
@@ -237,11 +241,156 @@ class WorkerController extends Controller
                     'message' => 'Pengaduan pekerja gagal disimpan. Silakan coba lagi.'
                 ], 502);
             }
-            
+
             DB::commit();
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Pengaduan pekerja berhasil dikirimkan!',
+                'data'    => $store
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Terjadi kesalahan saat mengirimkan aduan.',
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
+            ], 500);
+        }
+    }
+
+    public function allWork()
+    {
+        $user = auth()->user();
+        $workers = Application::with(['servant', 'employe', 'vacancy'])
+            ->where('servant_id', $user->id)
+            ->where('status', 'accepted')
+            ->paginate(10);
+
+        try {
+            if ($workers->isEmpty()) {
+                return response()->json([
+                    'success' => 'success',
+                    'message' => 'Data semua pekerjaan.',
+                    'data' => 'Belum ada pekerjaan.'
+                ], 200);
+            }
+
+            $datas = [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'role' => $user->roles->first()->name,
+                    'access_token' => $user->access_token,
+                ],
+                'worker' => [
+                    'data' => $workers->map(function ($query) {
+                        return [
+                            'id' => $query->id,
+                            'servant_id' => $query->servant_id,
+                            'client' => $query->employe ? $query->employe->name : $query->vacancy->user->name,
+                            'status' => $query->status,
+                            'interview_date' => $query->interview_date,
+                            'link_interview' => $query->link_interview,
+                            'notes_interview' => $query->notes_interview,
+                            'notes_verify' => $query->notes_verify,
+                            'notes_accepted' => $query->notes_accepted,
+                            'notes_rejected' => $query->notes_rejected,
+                            'salary' => $query->salary,
+                            'file_contract' => $query->file_contract,
+                            'work_start_date' => $query->work_start_date,
+                            'work_end_date' => $query->work_end_date,
+                        ];
+                    }),
+                    'pagination' => [
+                        'current_page' => $workers->currentPage(),
+                        'per_page' => $workers->perPage(),
+                        'total' => $workers->total(),
+                        'last_page' => $workers->lastPage(),
+                        'current_page_url' => $workers->url($workers->currentPage()),
+                        'next_page_url' => $workers->nextPageUrl(),
+                        'prev_page_url' => $workers->previousPageUrl(),
+                    ],
+                ],
+            ];
+
+            return response()->json([
+                'success' => 'success',
+                'message' => 'Data semua pekerjaan.',
+                'data' => $datas
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Terjadi kesalahan saat mengambil data.',
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
+            ], 500);
+        }
+    }
+
+    public function complaintWork(Request $request, Application $application)
+    {
+        $validator = Validator::make($request->all(), [
+            'message' => ['required'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Validasi gagal!',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $data = $validator->validated();
+
+        try {
+            DB::beginTransaction();
+
+            $user = auth()->user();
+
+            $complaint = Complaint::where('application_id', $application->id)->where('servant_id', $user->id)->first();
+
+            if ($complaint) {
+                DB::rollBack();
+                return response()->json([
+                    'status'  => 'failed',
+                    'message' => 'Pengaduan pekerjaan sudah dikirimkan. Silakan coba lagi.',
+                    'data'    => $complaint
+                ], 409);
+            }
+
+            $store = Complaint::create([
+                'application_id' => $application->id,
+                'servant_id' => $user->id,
+                'employe_id' => null,
+                'message' => $data['message'],
+                'status' => 'pending',
+            ]);
+
+            if (!$store) {
+                DB::rollBack();
+                return response()->json([
+                    'status'  => 'failed',
+                    'message' => 'Pengaduan pekerjaan gagal disimpan. Silakan coba lagi.'
+                ], 502);
+            }
+
+            DB::commit();
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Pengaduan pekerjaan berhasil dikirimkan!',
                 'data'    => $store
             ], 201);
         } catch (\Throwable $th) {
