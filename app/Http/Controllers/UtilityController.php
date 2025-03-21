@@ -170,10 +170,11 @@ class UtilityController extends Controller
         if (auth()->user()->roles->first()->name == 'majikan') {
             $datas = Application::where('employe_id', auth()->user()->id)
                 ->whereNotNull('employe_id')
+                ->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])
                 ->get();
             return view('cms.applicant.hire', compact('datas'));
         } else {
-            $datas = Application::whereNotNull('employe_id')->get();
+            $datas = Application::whereNotNull('employe_id')->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])->get();
             return view('cms.applicant.hire', compact('datas'));
         }
     }
@@ -184,10 +185,11 @@ class UtilityController extends Controller
             $datas = Application::whereHas('vacancy.user', function ($query) {
                 $query->where('id', auth()->user()->id);
             })
+                ->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])
                 ->whereNotNull('vacancy_id')
                 ->get();
         } else {
-            $datas = Application::whereNotNull('vacancy_id')->get();
+            $datas = Application::whereNotNull('vacancy_id')->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])->get();
         }
 
         return view('cms.applicant.independent', compact('datas'));

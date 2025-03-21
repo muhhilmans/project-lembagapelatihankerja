@@ -12,12 +12,8 @@
                     <thead>
                         <tr class="text-center">
                             <th>No</th>
-                            @hasrole('superadmin|admin|owner|pembantu')
-                                <th>Nama Majikan</th>
-                            @endhasrole
-                            @hasrole('superadmin|admin|owner|majikan')
-                                <th>Nama Pembantu</th>
-                            @endhasrole
+                            <th>Nama Pengadu</th>
+                            <th>Nama Yang Diadukan</th>
                             <th>Pesan Pengaduan</th>
                             <th>Status</th>
                             @hasrole('superadmin|admin')
@@ -29,12 +25,14 @@
                         @foreach ($datas as $data)
                             <tr>
                                 <td class="text-center">{{ $loop->iteration }}</td>
-                                @hasrole('superadmin|admin|owner|pembantu')
-                                    <td>{{ $data->employe->name }}</td>
-                                @endhasrole
-                                @hasrole('superadmin|admin|owner|majikan')
+                                @if ($data->servant_id)
                                     <td>{{ $data->application->servant->name }}</td>
-                                @endhasrole
+                                    <td>{{ $data->employe_id ? ($data->employe_id ? $data->application->employe_id : $data->application->employe->name) : $data->application->vacancy->user->name }}
+                                    </td>
+                                @else
+                                    <td>{{ $data->employe->name }}</td>
+                                    <td>{{ $data->application->servant->name }}</td>
+                                @endif
                                 <td>{!! $data->message !!}</td>
                                 <td class="text-center">
                                     <span
