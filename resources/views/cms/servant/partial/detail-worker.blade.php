@@ -32,25 +32,7 @@
                         <li><i class="fas fa-clock mr-2 mb-2"></i>
                             {{ \Carbon\Carbon::parse($data->work_start_date)->format('d F Y') }}</li>
                         <li><i class="fas fa-money-bill-wave mr-1 mb-2"></i>
-                            @hasrole('majikan')
-                                @php
-                                    $salary = $data->salary;
-                                    $service = $salary * $data->schemaSalary->adds_client;
-                                    $gaji = $salary + $service;
-                                @endphp
-
-                                Rp. {{ number_format($gaji, 0, ',', '.') }}
-                            @endhasrole
-
-                            @hasrole('superadmin|admin|owner|pembantu')
-                                @php
-                                    $salary = $data->salary;
-                                    $service = $salary * $data->schemaSalary->adds_mitra;
-                                    $gaji = $salary - $service;
-                                @endphp
-
-                                Rp. {{ number_format($gaji, 0, ',', '.') }}
-                            @endhasrole
+                            Rp. {{ number_format($data->salary, 0, ',', '.') }}
                         </li>
                     </ul>
                 </div>

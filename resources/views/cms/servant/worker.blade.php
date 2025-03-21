@@ -32,24 +32,21 @@
                             @endhasrole
                             <th>Gaji Pokok</th>
                             <th>Tanggal Bekerja</th>
-                            {{-- @hasrole('majikan') --}}
-                            @hasrole('superadmin|admin')
+                            @hasrole('superadmin|admin|owner|majikan')
                                 <th>Gaji (Dengan Tambahan)</th>
                             @endhasrole
-                            {{-- @hasrole('superadmin|admin|owner|pembantu') --}}
-                            @hasrole('superadmin|admin')
+                            @hasrole('superadmin|admin|owner|pembantu')
+                                {{-- @hasrole('superadmin|admin') --}}
                                 <th>Gaji (Dengan Potongan)</th>
                             @endhasrole
                             <th>Status</th>
-                            @hasrole('superadmin|admin|owner')
+                            @hasrole('superadmin|admin|owner|majikan')
                                 <th>Bank</th>
                             @endhasrole
                             @hasrole('superadmin|admin|owner')
                                 <th>BPJS</th>
                             @endhasrole
-                            @hasrole('superadmin|admin|owner')
-                                <th>Aksi</th>
-                            @endhasrole
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,8 +68,7 @@
                                 <td class="text-center">Rp. {{ number_format($data->salary, 0, ',', '.') }}</td>
                                 <td class="text-center">{{ \Carbon\Carbon::parse($data->work_start_date)->format('d-M-Y') }}
                                 </td>
-                                {{-- @hasrole('majikan') --}}
-                                @hasrole('superadmin|admin')
+                                @hasrole('superadmin|admin|majikan')
                                     <td class="text-center">
                                         @php
                                             $workerSalaries = App\Models\WorkerSalary::where(
@@ -103,8 +99,7 @@
                                         @endif
                                     </td>
                                 @endhasrole
-                                {{-- @hasrole('superadmin|admin|owner|pembantu') --}}
-                                @hasrole('superadmin|admin')
+                                @hasrole('superadmin|admin|owner|pembantu')
                                     <td class="text-center">
                                         @php
                                             $workerSalaries = App\Models\WorkerSalary::where(
@@ -163,11 +158,11 @@
                                         } }}
                                     </span>
                                 </td>
-                                {{-- @hasrole('majikan')
+                                @hasrole('majikan')
                                     <td class="text-center">
                                         123123123 (BCA)
                                     </td>
-                                @endhasrole --}}
+                                @endhasrole
                                 @hasrole('superadmin|admin|owner')
                                     <td class="text-center">
                                         @if ($data->servant->servantDetails->is_bank == 1)
@@ -186,12 +181,10 @@
                                         @endif
                                     </td>
                                 @endhasrole
-                                @hasrole('superadmin|admin|owner')
-                                    <td class="text-center">
-                                        @hasrole('superadmin|admin')
-                                            <a href="{{ route('worker.show', $data->id) }}" class="btn btn-sm btn-info mb-1"><i
-                                                    class="fas fa-eye"></i></a>
-                                        @endhasrole
+                                <td class="text-center">
+                                    <a href="{{ route('worker.show', $data->id) }}" class="btn btn-sm btn-info mb-1"><i
+                                            class="fas fa-eye"></i></a>
+                                    @hasrole('superadmin|admin|owner')
                                         @hasrole('superadmin|admin|majikan')
                                             @hasrole('superadmin|admin')
                                                 <a href="#" class="btn btn-sm btn-warning mb-1" data-toggle="modal"
@@ -230,8 +223,8 @@
                                                 @include('cms.servant.modal.review', ['data' => $data])
                                             @endif
                                         @endhasrole
-                                    </td>
-                                @endhasrole
+                                    @endhasrole
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
