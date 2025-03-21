@@ -190,19 +190,29 @@
             @hasrole('superadmin')
                 <!-- Nav Item - Voucher -->
                 <li class="nav-item {{ Route::is('vouchers.*') ? 'active' : '' }}">
-                    <a class="nav-link {{ Route::is('vouchers.*') ? 'active' : '' }}"
-                        href="{{ route('vouchers.index') }}">
+                    <a class="nav-link {{ Route::is('vouchers.*') ? 'active' : '' }}" href="{{ route('vouchers.index') }}">
                         <i class="fas fa-fw fa-percentage"></i>
                         <span>Voucher</span></a>
                 </li>
             @endhasrole
 
-            <!-- Nav Item - Profesi -->
-            <li class="nav-item {{ Route::is('professions.*') ? 'active' : '' }}">
-                <a class="nav-link {{ Route::is('professions.*') ? 'active' : '' }}"
-                    href="{{ route('professions.index') }}">
-                    <i class="fas fa-fw fa-layer-group"></i>
-                    <span>Profesi</span></a>
+            <!-- Nav Item - Settings Collapse Menu -->
+            <li class="nav-item {{ Route::is('professions.*', 'salaries.*') ? 'active' : '' }}">
+                <a class="nav-link {{ Route::is('professions.*', 'salaries.*') ? '' : 'collapsed' }}" href="#"
+                    data-toggle="collapse" data-target="#collapseSettings"
+                    aria-expanded="{{ Route::is('professions.*', 'salaries.*') ? 'true' : 'false' }}" aria-controls="collapseSettings">
+                    <i class="fas fa-fw fa-cogs"></i>
+                    <span>Settings</span>
+                </a>
+                <div id="collapseSettings" class="collapse {{ Route::is('professions.*', 'salaries.*') ? 'show' : '' }}"
+                    aria-labelledby="headingSettings" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item {{ Route::is('professions.*') ? 'active' : '' }}"
+                            href="{{ route('professions.index') }}">Profesi</a>
+                        <a class="collapse-item {{ Route::is('salaries.*') ? 'active' : '' }}"
+                            href="{{ route('salaries.index') }}">Gaji</a>
+                    </div>
+                </div>
             </li>
 
             <!-- Nav Item - Users Collapse Menu -->

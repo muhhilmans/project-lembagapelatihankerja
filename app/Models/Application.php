@@ -54,4 +54,9 @@ class Application extends Model
     {
         return $this->hasMany(WorkerSalary::class, 'application_id');
     }
+
+    public function salary()
+    {
+        return $this->belongsTo(Salary::class, 'schema_salary');
+    }
 }
