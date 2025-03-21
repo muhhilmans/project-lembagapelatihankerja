@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Voucher;
 use App\Models\Application;
+use App\Models\Salary;
 use Illuminate\Support\Str;
 use App\Models\WorkerSalary;
 use Illuminate\Http\Request;
@@ -35,7 +36,9 @@ class WorkerController extends Controller
             $datas = Application::whereIn('status', ['accepted', 'review'])->get();
         }
 
-        return view('cms.servant.worker', compact('datas'));
+        $schemas = Salary::all();
+
+        return view('cms.servant.worker', compact(['datas', 'schemas']));
     }
 
     public function showWorker(string $id)
@@ -109,6 +112,18 @@ class WorkerController extends Controller
 
         $application = Application::findOrFail($id);
 
+        if ($application->schemaSalary->bpjs_client == 0) {
+            $bpjsClient = 0;
+        } else {
+            $bpjsClient = 20000;
+        }
+
+        if ($application->schemaSalary->bpjs_mitra == 0) {
+            $bpjsMitra = 0;
+        } else {
+            $bpjsMitra = 20000;
+        }
+
         $voucher = null;
         if (!empty($data['voucher'])) {
             $voucher = Voucher::where('code', $data['voucher'])->first();
@@ -148,13 +163,13 @@ class WorkerController extends Controller
         $daySalary = $application->salary / $daysInMonth;
 
         $totalSalary = $data['presence'] * $daySalary;
-        $discount = $voucher ? (0.075 - ($voucher->discount / 100)) : 0.075;
+        $discount = $voucher ? ($application->schemaSalary->adds_client - ($voucher->discount / 100)) : $application->schemaSalary->adds_client;
 
         $majikanBonus = $totalSalary * $discount;
-        $totalSalaryMajikan = ($totalSalary + $majikanBonus) + 20000;
+        $totalSalaryMajikan = ($totalSalary + $majikanBonus) + $bpjsClient;
 
-        $addSalaryPembantu = $totalSalary * 0.025;
-        $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - 20000;
+        $addSalaryPembantu = $totalSalary * $application->schemaSalary->adds_mitra;
+        $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - $bpjsMitra;
 
         $dataSalary = [
             'day_salary' => ceil($daySalary),
@@ -200,19 +215,32 @@ class WorkerController extends Controller
 
         $data = $validator->validated();
 
+        if ($app->schemaSalary->bpjs_client == 0) {
+            $bpjsClient = 0;
+        } else {
+            $bpjsClient = 20000;
+        }
+
+        if ($app->schemaSalary->bpjs_mitra == 0) {
+            $bpjsMitra = 0;
+        } else {
+            $bpjsMitra = 20000;
+        }
+
         $monthString = substr($salary->month, 0, 7);
         $month = Carbon::createFromFormat('Y-m', $monthString);
         $daysInMonth = $month->daysInMonth;
         $daySalary = $app->salary / $daysInMonth;
-        
+
         $totalSalary = $data['presence'] * $daySalary;
-        $discount = $salary->voucher_id ? (0.075 - ($salary->voucher->discount / 100)) : 0.075;
+        $discount = $salary->voucher_id ? ($app->schemaSalary->adds_client - ($salary->voucher->discount / 100)) : $app->schemaSalary->adds_client;
 
+        
         $majikanBonus = $totalSalary * $discount;
-        $totalSalaryMajikan = ($totalSalary + $majikanBonus) + 20000;
-
-        $addSalaryPembantu = $totalSalary * 0.025;
-        $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - 20000;
+        $totalSalaryMajikan = ($totalSalary + $majikanBonus) + $bpjsClient;
+        
+        $addSalaryPembantu = $totalSalary * $app->schemaSalary->adds_mitra;
+        $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - $bpjsMitra;
 
         $dataSalary = [
             'discount' => $discount,
@@ -221,7 +249,7 @@ class WorkerController extends Controller
             'total_salary_majikan' => ceil($totalSalaryMajikan),
             'total_salary_pembantu' => ceil($totalSalaryPembantu),
         ];
-        
+
         try {
             DB::transaction(function () use ($salary, $data, $dataSalary) {
                 $salary->update([
@@ -329,6 +357,44 @@ class WorkerController extends Controller
             });
 
             Alert::success('Berhasil', 'Berhasil mengupload bukti pembayaran!');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+            $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+
+            return view('cms.error', compact('data'));
+        }
+    }
+
+    public function changeSchema(Request $request, Application $app)
+    {
+        $validator = Validator::make($request->all(), [
+            'schema_salary' => 'required|exists:salaries,id',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->first());
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Ambil nilai lama untuk dibandingkan
+            $oldSchema = $app->schema_salary;
+
+            if ($oldSchema != $request->input('schema_salary')) {
+                $app->update([
+                    'schema_salary' => $request->input('schema_salary'),
+                ]);
+            } else {
+                return redirect()->back()->with('toast_info', 'Tidak ada perubahan yang dilakukan.');
+            }
+
+            DB::commit();
+
+            Alert::success('Berhasil', 'Berhasil mengubah pengaturan gaji pekerja!');
             return redirect()->back();
         } catch (\Throwable $th) {
             $data = [

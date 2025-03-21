@@ -37,6 +37,8 @@ Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
     Route::resource('salaries', SalaryController::class)->except('create', 'show', 'edit');
 
     Route::put('/worker/{app}/salary/{salary}/upload-admin', [WorkerController::class, 'uploadAdmin'])->name('payment-admin.upload');
+
+    Route::put('/worker/{app}/change-schema', [WorkerController::class, 'changeSchema'])->name('worker.change-schema');
 });
 
 Route::group(['middleware' => ['role:superadmin|owner']], function () {

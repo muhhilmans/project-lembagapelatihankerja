@@ -34,11 +34,11 @@
                             <th>Tanggal Bekerja</th>
                             {{-- @hasrole('majikan') --}}
                             @hasrole('superadmin|admin')
-                                <th>Gaji (Dengan Tambahan 7,5%)</th>
+                                <th>Gaji (Dengan Tambahan)</th>
                             @endhasrole
                             {{-- @hasrole('superadmin|admin|owner|pembantu') --}}
                             @hasrole('superadmin|admin')
-                                <th>Gaji (Dengan Potongan 2,5%)</th>
+                                <th>Gaji (Dengan Potongan)</th>
                             @endhasrole
                             <th>Status</th>
                             @hasrole('superadmin|admin|owner')
@@ -194,10 +194,16 @@
                                         @endhasrole
                                         @hasrole('superadmin|admin|majikan')
                                             @hasrole('superadmin|admin')
+                                                <a href="#" class="btn btn-sm btn-warning mb-1" data-toggle="modal"
+                                                    data-target="#editSchemaModal-{{ $data->id }}"><i class="fas fa-edit"></i></a>
+                                                @include('cms.servant.modal.schema', [
+                                                    'data' => $data,
+                                                ])
+
                                                 @if ($data->servant->servantDetails->is_bank == 0 || $data->servant->servantDetails->is_bpjs == 0)
-                                                    <a href="#" class="btn btn-sm btn-warning mb-1" data-toggle="modal"
+                                                    <a href="#" class="btn btn-sm btn-secondary mb-1" data-toggle="modal"
                                                         data-target="#editBankModal-{{ $data->id }}"><i
-                                                            class="fas fa-edit"></i></a>
+                                                            class="fas fa-money-check"></i></a>
                                                     @include('cms.servant.modal.edit-bank', [
                                                         'data' => $data,
                                                     ])

@@ -35,7 +35,7 @@
                             @hasrole('majikan')
                                 @php
                                     $salary = $data->salary;
-                                    $service = $salary * 0.075;
+                                    $service = $salary * $data->schemaSalary->adds_client;
                                     $gaji = $salary + $service;
                                 @endphp
 
@@ -45,7 +45,7 @@
                             @hasrole('superadmin|admin|owner|pembantu')
                                 @php
                                     $salary = $data->salary;
-                                    $service = $salary * 0.025;
+                                    $service = $salary * $data->schemaSalary->adds_mitra;
                                     $gaji = $salary - $service;
                                 @endphp
 
@@ -81,11 +81,11 @@
                                     <th>Bulan</th>
                                     <th>Hadir</th>
                                     @hasrole('superadmin|admin|owner|majikan')
-                                        <th>Gaji (Dengan Tambahan 7,5%)</th>
+                                        <th>Gaji (Dengan Tambahan)</th>
                                         <th>Bukti Pembayaran</th>
                                     @endhasrole
                                     @hasrole('superadmin|admin|owner|pembantu')
-                                        <th>Gaji (Dengan Potongan 2,5%)</th>
+                                        <th>Gaji (Dengan Potongan)</th>
                                         <th>Bukti Dibayar</th>
                                     @endhasrole
                                     @hasrole('superadmin|admin|majikan')
