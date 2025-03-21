@@ -37,17 +37,25 @@
             ])
         @endif
 
-        @if ($d->status == 'interview')
-            <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                data-target="#passedModal-{{ $d->id }}">
-                <i class="fas fa-check"></i>
-            </a>
-            @include('cms.applicant.modal.passed', [
-                'data' => $d,
-            ])
-        @endif
-
         @hasrole('superadmin|admin')
+            @if ($d->status == 'interview')
+                <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
+                    data-target="#passedModal-{{ $d->id }}">
+                    <i class="fas fa-check"></i>
+                </a>
+                @include('cms.applicant.modal.passed', [
+                    'data' => $d,
+                ])
+
+                <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
+                    data-target="#rejectModal-{{ $d->id }}">
+                    <i class="fas fa-times"></i>
+                </a>
+                @include('cms.applicant.modal.reject', [
+                    'data' => $d,
+                ])
+            @endif
+
             @if ($d->status === 'schedule')
                 <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                     data-target="#interviewModal-{{ $d->id }}">
@@ -150,11 +158,11 @@
                 @include('cms.applicant.modal.complaint', ['data' => $d])
             @endif
 
-            <a href="{{ route('contract.download', ['applicationId' => $d->id]) }}" class="btn btn-sm btn-success mr-1"><i
-                    class="fas fa-file-download"></i></a>
+            <a href="{{ route('contract.download', ['applicationId' => $d->id]) }}"
+                class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
         @endif
 
-        @if ($d->status == 'pending' || $d->status == 'interview')
+        @if ($d->status == 'pending')
             <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                 data-target="#rejectModal-{{ $d->id }}">
                 <i class="fas fa-times"></i>

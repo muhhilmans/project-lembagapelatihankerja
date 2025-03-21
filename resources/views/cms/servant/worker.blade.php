@@ -221,12 +221,28 @@
                                         @endif
                                     @endhasrole
 
-                                    @hasrole('majikan|pembantu')
-                                        <a href="#" class="btn btn-sm btn-danger" data-toggle="modal"
-                                            data-target="#complaintModal-{{ $data->id }}">
-                                            <i class="fas fa-bullhorn"></i>
-                                        </a>
-                                        @include('cms.servant.modal.complaint', ['data' => $data])
+                                    @hasrole('majikan')
+                                        @if (
+                                            !$data->complaint->contains('application_id', $data->id) ||
+                                                !$data->complaint->contains('employe_id', auth()->user()->id))
+                                            <a href="#" class="btn btn-sm btn-danger mb-1" data-toggle="modal"
+                                                data-target="#complaintModal-{{ $data->id }}">
+                                                <i class="fas fa-bullhorn"></i>
+                                            </a>
+                                            @include('cms.servant.modal.complaint', ['data' => $data])
+                                        @endif
+                                    @endhasrole
+
+                                    @hasrole('pembantu')
+                                        @if (
+                                            !$data->complaint->contains('application_id', $data->id) ||
+                                                !$data->complaint->contains('servant_id', auth()->user()->id))
+                                            <a href="#" class="btn btn-sm btn-danger mb-1" data-toggle="modal"
+                                                data-target="#complaintModal-{{ $data->id }}">
+                                                <i class="fas fa-bullhorn"></i>
+                                            </a>
+                                            @include('cms.servant.modal.complaint', ['data' => $data])
+                                        @endif
                                     @endhasrole
                                 </td>
                             </tr>

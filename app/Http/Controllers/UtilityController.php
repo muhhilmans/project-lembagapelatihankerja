@@ -8,6 +8,7 @@ use App\Models\ApplyJob;
 use App\Models\Profession;
 use App\Models\Application;
 use App\Models\RecomServant;
+use App\Models\Salary;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
@@ -175,7 +176,9 @@ class UtilityController extends Controller
             return view('cms.applicant.hire', compact('datas'));
         } else {
             $datas = Application::whereNotNull('employe_id')->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])->get();
-            return view('cms.applicant.hire', compact('datas'));
+
+            $schemas = Salary::all();
+            return view('cms.applicant.hire', compact(['datas', 'schemas']));
         }
     }
 
@@ -188,11 +191,15 @@ class UtilityController extends Controller
                 ->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])
                 ->whereNotNull('vacancy_id')
                 ->get();
+
+            return view('cms.applicant.independent', compact('datas'));
         } else {
             $datas = Application::whereNotNull('vacancy_id')->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])->get();
-        }
 
-        return view('cms.applicant.independent', compact('datas'));
+            $schemas = Salary::all();
+
+            return view('cms.applicant.independent', compact(['datas', 'schemas']));
+        }
     }
 
     public function hireApplication()
