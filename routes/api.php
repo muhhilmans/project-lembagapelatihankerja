@@ -48,6 +48,9 @@ Route::middleware('jwt.auth')->group(function () {
 
         // Kelola Pekerja
         Route::get('/all-worker', [WorkerController::class, 'allWorker']);
+        Route::get('/all-worker/{id}', [WorkerController::class, 'showWorker']);
+        Route::post('/all-worker/{application}/presence', [WorkerController::class, 'presenceWorker']);
+        Route::put('/all-worker/{application}/presence/{salary}', [WorkerController::class, 'updatePresenceWorker']);
         Route::put('/all-worker/{application}/reject', [WorkerController::class, 'rejectWorker']);
         Route::post('/all-worker/{application}/complaint-worker', [WorkerController::class, 'complaintWorker']);
         Route::get('/complaints', [ComplaintController::class, 'allComplaintWorkers']);
@@ -74,6 +77,7 @@ Route::middleware('jwt.auth')->group(function () {
 
         // Kelola Pekerjaan
         Route::get('/all-work', [WorkerController::class, 'allWork']);
+        Route::get('/all-work/{id}', [WorkerController::class, 'showWork']);
         Route::post('/all-work/{application}/complaint-work', [WorkerController::class, 'complaintWork']);
         Route::get('/complaints-work', [ComplaintController::class, 'allComplaintWork']);
 

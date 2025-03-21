@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Complaint;
+use App\Models\Voucher;
+use App\Models\WorkerSalary;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -130,6 +133,360 @@ class WorkerController extends Controller
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat mengambil data.',
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
+            ], 500);
+        }
+    }
+
+    public function showWorker($id)
+    {
+        $user = auth()->user();
+        $worker = Application::with(['servant', 'employe', 'vacancy'])
+            ->where(function ($query) use ($user) {
+                $query->where('employe_id', $user->id)
+                    ->orWhereHas('vacancy', function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    });
+            })
+            ->where('status', 'accepted')
+            ->find($id);
+
+        $workerSalaries = WorkerSalary::with(['voucher'])->where('application_id', $id)->get();
+
+        if (!$worker) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data pekerja tidak ditemukan.',
+            ], 404);
+        }
+
+        try {
+            $datas = [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'role' => $user->roles->first()->name,
+                    'access_token' => $user->access_token,
+                ],
+                'detail' => [
+                    'id' => $worker->id,
+                    'servant_id' => $worker->servant_id,
+                    'client' => $worker->employe_id ? $worker->employe->name : $worker->vacancy->user->name,
+                    'status' => $worker->status,
+                    'salary' => $worker->salary,
+                    'work_start_date' => $worker->work_start_date,
+                    'servant_detail' => [
+                        'id' => $worker->servant->id,
+                        'name' => $worker->servant->name,
+                        'username' => $worker->servant->username,
+                        'email' => $worker->servant->email,
+                        'gender'           => $worker->servant->servantDetails->gender ?? 'not_filled',
+                        'place_of_birth'   => $worker->servant->servantDetails->place_of_birth ?? '-',
+                        'date_of_birth'    => $worker->servant->servantDetails->date_of_birth,
+                        'religion'         => $worker->servant->servantDetails->religion ?? '-',
+                        'marital_status'   => $worker->servant->servantDetails->marital_status ?? 'not_filled',
+                        'children'         => $worker->servant->servantDetails->children ?? 0,
+                        'last_education'   => $worker->servant->servantDetails->last_education ?? 'not_filled',
+                        'phone'            => $worker->servant->servantDetails->phone ?? '-',
+                        'emergency_number' => $worker->servant->servantDetails->emergency_number ?? '-',
+                        'address'          => $worker->servant->servantDetails->address ?? '-',
+                        'rt'               => $worker->servant->servantDetails->rt,
+                        'rw'               => $worker->servant->servantDetails->rw,
+                        'village'          => $worker->servant->servantDetails->village,
+                        'district'         => $worker->servant->servantDetails->district,
+                        'regency'          => $worker->servant->servantDetails->regency,
+                        'province'         => $worker->servant->servantDetails->province,
+                        'is_bank'          => $worker->servant->servantDetails->is_bank ?? 0,
+                        'bank_name'        => $worker->servant->servantDetails->bank_name ?? '-',
+                        'account_number'   => $worker->servant->servantDetails->account_number ?? '-',
+                        'is_bpjs'          => $worker->servant->servantDetails->is_bpjs ?? 0,
+                        'type_bpjs'        => $worker->servant->servantDetails->type_bpjs ?? 'Ketenagakerjaan',
+                        'number_bpjs'      => $worker->servant->servantDetails->number_bpjs ?? '-',
+                        'photo'            => $worker->servant->servantDetails->photo,
+                        'identity_card'    => $worker->servant->servantDetails->identity_card,
+                        'family_card'      => $worker->servant->servantDetails->family_card,
+                        'working_status'   => $worker->servant->servantDetails->working_status ?? 0,
+                        'experience'       => $worker->servant->servantDetails->experience ?? '-',
+                        'description'      => $worker->servant->servantDetails->description ?? '-',
+                        'is_inval'         => $worker->servant->servantDetails->is_inval ?? 0,
+                        'is_stay'          => $worker->servant->servantDetails->is_stay ?? 0,
+                        'profession'       => $worker->servant->servantDetails->profession->name ?? null,
+                        'skills' => $worker->servant->servantSkills->map(function ($skill) {
+                            return [
+                                'id' => $skill->id,
+                                'user_id' => $skill->user_id,
+                                'skill' => $skill->skill,
+                                'keahlian' => $skill->level
+                            ];
+                        }),
+                    ],
+                ],
+                'gaji' => $workerSalaries->makeHidden(['total_salary_pembantu', 'voucher_id', 'created_at', 'updated_at']),
+            ];
+
+            return response()->json([
+                'success' => 'success',
+                'message' => 'Data detail pekerja.',
+                'data' => $datas
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Terjadi kesalahan saat mengambil data.',
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
+            ], 500);
+        }
+    }
+
+    public function presenceWorker(Request $request, Application $application)
+    {
+        if (!$application) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data pekerjaan tidak ditemukan.',
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'month' => 'required',
+            'presence' => 'required|integer|min:0',
+            'voucher' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Validasi gagal!',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $data = $validator->validated();
+
+        $schemaSalary = optional($application->schemaSalary);
+        $bpjsClient = $schemaSalary->bpjs_client ? 20000 : 0;
+        $bpjsMitra = $schemaSalary->bpjs_mitra ? 20000 : 0;
+
+        $voucher = null;
+        if (!empty($data['voucher'])) {
+            $voucher = Voucher::where('code', $data['voucher'])->first();
+
+            if (!$voucher) {
+                return response()->json([
+                    'success' => 'failed',
+                    'message' => 'Kode voucher tidak ditemukan',
+                ], 400);
+            }
+
+            if (!$voucher->is_active) {
+                return response()->json([
+                    'success' => 'failed',
+                    'message' => 'Kode voucher sudah tidak aktif',
+                ], 400);
+            }
+
+            if ($voucher->expired_date && $voucher->expired_date < Carbon::now()->format('Y-m-d')) {
+                return response()->json([
+                    'success' => 'failed',
+                    'message' => 'Kode voucher sudah tidak berlaku',
+                ], 400);
+            }
+
+            $usedCount = WorkerSalary::where('voucher_id', $voucher->id)->count();
+            $usedInApplication = $application->workerSalary()->where('voucher_id', $voucher->id)->count();
+
+            if ($voucher->people_used && $usedCount >= $voucher->people_used) {
+                if (!($voucher->time_used && $usedInApplication < $voucher->time_used)) {
+                    return response()->json([
+                        'success' => 'failed',
+                        'message' => 'Kode voucher telah mencapai batas penggunaan',
+                    ], 400);
+                }
+            }
+
+            if ($voucher->time_used && $usedInApplication >= $voucher->time_used) {
+                return response()->json([
+                    'success' => 'failed',
+                    'message' => 'Kode voucher telah mencapai batas penggunaan pada pekerja ini',
+                ], 400);
+            }
+        }
+
+        $month = Carbon::createFromFormat('Y-m', $data['month']);
+        $daysInMonth = $month->daysInMonth;
+        $daySalary = $application->salary / $daysInMonth;
+
+        $totalSalary = $data['presence'] * $daySalary;
+        $discount = $voucher ? ($application->schemaSalary->adds_client - ($voucher->discount / 100)) : $application->schemaSalary->adds_client;
+
+        $majikanBonus = $totalSalary * $discount;
+        $totalSalaryMajikan = ($totalSalary + $majikanBonus) + $bpjsClient;
+
+        $addSalaryPembantu = $totalSalary * $application->schemaSalary->adds_mitra;
+        $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - $bpjsMitra;
+
+        $dataSalary = [
+            'day_salary' => ceil($daySalary),
+            'total_salary' => ceil($totalSalary),
+            'total_salary_majikan' => ceil($totalSalaryMajikan),
+            'total_salary_pembantu' => ceil($totalSalaryPembantu),
+        ];
+
+        try {
+            DB::beginTransaction();
+
+            $store = WorkerSalary::create([
+                'application_id' => $application->id,
+                'month' => Carbon::createFromFormat('Y-m', $data['month'])->startOfMonth()->format('Y-m-d'),
+                'presence' => $data['presence'],
+                'total_salary' => $dataSalary['total_salary'],
+                'total_salary_majikan' => $dataSalary['total_salary_majikan'],
+                'total_salary_pembantu' => $dataSalary['total_salary_pembantu'],
+                'voucher_id' => $voucher ? $voucher->id : null,
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Absensi pekerja berhasil dikirimkan!',
+                'data'    => $store
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Terjadi kesalahan saat mengirimkan absensi.',
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
+            ], 500);
+        }
+    }
+
+    public function updatePresenceWorker(Request $request, Application $application, WorkerSalary $salary)
+    {
+        if (!$salary) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data gaji pekerja tidak ditemukan.',
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'month' => 'required',
+            'presence' => 'required|integer|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Validasi gagal!',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $data = $validator->validated();
+
+        $schemaSalary = optional($application->schemaSalary);
+        $bpjsClient = $schemaSalary->bpjs_client ? 20000 : 0;
+        $bpjsMitra = $schemaSalary->bpjs_mitra ? 20000 : 0;
+
+        $voucher = null;
+        if (!empty($data['voucher'])) {
+            $voucher = Voucher::where('code', $data['voucher'])->first();
+
+            if (!$voucher) {
+                return response()->json([
+                    'success' => 'failed',
+                    'message' => 'Kode voucher tidak ditemukan',
+                ], 400);
+            }
+
+            if (!$voucher->is_active || ($voucher->expired_date && $voucher->expired_date < now()->format('Y-m-d'))) {
+                return response()->json([
+                    'success' => 'failed',
+                    'message' => 'Kode voucher tidak aktif atau sudah kadaluarsa',
+                ], 400);
+            }
+
+            $usedCount = WorkerSalary::where('voucher_id', $voucher->id)->count();
+            $usedInApplication = $application->workerSalary()->where('voucher_id', $voucher->id)->count();
+
+            if ($voucher->people_used && $usedCount >= $voucher->people_used) {
+                if (!($voucher->time_used && $usedInApplication < $voucher->time_used)) {
+                    return response()->json([
+                        'success' => 'failed',
+                        'message' => 'Kode voucher telah mencapai batas penggunaan',
+                    ], 400);
+                }
+            }
+
+            if ($voucher->time_used && $usedInApplication >= $voucher->time_used) {
+                return response()->json([
+                    'success' => 'failed',
+                    'message' => 'Kode voucher telah mencapai batas penggunaan pada pekerja ini',
+                ], 400);
+            }
+        }
+
+        $month = Carbon::createFromFormat('Y-m', $data['month']);
+        $daysInMonth = $month->daysInMonth;
+        $daySalary = $application->salary / $daysInMonth;
+
+        $totalSalary = $data['presence'] * $daySalary;
+        $discount = $voucher ? ($schemaSalary->adds_client - ($voucher->discount / 100)) : $schemaSalary->adds_client;
+
+        $majikanBonus = $totalSalary * $discount;
+        $totalSalaryMajikan = ($totalSalary + $majikanBonus) + $bpjsClient;
+
+        $addSalaryPembantu = $totalSalary * $schemaSalary->adds_mitra;
+        $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - $bpjsMitra;
+
+        $dataSalary = [
+            'day_salary' => ceil($daySalary),
+            'total_salary' => ceil($totalSalary),
+            'total_salary_majikan' => ceil($totalSalaryMajikan),
+            'total_salary_pembantu' => ceil($totalSalaryPembantu),
+        ];
+
+        try {
+            DB::beginTransaction();
+
+            $update = $salary->update([
+                'month' => $month->startOfMonth()->format('Y-m-d'),
+                'presence' => $data['presence'],
+                'total_salary' => $dataSalary['total_salary'],
+                'total_salary_majikan' => $dataSalary['total_salary_majikan'],
+                'total_salary_pembantu' => $dataSalary['total_salary_pembantu'],
+                'voucher_id' => $voucher ? $voucher->id : $salary->voucher_id,
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Absensi pekerja berhasil diperbarui!',
+                'data'    => $update
+            ], 201);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Terjadi kesalahan saat memperbarui absensi.',
                 'error'   => [
                     'message' => $th->getMessage(),
                     'file' => $th->getFile(),
@@ -323,6 +680,108 @@ class WorkerController extends Controller
             return response()->json([
                 'success' => 'success',
                 'message' => 'Data semua pekerjaan.',
+                'data' => $datas
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Terjadi kesalahan saat mengambil data.',
+                'error'   => [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine()
+                ]
+            ], 500);
+        }
+    }
+
+    public function showWork($id)
+    {
+        $user = auth()->user();
+        $worker = Application::with(['servant', 'employe', 'vacancy'])
+            ->where('servant_id', $user->id)
+            ->where('status', 'accepted')
+            ->find($id);
+
+        $workerSalaries = WorkerSalary::with(['voucher'])->where('application_id', $id)->get();
+
+        if (!$worker) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Data pekerja tidak ditemukan.',
+            ], 404);
+        }
+
+        try {
+            $datas = [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'username' => $user->username,
+                    'email' => $user->email,
+                    'role' => $user->roles->first()->name,
+                    'access_token' => $user->access_token,
+                ],
+                'detail' => [
+                    'id' => $worker->id,
+                    'servant_id' => $worker->servant_id,
+                    'client' => $worker->employe_id ? $worker->employe->name : $worker->vacancy->user->name,
+                    'status' => $worker->status,
+                    'salary' => $worker->salary,
+                    'work_start_date' => $worker->work_start_date,
+                    'servant_detail' => [
+                        'id' => $worker->servant->id,
+                        'name' => $worker->servant->name,
+                        'username' => $worker->servant->username,
+                        'email' => $worker->servant->email,
+                        'gender'           => $worker->servant->servantDetails->gender ?? 'not_filled',
+                        'place_of_birth'   => $worker->servant->servantDetails->place_of_birth ?? '-',
+                        'date_of_birth'    => $worker->servant->servantDetails->date_of_birth,
+                        'religion'         => $worker->servant->servantDetails->religion ?? '-',
+                        'marital_status'   => $worker->servant->servantDetails->marital_status ?? 'not_filled',
+                        'children'         => $worker->servant->servantDetails->children ?? 0,
+                        'last_education'   => $worker->servant->servantDetails->last_education ?? 'not_filled',
+                        'phone'            => $worker->servant->servantDetails->phone ?? '-',
+                        'emergency_number' => $worker->servant->servantDetails->emergency_number ?? '-',
+                        'address'          => $worker->servant->servantDetails->address ?? '-',
+                        'rt'               => $worker->servant->servantDetails->rt,
+                        'rw'               => $worker->servant->servantDetails->rw,
+                        'village'          => $worker->servant->servantDetails->village,
+                        'district'         => $worker->servant->servantDetails->district,
+                        'regency'          => $worker->servant->servantDetails->regency,
+                        'province'         => $worker->servant->servantDetails->province,
+                        'is_bank'          => $worker->servant->servantDetails->is_bank ?? 0,
+                        'bank_name'        => $worker->servant->servantDetails->bank_name ?? '-',
+                        'account_number'   => $worker->servant->servantDetails->account_number ?? '-',
+                        'is_bpjs'          => $worker->servant->servantDetails->is_bpjs ?? 0,
+                        'type_bpjs'        => $worker->servant->servantDetails->type_bpjs ?? 'Ketenagakerjaan',
+                        'number_bpjs'      => $worker->servant->servantDetails->number_bpjs ?? '-',
+                        'photo'            => $worker->servant->servantDetails->photo,
+                        'identity_card'    => $worker->servant->servantDetails->identity_card,
+                        'family_card'      => $worker->servant->servantDetails->family_card,
+                        'working_status'   => $worker->servant->servantDetails->working_status ?? 0,
+                        'experience'       => $worker->servant->servantDetails->experience ?? '-',
+                        'description'      => $worker->servant->servantDetails->description ?? '-',
+                        'is_inval'         => $worker->servant->servantDetails->is_inval ?? 0,
+                        'is_stay'          => $worker->servant->servantDetails->is_stay ?? 0,
+                        'profession'       => $worker->servant->servantDetails->profession->name ?? null,
+                        'skills' => $worker->servant->servantSkills->map(function ($skill) {
+                            return [
+                                'id' => $skill->id,
+                                'user_id' => $skill->user_id,
+                                'skill' => $skill->skill,
+                                'keahlian' => $skill->level
+                            ];
+                        }),
+                    ],
+                ],
+                'gaji' => $workerSalaries->makeHidden(['total_salary_majikan', 'payment_majikan_image', 'payment_pembantu_image', 'voucher', 'voucher_id', 'created_at', 'updated_at']),
+            ];
+
+            return response()->json([
+                'success' => 'success',
+                'message' => 'Data detail pekerja.',
                 'data' => $datas
             ], 200);
         } catch (\Throwable $th) {
