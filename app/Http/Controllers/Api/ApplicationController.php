@@ -14,6 +14,43 @@ use Illuminate\Support\Facades\Validator;
 
 class ApplicationController extends Controller
 {
+    public function scheduleInterview()
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('majikan')) {
+            $schedules = Application::with(['vacancy', 'servant', 'employe'])
+                ->whereHas('vacancy', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })
+                ->where('employe_id', $user->id)
+                ->where('status', 'interview')
+                ->orderByDesc('updated_at')
+                ->limit(3)
+                ->get();
+
+        } elseif ($user->hasRole('pembantu')) {
+            $schedules = Application::with(['vacancy', 'servant', 'employe'])
+                ->where('servant_id', $user->id)
+                ->where('status', 'interview')
+                ->orderByDesc('updated_at')
+                ->limit(3)
+                ->get();
+        } else {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Role tidak valid.',
+                'data' => null
+            ], 403);
+        }
+
+        return response()->json([
+            'success' => 'success',
+            'message' => 'Data jadwal interview.',
+            'data' => $schedules->isNotEmpty() ? $schedules : 'Belum ada jadwal interview.'
+        ], 200);
+    }
+
     public function allApplicant()
     {
         $user = auth()->user();

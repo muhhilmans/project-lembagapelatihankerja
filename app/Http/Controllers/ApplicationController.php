@@ -65,7 +65,7 @@ class ApplicationController extends Controller
             'interview_date' => ['sometimes', 'date'],
             'work_end_date' => ['sometimes', 'date'],
             'salary' => ['nullable', 'numeric'],
-            'schema_salary' => ['required', 'exists:salaries,id'],
+            'schema_salary' => ['sometimes', 'exists:salaries,id'],
         ]);
 
 
@@ -305,7 +305,7 @@ class ApplicationController extends Controller
             'interview_date' => ['sometimes', 'date'],
             'work_end_date' => ['sometimes', 'date'],
             'salary' => ['nullable', 'numeric'],
-            'schema_salary' => ['required', 'exists:salaries,id'],
+            'schema_salary' => ['sometimes', 'exists:salaries,id'],
         ]);
 
         if ($validator->fails()) {

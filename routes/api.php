@@ -92,5 +92,6 @@ Route::middleware('jwt.auth')->group(function () {
     });
 
     // ALL
+    Route::get('/schedule-interview', [ApplicationController::class, 'scheduleInterview']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
