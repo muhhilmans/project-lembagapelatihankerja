@@ -14,7 +14,7 @@
                     <input type="text" name="status" value="process" hidden>
                     <input type="text" name="notes" value="" hidden>
 
-                    Apakah anda yakin untuk memverifikasi aduan dari <b>{{ $data->employe->name }}</b> ini?
+                    Apakah anda yakin untuk memverifikasi aduan dari <b>{{ $data->employe_id ? $data->employe_id : "-" }}</b> ini?
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>

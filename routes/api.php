@@ -2,6 +2,13 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\VacancyController;
+use App\Http\Controllers\Api\ApplicationController;
+use App\Http\Controllers\Api\ComplaintController;
+use App\Http\Controllers\Api\PartnerController;
+use App\Http\Controllers\Api\WorkerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +21,77 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::post('/register-employe', [AuthController::class, 'storeEmployeRegister']);
+Route::get('/professions', [AuthController::class, 'getProfessions']);
+Route::post('/register-servant', [AuthController::class, 'storeServantRegister']);
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+Route::post('/verify-otp/resend', [AuthController::class, 'resendOtpVerification']);
+
+Route::middleware('jwt.auth')->group(function () {
+
+    // Client
+    Route::middleware('role_api:majikan')->group(function () {
+        // Cari Mitra
+        Route::get('/seek-mitra', [PartnerController::class, 'allPartner']);
+        Route::get('/seek-mitra/detail/{id}', [PartnerController::class, 'showPartner']);
+        Route::post('/seek-mitra/detail/{id}/hire', [PartnerController::class, 'hirePartner']);
+
+        // Kelola Pelamar
+        Route::get('/all-applicant', [ApplicationController::class, 'allApplicant']);
+        Route::put('/all-applicant/{application}/change', [ApplicationController::class, 'changeStatus']);
+
+        // Kelola Pekerja
+        Route::get('/all-worker', [WorkerController::class, 'allWorker']);
+        Route::get('/all-worker/{id}', [WorkerController::class, 'showWorker']);
+        Route::post('/all-worker/{application}/presence', [WorkerController::class, 'presenceWorker']);
+        Route::put('/all-worker/{application}/presence/{salary}', [WorkerController::class, 'updatePresenceWorker']);
+        Route::put('/all-worker/{application}/reject', [WorkerController::class, 'rejectWorker']);
+        Route::post('/all-worker/{application}/complaint-worker', [WorkerController::class, 'complaintWorker']);
+        Route::get('/complaints', [ComplaintController::class, 'allComplaintWorkers']);
+
+        // Kelola Lowongan
+        Route::apiResource('vacancy', VacancyController::class);
+        Route::post('/vacancy/{vacancy}/apply-recom/{recomServant}', [ApplicationController::class, 'applyRecom']);
+
+        // Kelola Profil
+        Route::get('/profile/majikan/{id}', [ProfileController::class, 'profileMajikan']);
+        Route::put('/profile/majikan/{id}/edit', [ProfileController::class, 'updateMajikan']);
+    });
+
+    // Mitra
+    Route::middleware('role_api:pembantu')->group(function () {
+        // Cari Lowongan
+        Route::get('/seek-vacancy', [VacancyController::class, 'seekVacancy']);
+        Route::get('/seek-vacancy/{id}', [VacancyController::class, 'showVacancy']);
+
+        // Lamaran
+        Route::post('/apply-job', [ApplicationController::class, 'applyJob']);
+        Route::get('/all-application', [ApplicationController::class, 'allApplication']);
+        Route::put('/all-application/{application}/choose', [ApplicationController::class, 'chooseStatus']);
+
+        // Kelola Pekerjaan
+        Route::get('/all-work', [WorkerController::class, 'allWork']);
+        Route::get('/all-work/{id}', [WorkerController::class, 'showWork']);
+        Route::post('/all-work/{application}/complaint-work', [WorkerController::class, 'complaintWork']);
+        Route::get('/complaints-work', [ComplaintController::class, 'allComplaintWork']);
+
+        // Kelola Profil
+        Route::get('/profile/pembantu/{id}', [ProfileController::class, 'profilePembantu']);
+        Route::put('/profile/pembantu/{id}/edit', [ProfileController::class, 'updatePembantu']);
+        Route::post('profile/pembantu/{id}/skill', [ProfileController::class, 'storeSkill']);
+        Route::put('/profile/pembantu/{id}/skill/{skill_id}', [ProfileController::class, 'updateSkill']);
+        Route::delete('/profile/pembantu/{id}/skill/{skill_id}', [ProfileController::class, 'destroySkill']);
+        Route::put('/profile/pembantu/{id}/change-inval', [ProfileController::class, 'changeInval']);
+        Route::put('/profile/pembantu/{id}/change-stay', [ProfileController::class, 'changeStay']);
+    });
+
+    // ALL
+    Route::get('/schedule-interview', [ApplicationController::class, 'scheduleInterview']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });

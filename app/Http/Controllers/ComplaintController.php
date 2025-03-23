@@ -18,6 +18,8 @@ class ComplaintController extends Controller
     {
         if (auth()->user()->roles->first()->name == 'majikan') {
             $datas = Complaint::where('employe_id', auth()->user()->id)->get();
+        } elseif (auth()->user()->roles->first()->name == 'pembantu') {
+            $datas = Complaint::where('servant_id', auth()->user()->id)->get();
         } else {
             $datas = Complaint::all();
         }
@@ -88,9 +90,9 @@ class ComplaintController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'application_id' => ['sometimes', 'exists:applications,id'],
-            'servant_id' => ['required', 'exists:users,id'],
-            'employe_id' => ['required', 'exists:users,id'],
+            'application_id' => ['required', 'exists:applications,id'],
+            'servant_id' => ['sometimes', 'exists:users,id'],
+            'employe_id' => ['sometimes', 'exists:users,id'],
             'message' => ['required'],
         ]);
 
@@ -104,8 +106,8 @@ class ComplaintController extends Controller
             DB::transaction(function () use ($data) {
                 Complaint::create([
                     'application_id' => $data['application_id'],
-                    'servant_id' => $data['servant_id'],
-                    'employe_id' => $data['employe_id'],
+                    'servant_id' => $data['servant_id'] ?? null,
+                    'employe_id' => $data['employe_id'] ?? null,
                     'message' => $data['message'],
                     'status' => 'pending',
                 ]);

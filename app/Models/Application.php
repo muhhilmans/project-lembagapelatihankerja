@@ -28,6 +28,7 @@ class Application extends Model
         'work_start_date',
         'work_end_date',
         'file_contract',
+        'schema_salary',
     ];
 
     public function servant()
@@ -53,5 +54,10 @@ class Application extends Model
     public function workerSalary()
     {
         return $this->hasMany(WorkerSalary::class, 'application_id');
+    }
+
+    public function schemaSalary()
+    {
+        return $this->belongsTo(Salary::class, 'schema_salary');
     }
 }

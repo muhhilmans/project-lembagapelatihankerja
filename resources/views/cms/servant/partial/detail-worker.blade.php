@@ -32,25 +32,7 @@
                         <li><i class="fas fa-clock mr-2 mb-2"></i>
                             {{ \Carbon\Carbon::parse($data->work_start_date)->format('d F Y') }}</li>
                         <li><i class="fas fa-money-bill-wave mr-1 mb-2"></i>
-                            @hasrole('majikan')
-                                @php
-                                    $salary = $data->salary;
-                                    $service = $salary * 0.075;
-                                    $gaji = $salary + $service;
-                                @endphp
-
-                                Rp. {{ number_format($gaji, 0, ',', '.') }}
-                            @endhasrole
-
-                            @hasrole('superadmin|admin|owner|pembantu')
-                                @php
-                                    $salary = $data->salary;
-                                    $service = $salary * 0.025;
-                                    $gaji = $salary - $service;
-                                @endphp
-
-                                Rp. {{ number_format($gaji, 0, ',', '.') }}
-                            @endhasrole
+                            Rp. {{ number_format($data->salary, 0, ',', '.') }}
                         </li>
                     </ul>
                 </div>
@@ -81,11 +63,11 @@
                                     <th>Bulan</th>
                                     <th>Hadir</th>
                                     @hasrole('superadmin|admin|owner|majikan')
-                                        <th>Gaji (Dengan Tambahan 7,5%)</th>
+                                        <th>Gaji (Dengan Tambahan)</th>
                                         <th>Bukti Pembayaran</th>
                                     @endhasrole
                                     @hasrole('superadmin|admin|owner|pembantu')
-                                        <th>Gaji (Dengan Potongan 2,5%)</th>
+                                        <th>Gaji (Dengan Potongan)</th>
                                         <th>Bukti Dibayar</th>
                                     @endhasrole
                                     @hasrole('superadmin|admin|majikan')

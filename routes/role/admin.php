@@ -8,6 +8,7 @@ use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfessionController;
+use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\User\AdminController;
 use App\Http\Controllers\User\EmployeController;
 use App\Http\Controllers\User\ServantController;
@@ -33,7 +34,11 @@ Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
 
     Route::resource('blogs', BlogController::class);
 
+    Route::resource('salaries', SalaryController::class)->except('create', 'show', 'edit');
+
     Route::put('/worker/{app}/salary/{salary}/upload-admin', [WorkerController::class, 'uploadAdmin'])->name('payment-admin.upload');
+
+    Route::put('/worker/{app}/change-schema', [WorkerController::class, 'changeSchema'])->name('worker.change-schema');
 });
 
 Route::group(['middleware' => ['role:superadmin|owner']], function () {
