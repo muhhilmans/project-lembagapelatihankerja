@@ -8,12 +8,35 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
+    public function imgProfile($imageName)
+    {
+        $filePath = "public/img/photo/{$imageName}";
+
+        if (!Storage::exists($filePath)) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Gambar tidak ditemukan.',
+                'url' => null
+            ], 404);
+        }
+
+        $imageUrl = asset("storage/img/photo/{$imageName}");
+
+        return response()->json([
+            'success' => 'success',
+            'message' => 'Gambar berhasil ditemukan.',
+            'url' => $imageUrl
+        ], 200);
+    }
+
     public function profileMajikan($id)
     {
         $data = User::with(['employeDetails', 'roles'])
@@ -31,7 +54,23 @@ class ProfileController extends Controller
         return response()->json([
             'success'   => 'success',
             'message'   => 'Data profile majikan',
-            'data'      => $data
+            'data'      => [
+                'id' => $data->id,
+                'name' => $data->name,
+                'username' => $data->username,
+                'email' => $data->email,
+                'email_verified_at' => $data->email_verified_at,
+                'is_active' => $data->is_active,
+                'created_at' => $data->created_at,
+                'updated_at' => $data->updated_at,
+                'employe_details' => [
+                    'address' => $data->employeDetails->address,
+                    'phone' => $data->employeDetails->phone,
+                    'bank_name' => $data->employeDetails->bank_name,
+                    'account_number' => $data->employeDetails->account_number,
+                    'identity_card' => $data->employeDetails->identity_card ? asset("storage/img/identity_card/{$data->employeDetails->identity_card}") : "-",
+                ],
+            ],
         ]);
     }
 
@@ -169,21 +208,21 @@ class ProfileController extends Controller
                     'phone'            => $data->servantDetails->phone ?? '-',
                     'emergency_number' => $data->servantDetails->emergency_number ?? '-',
                     'address'          => $data->servantDetails->address ?? '-',
-                    'rt'               => $data->servantDetails->rt,
-                    'rw'               => $data->servantDetails->rw,
-                    'village'          => $data->servantDetails->village,
-                    'district'         => $data->servantDetails->district,
-                    'regency'          => $data->servantDetails->regency,
-                    'province'         => $data->servantDetails->province,
+                    'rt'               => $data->servantDetails->rt ?? '-',
+                    'rw'               => $data->servantDetails->rw ?? '-',
+                    'village'          => $data->servantDetails->village ?? '-',
+                    'district'         => $data->servantDetails->district ?? '-',
+                    'regency'          => $data->servantDetails->regency ?? '-',
+                    'province'         => $data->servantDetails->province ?? '-',
                     'is_bank'          => $data->servantDetails->is_bank ?? 0,
                     'bank_name'        => $data->servantDetails->bank_name ?? '-',
                     'account_number'   => $data->servantDetails->account_number ?? '-',
                     'is_bpjs'          => $data->servantDetails->is_bpjs ?? 0,
                     'type_bpjs'        => $data->servantDetails->type_bpjs ?? 'Ketenagakerjaan',
                     'number_bpjs'      => $data->servantDetails->number_bpjs ?? '-',
-                    'photo'            => $data->servantDetails->photo,
-                    'identity_card'    => $data->servantDetails->identity_card,
-                    'family_card'      => $data->servantDetails->family_card,
+                    'photo'            => $data->servantDetails->photo ? asset("storage/img/photo/{$data->servantDetails->photo}") : "-",
+                    'identity_card'    => $data->servantDetails->identity_card ? asset("storage/img/identity_card/{$data->servantDetails->identity_card}") : "-",
+                    'family_card'      => $data->servantDetails->family_card ? asset("storage/img/family_card/{$data->servantDetails->family_card}") : "-",
                     'working_status'   => $data->servantDetails->working_status ?? 0,
                     'experience'       => $data->servantDetails->experience ?? '-',
                     'description'      => $data->servantDetails->description ?? '-',
@@ -191,7 +230,7 @@ class ProfileController extends Controller
                     'updated_at'       => $data->servantDetails->updated_at,
                     'is_inval'         => $data->servantDetails->is_inval ?? 0,
                     'is_stay'          => $data->servantDetails->is_stay ?? 0,
-                    'profession'       => $data->servantDetails->profession->name ?? null,
+                    'profession'       => $data->servantDetails->profession->name ?? "-",
                 ],
                 'servant_skills' => $data->servantSkills->map(function ($skill) {
                     return [
