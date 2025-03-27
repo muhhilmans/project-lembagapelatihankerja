@@ -11,6 +11,7 @@
     <!-- PWA  -->
     <meta name="theme-color" content="#6777ef" />
     <link rel="apple-touch-icon" href="{{ asset('assets/img/logo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/img/logo.png') }}" type="image/png">
     <link rel="manifest" href="{{ asset('/manifest.json') }}">
 
     <title>{{ $title }} | {{ env('APP_NAME') }}</title>
