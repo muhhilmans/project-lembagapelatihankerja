@@ -1,0 +1,17 @@
+{
+    "name": "SIPEMBANTU",
+    "short_name": "SIPEMBANTU",
+    "start_url": "/login",
+    "background_color": "#6777ef",
+    "description": "PWA of SIPEMBANTU",
+    "display": "fullscreen",
+    "theme_color": "#6777ef",
+    "icons": [
+        {
+            "src": "/assets/img/apple-touch-icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
