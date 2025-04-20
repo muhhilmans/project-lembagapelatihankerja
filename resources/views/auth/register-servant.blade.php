@@ -32,7 +32,16 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="password">Password <span class="text-danger">*</span></label>
-                                        <input type="password" class="form-control" id="password" name="password" required>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control form-control-user" id="password"
+                                                name="password" placeholder="Password" required>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="button"
+                                                    id="togglePassword">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-row p-1">
@@ -74,6 +83,18 @@
 
             confirmRegistration.addEventListener('click', function() {
                 servantRegisterForm.submit();
+            });
+
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            const icon = togglePassword.querySelector('i');
+
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
             });
         });
     </script>

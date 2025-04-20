@@ -8,7 +8,8 @@
         <div class="row text-center">
             <div class="col-lg-12">
                 <div class="card o-hidden border-0 shadow-lg mb-3 mb-lg-0 p-3">
-                    <a href="{{ route('home') }}"><img src="{{ asset('assets/img/logo.png') }}" alt="Logo" class="img-fluid mb-2" style="max-height: 100px; width: auto;"></a>
+                    <a href="{{ route('home') }}"><img src="{{ asset('assets/img/logo.png') }}" alt="Logo"
+                            class="img-fluid mb-2" style="max-height: 100px; width: auto;"></a>
                     <h3 class="card-title font-weight-bold">Registrasi Akun</h3>
                     <div class="card-body text-start">
                         <form action="{{ route('store-employe-register') }}" method="POST" id="employeRegisterForm">
@@ -31,7 +32,16 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label for="password">Password <span class="text-danger">*</span></label>
-                                        <input type="password" class="form-control" id="password" name="password" required>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control form-control-user" id="password"
+                                                name="password" placeholder="Password" required>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="button"
+                                                    id="togglePassword">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-row">
@@ -75,6 +85,18 @@
 
             confirmRegistration.addEventListener('click', function() {
                 employeRegisterForm.submit();
+            });
+
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            const icon = togglePassword.querySelector('i');
+
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
             });
         });
     </script>

@@ -17,12 +17,29 @@
                             </div>
                             <div class="form-group">
                                 <label for="password">Password Baru</label>
-                                <input type="password" name="password" id="password" class="form-control" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control form-control-user" id="password"
+                                        name="password" placeholder="Password" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-white border-left-0" onclick="togglePassword()"
+                                            style="cursor: pointer;">
+                                            <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label for="password_confirmation">Konfirmasi Password</label>
-                                <input type="password" name="password_confirmation" id="password_confirmation"
-                                    class="form-control" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control form-control-user" id="password_confirmation"
+                                        name="password_confirmation" placeholder="Password" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-white border-left-0"
+                                            onclick="togglePasswordConfirmation()" style="cursor: pointer;">
+                                            <i class="fas fa-eye" id="togglePasswordConfirmationIcon"></i>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                             <button type="submit" class="btn btn-primary mt-3 shadow">Ubah Password</button>
                         </div>
@@ -32,3 +49,27 @@
         </div>
     </div>
 @endsection
+
+@push('custom-script')
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.getElementById('togglePasswordIcon');
+            const isPassword = passwordInput.type === 'password';
+
+            passwordInput.type = isPassword ? 'text' : 'password';
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        }
+
+        function togglePasswordConfirmation() {
+            const passwordInput = document.getElementById('password_confirmation');
+            const icon = document.getElementById('togglePasswordConfirmationIcon');
+            const isPassword = passwordInput.type === 'password';
+
+            passwordInput.type = isPassword ? 'text' : 'password';
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        }
+    </script>
+@endpush
