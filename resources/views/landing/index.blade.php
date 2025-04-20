@@ -30,9 +30,13 @@
     {{-- @include('landing.section.team') --}}
     <!--<<  Team Member >>-->
 
+    <!--<<  Gallery section >>-->
+    @include('landing.section.gallery')
+    <!--<<  Gallery section >>-->
+
 
     <!--<<  Testimonial sectioN >>-->
-    {{-- @include('landing.section.testimonial') --}}
+    @include('landing.section.testimonial')
     <!--<<  Testimonial sectioN >>-->
 
     <!--<<  Pricing sectioN >>-->
