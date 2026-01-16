@@ -9,47 +9,33 @@ use App\Models\RecomServant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\VacancyResource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\ApiResponse;
 
 class VacancyController extends Controller
 {
+    use ApiResponse;
+
     public function index()
     {
-        $professions = Profession::all();
         $user = auth()->user();
-        $vacancies = Vacancy::where('user_id', $user->id)->paginate(10);
+
+        $vacancies = Vacancy::with(['profession:id,name', 'user:id,name'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->paginate(10);
 
         if ($vacancies->isEmpty()) {
-            return response()->json([
-                'success'   => 'success',
-                'message'   => 'Belum ada lowongan!',
-            ], 200);
+            return $this->successResponse([], 'Belum ada lowongan!');
         }
 
+        $professions = Profession::select('id', 'name')->get();
+
         $datas = [
-            'professions' => $professions->map(function ($profession) {
-                return [
-                    'id' => $profession->id,
-                    'name' => $profession->name,
-                ];
-            }),
+            'professions' => $professions,
             'vacancies' => [
-                'data' => $vacancies->map(function ($vacancy) {
-                    return [
-                        'id' => $vacancy->id,
-                        'title' => $vacancy->title,
-                        'description' => $vacancy->description,
-                        'requirements' => $vacancy->requirements,
-                        'benefits' => $vacancy->benefits,
-                        'closing_date' => $vacancy->closing_date,
-                        'limit' => $vacancy->limit,
-                        'status' => $vacancy->status,
-                        'user' => $vacancy->user->name,
-                        'profession' => $vacancy->profession->name,
-                    ];
-                }),
+                'data' => $vacancies->map(fn($v) => $this->formatVacancy($v)),
                 'pagination' => [
                     'current_page' => $vacancies->currentPage(),
                     'per_page' => $vacancies->perPage(),
@@ -62,31 +48,32 @@ class VacancyController extends Controller
             ]
         ];
 
-        return new VacancyResource('success', 'Data semua lowongan', $datas);
+        return $this->successResponse($datas, 'Data semua lowongan');
     }
 
     public function show(string $id)
     {
         $user = auth()->user();
-        $detail = Vacancy::find($id);
+
+        $detail = Vacancy::with(['profession:id,name', 'user:id,name'])->find($id);
 
         if (!$detail) {
-            return response()->json([
-                'success'   => 'failed',
-                'message'   => 'Data lowongan tidak ditemukan!',
-            ], 404);
+            return $this->errorResponse('Data lowongan tidak ditemukan!', [], 404);
         }
 
         if ($detail->user_id !== $user->id) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Unauthorized access. You do not have permission to view this vacancy.'
-            ], 401);
+            return $this->errorResponse('Anda tidak memiliki izin melihat lowongan ini.', [], 403);
         }
 
-        $applications = Application::with('servant')->where('vacancy_id', $id)->where('status', '!=', 'accepted')->get();
+        $applications = Application::with(['servant.servantDetails'])
+            ->where('vacancy_id', $id)
+            ->where('status', '!=', 'accepted')
+            ->get();
+
         $appliedServantIds = $applications->pluck('servant_id')->toArray();
-        $recoms = RecomServant::with('servant.servantDetails')->where('vacancy_id', $id)
+
+        $recoms = RecomServant::with(['servant.servantDetails'])
+            ->where('vacancy_id', $id)
             ->whereHas('servant.servantDetails', function ($query) {
                 $query->where('working_status', false);
             })
@@ -94,55 +81,34 @@ class VacancyController extends Controller
             ->get();
 
         $datas = [
-            'detail' => [
-                'id' => $detail->id,
-                'title' => $detail->title,
-                'description' => $detail->description,
-                'requirements' => $detail->requirements,
-                'benefits' => $detail->benefits,
-                'closing_date' => $detail->closing_date,
-                'limit' => $detail->limit,
-                'status' => $detail->status,
-                'client' => $detail->user->name,
-                'profession' => $detail->profession->name,
-            ],
-            'pelamar' => $applications->map(function ($application) {
+            'detail' => $this->formatVacancy($detail),
+            'pelamar' => $applications->map(function ($app) {
                 return [
-                    'id' => $application->id,
-                    'status' => $application->status,
-                    'servant' => [
-                        'id' => $application->servant->id,
-                        'name' => $application->servant->name,
-                        'email' => $application->servant->email,
-                        'detail' => $application->servant->servantDetails->where('user_id', $application->servant->id)->first()->makeHidden(['id', 'servant_id', 'created_at', 'updated_at']),
-                    ],
-                    'salary' => $application->salary,
-                    'link_interview' => $application->link_interview,
-                    'interview_date' => $application->interview_date,
-                    'notes_interview' => $application->notes_interview,
-                    'notes_verify' => $application->notes_verify,
-                    'notes_accepted' => $application->notes_accepted,
-                    'notes_rejected' => $application->notes_rejected,
-                    'work_start_date' => $application->work_start_date,
-                    'work_end_date' => $application->work_end_date,
-                    'file_contract' => $application->file_contract,
+                    'id' => $app->id,
+                    'status' => $app->status,
+                    'servant' => $this->formatUserDetail($app->servant),
+                    'salary' => $app->salary,
+                    'link_interview' => $app->link_interview,
+                    'interview_date' => $app->interview_date,
+                    'notes_interview' => $app->notes_interview,
+                    'notes_verify' => $app->notes_verify,
+                    'notes_accepted' => $app->notes_accepted,
+                    'notes_rejected' => $app->notes_rejected,
+                    'work_start_date' => $app->work_start_date,
+                    'work_end_date' => $app->work_end_date,
+                    'file_contract' => $app->file_contract,
                 ];
             }),
             'rekomendasi' => $recoms->map(function ($recom) {
                 return [
                     'id' => $recom->id,
                     'vacancy_id' => $recom->vacancy_id,
-                    'servant' => [
-                        'id' => $recom->servant->id,
-                        'name' => $recom->servant->name,
-                        'email' => $recom->servant->email,
-                        'detail' => $recom->servant->servantDetails->where('user_id', $recom->servant->id)->first()->makeHidden(['id', 'servant_id', 'created_at', 'updated_at']),
-                    ],
+                    'servant' => $this->formatUserDetail($recom->servant),
                 ];
             }),
         ];
 
-        return new VacancyResource('success', 'Detail lowongan', $datas);
+        return $this->successResponse($datas, 'Detail lowongan');
     }
 
     public function store(Request $request)
@@ -158,54 +124,32 @@ class VacancyController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->validationErrorResponse($validator);
         }
 
         $data = $validator->validated();
-        $user = auth()->user();
 
-        try {
-            DB::beginTransaction();
+        return DB::transaction(function () use ($data) {
+            try {
+                $store = Vacancy::create([
+                    'title'         => $data['title'],
+                    'profession_id' => $data['profession_id'],
+                    'closing_date'  => $data['closing_date'],
+                    'user_id'       => auth()->id(),
+                    'limit'         => $data['limit'],
+                    'description'   => $data['description'],
+                    'requirements'  => $data['requirements'],
+                    'benefits'      => $data['benefits'] ?? null,
+                    'status'        => true
+                ]);
 
-            $store = Vacancy::create([
-                'title'         => $data['title'],
-                'profession_id' => $data['profession_id'],
-                'closing_date'  => $data['closing_date'],
-                'user_id'       => $user->id,
-                'limit'         => $data['limit'],
-                'description'   => $data['description'],
-                'requirements'  => $data['requirements'],
-                'benefits'      => $data['benefits'] ?? null,
-                'status'        => true
-            ]);
+                return $this->successResponse($store, 'Lowongan berhasil ditambahkan', 201);
 
-            if (!$store) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'Lowongan gagal disimpan. Silakan coba lagi.'
-                ], 502);
+            } catch (\Throwable $th) {
+                Log::error("Store Vacancy Error: " . $th->getMessage());
+                return $this->errorResponse('Terjadi kesalahan saat menambahkan lowongan', [], 500);
             }
-
-            DB::commit();
-
-            return new VacancyResource('success', 'Lowongan berhasil ditambahkan', $store);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Terjadi kesalahan saat menambahkan lowongan',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
-            ], 500);
-        }
+        });
     }
 
     public function update(Request $request, $id)
@@ -221,158 +165,87 @@ class VacancyController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->validationErrorResponse($validator);
         }
 
-        $update = Vacancy::find($id);
+        $vacancy = Vacancy::find($id);
 
-        if (!$update) {
-            return response()->json([
-                'success'   => 'failed',
-                'message'   => 'Data lowongan tidak ditemukan!',
-            ], 404);
+        if (!$vacancy) {
+            return $this->errorResponse('Data lowongan tidak ditemukan!', [], 404);
+        }
+
+        if ($vacancy->user_id !== auth()->id()) {
+            return $this->errorResponse('Unauthorized', [], 403);
         }
 
         $data = $validator->validated();
-        $user = auth()->user();
 
-        try {
-            DB::beginTransaction();
+        return DB::transaction(function () use ($vacancy, $data) {
+            try {
+                $status = ($vacancy->limit <= $data['limit']);
 
-            if ($update->limit <= $data['limit']) {
-                $status = true;
-            } else {
-                $status = false;
+                $vacancy->update([
+                    'title' => $data['title'],
+                    'closing_date' => $data['closing_date'],
+                    'profession_id' => $data['profession_id'],
+                    'limit' => $data['limit'],
+                    'description' => $data['description'],
+                    'requirements' => $data['requirements'],
+                    'benefits' => $data['benefits'] ?? $vacancy->benefits,
+                    'status' => $status
+                ]);
+
+                return $this->successResponse($vacancy, 'Lowongan berhasil diperbarui');
+
+            } catch (\Throwable $th) {
+                Log::error("Update Vacancy Error: " . $th->getMessage());
+                return $this->errorResponse('Terjadi kesalahan saat memperbaiki lowongan', [], 500);
             }
-
-            $update->update([
-                'title' => $data['title'],
-                'closing_date' => $data['closing_date'],
-                'profession_id' => $data['profession_id'],
-                'user_id' => $user->id,
-                'limit' => $data['limit'],
-                'description' => $data['description'],
-                'requirements' => $data['requirements'],
-                'benefits' => $data['benefits'],
-                'status' => $status
-            ]);
-
-            if (!$update) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'Lowongan gagal disimpan. Silakan coba lagi.'
-                ], 502);
-            }
-
-            DB::commit();
-
-            return new VacancyResource('success', 'Lowongan berhasil diperbarui', $update);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Terjadi kesalahan saat memperbaiki lowongan',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
-            ], 500);
-        }
+        });
     }
 
     public function destroy($id)
     {
-        $data = Vacancy::find($id);
+        $vacancy = Vacancy::find($id);
 
-        if (!$data) {
-            return response()->json([
-                'success'   => 'failed',
-                'message'   => 'Data lowongan tidak ditemukan!',
-            ], 404);
+        if (!$vacancy) {
+            return $this->errorResponse('Data lowongan tidak ditemukan!', [], 404);
         }
 
-        if ($data->applications->count() > 0) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Lowongan masih digunakan oleh pelamar'
-            ], 422);
+        if ($vacancy->user_id !== auth()->id()) {
+            return $this->errorResponse('Unauthorized', [], 403);
+        }
+
+        if ($vacancy->applications()->exists()) {
+            return $this->errorResponse('Lowongan masih digunakan oleh pelamar', [], 422);
         }
 
         try {
-            DB::beginTransaction();
-
-            $delete = $data->delete();
-
-            if (!$delete) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'Lowongan gagal dihapus. Silakan coba lagi.'
-                ], 502);
-            }
-
-            DB::commit();
-
-            return new VacancyResource('success', 'Lowongan berhasil dihapus!', true);
+            $vacancy->delete();
+            return $this->successResponse(true, 'Lowongan berhasil dihapus!');
         } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Terjadi kesalahan saat menghapus lowongan',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
-            ], 500);
+            Log::error("Delete Vacancy Error: " . $th->getMessage());
+            return $this->errorResponse('Terjadi kesalahan saat menghapus lowongan', [], 500);
         }
     }
 
     public function seekVacancy()
     {
-        $vacancies = Vacancy::with('user')
+        $vacancies = Vacancy::with(['user:id,name', 'profession:id,name'])
             ->where('closing_date', '>=', now())
             ->where('status', true)
             ->paginate(5);
 
-        $professions = Profession::all();
-
         if ($vacancies->isEmpty()) {
-            return response()->json([
-                'success'   => 'success',
-                'message'   => 'Tidak ada lowongan!',
-            ], 200);
+            return $this->successResponse([], 'Tidak ada lowongan!');
         }
 
+        $professions = Profession::select('id', 'name')->get();
+
         $datas = [
-            'professions' => $professions->map(function ($profession) {
-                return [
-                    'id' => $profession->id,
-                    'name' => $profession->name,
-                ];
-            }),
+            'professions' => $professions,
             'vacancies' => [
-                'data' => $vacancies->map(function ($vacancy) {
-                    return [
-                        'id' => $vacancy->id,
-                        'title' => $vacancy->title,
-                        'description' => $vacancy->description,
-                        'requirements' => $vacancy->requirements,
-                        'benefits' => $vacancy->benefits,
-                        'closing_date' => $vacancy->closing_date,
-                        'limit' => $vacancy->limit,
-                        'status' => $vacancy->status,
-                        'user' => $vacancy->user->name,
-                        'profession' => $vacancy->profession->name,
-                    ];
-                }),
+                'data' => $vacancies->map(fn($v) => $this->formatVacancy($v)),
                 'pagination' => [
                     'current_page' => $vacancies->currentPage(),
                     'per_page' => $vacancies->perPage(),
@@ -385,18 +258,15 @@ class VacancyController extends Controller
             ]
         ];
 
-        return new VacancyResource('success', 'Data semua lowongan', $datas);
+        return $this->successResponse($datas, 'Data semua lowongan');
     }
 
     public function showVacancy($id)
     {
-        $detail = Vacancy::with(['profession', 'user'])->find($id);
+        $detail = Vacancy::with(['profession:id,name', 'user:id,name'])->find($id);
 
         if (!$detail) {
-            return response()->json([
-                'success'   => 'failed',
-                'message'   => 'Data lowongan tidak ditemukan!',
-            ], 404);
+            return $this->errorResponse('Data lowongan tidak ditemukan!', [], 404);
         }
 
         $application = Application::where('vacancy_id', $id)
@@ -408,21 +278,40 @@ class VacancyController extends Controller
             : ['status' => 'Belum melamar', 'applied_at' => null];
 
         $data = [
-            'detail' => [
-                'id' => $detail->id,
-                'title' => $detail->title,
-                'description' => $detail->description,
-                'requirements' => $detail->requirements,
-                'benefits' => $detail->benefits,
-                'closing_date' => $detail->closing_date,
-                'limit' => $detail->limit,
-                'status' => $detail->status,
-                'client' => $detail->user->name,
-                'profession' => $detail->profession->name,
-            ],
+            'detail' => $this->formatVacancy($detail),
             'status_lamaran' => $statusLamaran
         ];
 
-        return new VacancyResource('success', 'Data detail lowongan', $data);
+        return $this->successResponse($data, 'Data detail lowongan');
+    }
+
+    // --- PRIVATE HELPER METHODS (DRY) ---
+
+    private function formatVacancy($vacancy)
+    {
+        return [
+            'id' => $vacancy->id,
+            'title' => $vacancy->title,
+            'description' => $vacancy->description,
+            'requirements' => $vacancy->requirements,
+            'benefits' => $vacancy->benefits,
+            'closing_date' => $vacancy->closing_date,
+            'limit' => $vacancy->limit,
+            'status' => $vacancy->status,
+            'user' => $vacancy->user->name ?? 'Unknown',
+            'profession' => $vacancy->profession->name ?? 'Unknown',
+        ];
+    }
+
+    private function formatUserDetail($userModel)
+    {
+        $detail = $userModel->servantDetails->where('user_id', $userModel->id)->first();
+
+        return [
+            'id' => $userModel->id,
+            'name' => $userModel->name,
+            'email' => $userModel->email,
+            'detail' => $detail ? $detail->makeHidden(['id', 'servant_id', 'created_at', 'updated_at']) : null,
+        ];
     }
 }

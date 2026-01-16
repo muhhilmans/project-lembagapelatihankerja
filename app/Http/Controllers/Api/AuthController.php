@@ -12,90 +12,67 @@ use App\Models\ServantDetail;
 use Illuminate\Validation\Rules;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use App\Traits\ApiResponse;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
+
     public function responseWithToken($token, $user)
     {
-        return response()->json([
-            'status' => 'success',
-            'user' => $user->makeHidden(['roles', 'access_token']),
-            'role' => $user->roles->pluck('name')->toArray(),
+        return $this->successResponse([
+            'user' => $user->makeHidden(['roles', 'access_token', 'created_at', 'updated_at']),
+            'role' => $user->getRoleNames(),
             'access_token' => $token,
             'type' => 'bearer'
-        ]);
+        ], 'Login berhasil');
     }
 
     public function login(Request $request)
     {
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'account' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        $fieldType = filter_var($validated['account'], FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator);
+        }
 
+        $fieldType = filter_var($request->account, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
         $credentials = [
-            $fieldType => $validated['account'],
-            'password' => $validated['password'],
+            $fieldType => $request->account,
+            'password' => $request->password,
         ];
 
-        $user = User::where($fieldType, $validated['account'])->first();
+        $user = User::where($fieldType, $request->account)->first();
 
         if (!$user) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Akun tidak terdaftar.',
-            ], 401);
+            return $this->errorResponse('Akun tidak terdaftar.', [], 401);
         }
-
-        // if ($user && !empty($user->access_token)) {
-        //     $cekToken = auth('api')->setToken($user->access_token)->authenticate();
-        //     if ($cekToken) {
-        //         return response()->json([
-        //             'status' => 'success',
-        //             'message' => 'Anda sudah login',
-        //             'access_token' => $user->access_token,
-        //             'type' => 'bearer'
-        //         ]);
-        //     }
-        // }
 
         if (!empty($user->access_token)) {
-            auth('api')->setToken($user->access_token)->invalidate();
-            $user->access_token = null;
-            $user->save();
+            try {
+                auth('api')->setToken($user->access_token)->invalidate();
+            } catch (\Exception $e) { }
         }
 
-        if (!$token = auth('api')->setTTL(43200)->attempt($credentials)) { // 30 hari = 43200 menit
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Akun yang dimasukkan salah',
-            ], 401);
+        if (!$token = auth('api')->setTTL(43200)->attempt($credentials)) {
+            return $this->errorResponse('Kombinasi akun dan password salah.', [], 401);
         }
 
         $user = auth('api')->user();
 
         if ($user->email_verified_at == null) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Email belum diverifikasi! Silahkan verifikasi email terlebih dahulu.',
-                'email' => $user->email
-            ], 401);
+            auth('api')->logout();
+            return $this->errorResponse('Email belum diverifikasi!', ['email' => $user->email], 401);
         }
 
-        // if ($user->access_token !== $token) {
-        //     $user->access_token = $token;
-        //     $user->save();
-        // }
-        $user->access_token = $token;
-        $user->save();
+        $user->forceFill(['access_token' => $token])->save();
 
         return $this->responseWithToken($token, $user);
     }
@@ -104,28 +81,48 @@ class AuthController extends Controller
     {
         try {
             $user = auth('api')->user();
-
-            if (!$user) {
-                return response()->json([
-                    'status' => 'failed',
-                    'message' => 'User not authenticated',
-                ], 401);
+            if ($user) {
+                $user->forceFill(['access_token' => null])->save();
+                auth('api')->invalidate(true);
             }
-
-            auth('api')->invalidate(true);
-
-            $user->access_token = null;
-            $user->save();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Successfully logged out',
-            ]);
+            return $this->successResponse([], 'Berhasil logout.');
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Failed to logout, please try again!',
-            ], 500);
+            return $this->errorResponse('Gagal logout.', [], 500);
+        }
+    }
+
+    private function createUser(array $data, string $role, callable $detailsCallback)
+    {
+        DB::beginTransaction();
+        try {
+            $user = User::create([
+                'name' => $data['name'],
+                'username' => $data['username'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'is_active' => false,
+            ]);
+
+            $user->assignRole($role);
+            $detailsCallback($user);
+
+            $otpCode = random_int(100000, 999999);
+            Otp::create([
+                'user_id' => $user->id,
+                'otp_code' => $otpCode,
+                'expires_at' => Carbon::now()->addMinutes(5),
+            ]);
+
+            DB::commit();
+
+            $this->sendOtpEmail($user, $otpCode);
+
+            return $this->successResponse(['user' => $user], 'Registrasi berhasil. Silakan verifikasi email Anda.', 201);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Register Error: {$th->getMessage()}");
+            return $this->errorResponse('Terjadi kesalahan sistem saat registrasi.', [], 500);
         }
     }
 
@@ -136,104 +133,21 @@ class AuthController extends Controller
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', Rules\Password::defaults()],
-            'phone' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->validationErrorResponse($validator);
         }
 
-        $data = $validator->validated();
-
-        try {
-            DB::beginTransaction();
-
-            $store = User::create([
-                'name' => $data['name'],
-                'username' => $data['username'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['password']),
-                'is_active' => false,
-            ]);
-
-            if (!$store) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.'
-                ], 502);
-            }
-
-            $store->assignRole('majikan');
-
+        return $this->createUser($request->all(), 'majikan', function($user) use ($request) {
             EmployeDetail::create([
-                'user_id' => $store->id,
-                'phone' => $data['phone'],
-                'address' => $data['address']
+                'user_id' => $user->id,
+                'phone' => $request->phone,
+                'address' => $request->address
             ]);
-
-            $otp = rand(100000, 999999);
-            $expiresAt = Carbon::now()->addMinutes(5);
-
-            Otp::create([
-                'user_id' => $store->id,
-                'otp_code' => $otp,
-                'expires_at' => $expiresAt,
-            ]);
-
-            $this->sendOtpEmail($store, $otp);
-
-            DB::commit();
-
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Registrasi berhasil. Silakan verifikasi email Anda.',
-                'user'    => $store
-            ], 201);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Terjadi kesalahan saat registrasi, silahkan coba lagi.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
-            ], 500);
-        }
-    }
-
-    public function getProfessions()
-    {
-        try {
-            $data = Profession::all();
-
-            if ($data->isEmpty()) {
-                return response()->json([
-                    'status'  => 'success',
-                    'message' => 'Belum ada profesi!',
-                    'data'    => []
-                ], 200);
-            }
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Semua data profesi',
-                'data' => $data
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Terjadi kesalahan saat pengambilan data, silahkan coba lagi.',
-                'error'   => $th->getMessage()
-            ], 500);
-        }
+        });
     }
 
     public function storeServantRegister(Request $request)
@@ -247,122 +161,57 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => 'failed',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->validationErrorResponse($validator);
         }
 
-        $data = $validator->validated();
-
-        try {
-            DB::beginTransaction();
-
-            $store = User::create([
-                'name' => $data['name'],
-                'username' => $data['username'],
-                'email' => $data['email'],
-                'password' => Hash::make($data['password']),
-                'is_active' => false,
-            ]);
-
-            if (!$store) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.'
-                ], 502);
-            }
-
-            $store->assignRole('pembantu');
-
+        return $this->createUser($request->all(), 'pembantu', function($user) use ($request) {
             ServantDetail::create([
-                'user_id' => $store->id,
+                'user_id' => $user->id,
                 'profession_id' => $request->profession_id
             ]);
-
-            $otp = rand(100000, 999999);
-            $expiresAt = Carbon::now()->addMinutes(5);
-
-            Otp::create([
-                'user_id' => $store->id,
-                'otp_code' => $otp,
-                'expires_at' => $expiresAt,
-            ]);
-
-            $this->sendOtpEmail($store, $otp);
-
-            DB::commit();
-
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Registrasi berhasil. Silakan verifikasi email Anda.',
-                'user'    => $store
-            ], 201);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
-            return response()->json([
-                'status'  => 'failed',
-                'message' => 'Terjadi kesalahan saat registrasi, silahkan coba lagi.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
-            ], 500);
-        }
+        });
     }
 
-    protected function sendOtpEmail($user, $otp)
+    public function getProfessions()
     {
-        Mail::send('auth.otp-email', ['otp' => $otp], function ($message) use ($user) {
-            $message->to($user->email)->subject('Kode OTP Verifikasi Email');
-        });
+        $data = Profession::all();
+
+        if ($data->isEmpty()) {
+            return $this->successResponse([], 'Belum ada data profesi.');
+        }
+
+        return $this->successResponse($data, 'Semua data profesi');
     }
 
     public function verifyOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email',
             'otp' => 'required|digits:6',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            return response()->json([
-                'status' => 'failed',
-                'errors' => 'Pengguna tidak ditemukan!'
-            ], 404);
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator, 'Format data salah');
         }
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'failed',
-                'errors' => $validator->errors()
-            ], 422);
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return $this->errorResponse('Pengguna tidak ditemukan!', [], 404);
         }
 
         $otpRecord = Otp::where('user_id', $user->id)
             ->where('otp_code', $request->otp)
+            ->where('expires_at', '>', now())
             ->first();
 
-        if (!$otpRecord || $otpRecord->isExpired()) {
-            return response()->json([
-                'status' => 'failed',
-                'errors' => 'Kode OTP salah atau sudah kedaluwarsa!'
-            ], 422);
+        if (!$otpRecord) {
+            return $this->errorResponse('Kode OTP salah atau sudah kedaluwarsa!', [], 422);
         }
 
         $otpRecord->delete();
+        $user->forceFill(['email_verified_at' => now()])->save();
 
-        $user->update(['email_verified_at' => now()]);
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Email berhasil diverifikasi.',
-        ], 200);
+        return $this->successResponse([], 'Email berhasil diverifikasi.');
     }
 
     public function resendOtpVerification(Request $request)
@@ -371,67 +220,45 @@ class AuthController extends Controller
             'email' => 'required|email|exists:users,email',
         ]);
 
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator);
+        }
+
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
-            return response()->json([
-                'status' => 'failed',
-                'errors' => 'Pengguna tidak ditemukan!'
-            ], 404);
-        }
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'failed',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
         if (!is_null($user->email_verified_at)) {
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Email sudah diverifikasi sebelumnya. Silakan login.',
-            ], 200);
+            return $this->successResponse([], 'Email sudah diverifikasi sebelumnya. Silakan login.');
         }
 
-        $otp = rand(100000, 999999);
-        $expiresAt = Carbon::now()->addMinutes(5);
+        $recentOtp = Otp::where('user_id', $user->id)
+                        ->where('created_at', '>', now()->subMinute())
+                        ->exists();
 
-        Otp::updateOrCreate(
-            ['user_id' => $user->id],
-            ['otp_code' => $otp, 'expires_at' => $expiresAt]
-        );
+        if ($recentOtp) {
+            return $this->errorResponse('Harap tunggu 1 menit sebelum meminta OTP lagi.', [], 429);
+        }
+
+        Otp::where('user_id', $user->id)->delete();
+
+        $otp = random_int(100000, 999999);
+        Otp::create([
+            'user_id' => $user->id,
+            'otp_code' => $otp,
+            'expires_at' => Carbon::now()->addMinutes(5)
+        ]);
 
         $this->sendOtpEmail($user, $otp);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Kode OTP berhasil dikirim ulang. Silakan cek email Anda.',
-        ], 200);
+        return $this->successResponse([], 'Kode OTP berhasil dikirim ulang. Silakan cek email Anda.');
     }
 
-    // protected function sendVerificationEmail($user)
-    // {
-    //     $verificationLink = route('verification.verify', [
-    //         'id' => $user->id,
-    //         'hash' => sha1($user->email),
-    //     ]);
-
-    //     Mail::send('auth.verify', ['link' => $verificationLink], function ($message) use ($user) {
-    //         $message->to($user->email)->subject('Verifikasi Email Anda');
-    //     });
-    // }
-
-    // public function verifyEmail($id, $hash)
-    // {
-    //     $user = User::find($id);
-
-    //     if (!$user || sha1($user->email) !== $hash) {
-    //         return redirect()->route('login')->with('error', 'Tautan verifikasi tidak valid.');
-    //     }
-
-    //     $user->update(['email_verified_at' => now()]);
-
-    //     return redirect()->route('login')->with('success', 'Email berhasil diverifikasi.');
-    // }
+    protected function sendOtpEmail($user, $otp) {
+        try {
+            Mail::send('auth.otp-email', ['otp' => $otp], function ($message) use ($user) {
+                $message->to($user->email)->subject('Kode OTP Verifikasi Email');
+            });
+        } catch (\Exception $e) {
+            Log::error("Gagal mengirim email: " . $e->getMessage());
+        }
+    }
 }
