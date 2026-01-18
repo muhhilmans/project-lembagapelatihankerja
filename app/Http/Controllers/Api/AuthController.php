@@ -57,10 +57,9 @@ class AuthController extends Controller
 
         if (!empty($user->access_token)) {
             try {
-                auth('api')->setToken($user->access_token)->invalidate(true);
-            } catch (\PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException $e) {
 
-            } catch (\Exception $e) {
+                auth('api')->setToken($user->access_token)->invalidate(true);
+            } catch (\Throwable $e) {
 
             }
         }
@@ -69,7 +68,6 @@ class AuthController extends Controller
             return $this->errorResponse('Kombinasi akun dan password salah.', [], 401);
         }
 
-        $user = auth('api')->user();
 
         if ($user->email_verified_at == null) {
             auth('api')->logout();
