@@ -57,8 +57,12 @@ class AuthController extends Controller
 
         if (!empty($user->access_token)) {
             try {
-                auth('api')->setToken($user->access_token)->invalidate();
-            } catch (\Exception $e) { }
+                auth('api')->setToken($user->access_token)->invalidate(true);
+            } catch (\PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException $e) {
+
+            } catch (\Exception $e) {
+
+            }
         }
 
         if (!$token = auth('api')->setTTL(43200)->attempt($credentials)) {

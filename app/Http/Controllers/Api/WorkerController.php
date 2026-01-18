@@ -15,9 +15,11 @@ use Illuminate\Support\Facades\Validator;
 
 class WorkerController extends Controller
 {
-    public function allWorker()
+    public function allWorker(Request $request)
     {
         $user = auth()->user();
+        $search = $request->input('search', '');
+
         $workers = Application::with(['servant', 'employe', 'vacancy'])
             ->where(function ($query) use ($user) {
                 $query->where('employe_id', $user->id)
@@ -26,6 +28,12 @@ class WorkerController extends Controller
                     });
             })
             ->where('status', 'accepted')
+            ->when($search, function ($q) use ($search) {
+                $q->whereHas('servant', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
             ->paginate(10);
 
         try {
@@ -620,12 +628,24 @@ class WorkerController extends Controller
         }
     }
 
-    public function allWork()
+    public function allWork(Request $request)
     {
         $user = auth()->user();
+        $search = $request->input('search');
+
         $workers = Application::with(['servant', 'employe', 'vacancy'])
             ->where('servant_id', $user->id)
             ->where('status', 'accepted')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('employe', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('vacancy.user', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
+                });
+            })
             ->paginate(10);
 
         try {

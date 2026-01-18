@@ -17,14 +17,24 @@ class VacancyController extends Controller
 {
     use ApiResponse;
 
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
         $user = auth()->user();
 
-        $vacancies = Vacancy::with(['profession:id,name', 'user:id,name'])
-            ->where('user_id', $user->id)
-            ->latest()
-            ->paginate(10);
+        $query = Vacancy::with(['profession:id,name', 'user:id,name'])
+            ->where('user_id', $user->id);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('requirements', 'like', "%{$search}%");
+            });
+        }
+
+        $vacancies = $query->latest()->paginate(10);
 
         if ($vacancies->isEmpty()) {
             return $this->successResponse([], 'Belum ada lowongan!');
