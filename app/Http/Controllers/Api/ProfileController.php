@@ -230,7 +230,14 @@ class ProfileController extends Controller
                     'updated_at'       => $data->servantDetails->updated_at,
                     'is_inval'         => $data->servantDetails->is_inval ?? 0,
                     'is_stay'          => $data->servantDetails->is_stay ?? 0,
-                    'profession'       => $data->servantDetails->profession->name ?? "-",
+                    'profession'        => $data->servantDetails->profession?->name ?? '-',
+                    'professions'       => $data->servantDetails->professions?->map(function ($p) {
+                        return [
+                            'id' => $p->id,
+                            'name' => $p->name,
+                            'file_draft' => $p->file_draft
+                        ];
+                    }),
                 ],
                 'servant_skills' => $data->servantSkills->map(function ($skill) {
                     return [
@@ -266,7 +273,9 @@ class ProfileController extends Controller
             'religion' => ['required', 'string', 'max:255'],
             'marital_status' => ['required', 'string', 'max:255'],
             'children' => ['required', 'integer'],
-            'profession_id' => ['required', 'exists:professions,id'],
+            'profession_id' => ['nullable', 'exists:professions,id'],
+            'profession_ids' => ['nullable', 'array'],
+            'profession_ids.*' => ['string', 'exists:professions,id', 'distinct'],
             'last_education' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:255'],
             'emergency_number' => ['required', 'string', 'max:255'],
@@ -360,6 +369,9 @@ class ProfileController extends Controller
                 'identity_card' => $data['identity_card'],
                 'family_card' => $data['family_card'],
             ]);
+
+            $professions = $request->input('profession_ids', []);
+            $user->servantDetails->professions()->sync($professions);
 
             if (!$user) {
                 DB::rollBack();
