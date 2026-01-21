@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Validator;
 class WorkerController extends Controller
 {
     use ApiResponse;
-    
+
     public function allWorker(Request $request)
     {
         try {
@@ -41,7 +41,7 @@ class WorkerController extends Controller
                 })
                 ->paginate(10);
 
-        
+
             if ($workers->isEmpty()) {
                 return response()->json([
                     'success' => 'success',
@@ -240,7 +240,7 @@ class WorkerController extends Controller
                         'is_inval'         => $worker->servant->servantDetails->is_inval ?? 0,
                         'is_stay'          => $worker->servant->servantDetails->is_stay ?? 0,
                         'profession'       => $worker->servant->servantDetails->profession->name ?? null,
-                        'professions'       => $worker->servant->servantDetails->professions->map(function ($p) {
+                        'professions'       => $worker->servant->servantDetails?->professions->map(function ($p) {
                                                 return [
                                                     'id' => $p->id,
                                                     'name' => $p->name,
@@ -526,7 +526,7 @@ class WorkerController extends Controller
         }
     }
 
-    public function uploadMajikan(Request $request, Application $app)
+    public function uploadMajikan(Request $request, Application $application)
     {
         $validator = Validator::make($request->all(), [
             'proof_majikan' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
@@ -541,35 +541,29 @@ class WorkerController extends Controller
 
         try {
             $salary = WorkerSalary::find($request->worker_salary_id);
-
             if(!$salary) {
                 return $this->errorResponse('salary tidak ditemukan');
             }
 
-            $majikanName = str_replace(' ', '_', ($app->vacancy ? $app->vacancy->user->name : $app->employe->name));
-            $servantName = str_replace(' ', '_', $app->servant->name);
+            $majikanName = str_replace(' ', '_', ($application->vacancy ? $application->vacancy->user->name : $application->employe->name));
+            $servantName = str_replace(' ', '_', $application->servant->name);
             $date = Carbon::parse($salary->month)->format('M-Y');
+
             $directory = "payments/{$majikanName}/{$servantName}";
             $fileName = "proof_majikan_" . $date . "_{$servantName}." . $request->file('proof_majikan')->getClientOriginalExtension();
-            $storagePath = "public/{$directory}";
 
-            if (!Storage::exists($storagePath)) {
-                Storage::makeDirectory($storagePath);
+            if ($salary->payment_majikan_image && Storage::disk('public')->exists("payments/" . $salary->payment_majikan_image)) {
+                Storage::disk('public')->delete("payments/" . $salary->payment_majikan_image);
             }
 
-            if ($salary->payment_majikan_image && Storage::exists("payments/{$salary->payment_majikan_image}")) {
-                Storage::delete("payments/{$salary->payment_majikan_image}");
-            }
-
-            $path = $request->file('proof_majikan')->storeAs($storagePath, $fileName);
+            $path = $request->file('proof_majikan')->storeAs($directory, $fileName, 'public');
 
             DB::transaction(function () use ($salary, $path) {
                 $salary->update([
-                    'payment_majikan_image' => str_replace('public/payments/', '', $path),
+                    'payment_majikan_image' => $path,
                 ]);
             });
 
-            // Alert::success('Berhasil', 'Berhasil mengupload bukti pembayaran!');
             return $this->successResponse($salary, 'Berhasil mengupload bukti pembayaran');
         } catch (\Throwable $th) {
             return $this->errorResponse('kesalahan sistem', $th->getMessage());

@@ -296,7 +296,6 @@ class VacancyController extends Controller
     }
 
     // --- PRIVATE HELPER METHODS (DRY) ---
-
     private function formatVacancy($vacancy)
     {
         return [
@@ -310,6 +309,7 @@ class VacancyController extends Controller
             'status' => $vacancy->status,
             'user' => $vacancy->user->name ?? 'Unknown',
             'profession' => $vacancy->profession->name ?? 'Unknown',
+            'is_favorited' => $vacancy->is_favorited
         ];
     }
 
@@ -323,5 +323,35 @@ class VacancyController extends Controller
             'email' => $userModel->email,
             'detail' => $detail ? $detail->makeHidden(['id', 'servant_id', 'created_at', 'updated_at']) : null,
         ];
+    }
+
+    public function toggleFavorite(Vacancy $vacancy)
+    {
+        $user = auth()->user();
+
+        if (!$vacancy) {
+            return response()->json(['message' => 'Lowongan tidak ditemukan'], 404);
+        }
+
+        $changes = $user->favoriteVacancies()->toggle($vacancy->id);
+
+        $message = count($changes['attached']) > 0 ? 'Berhasil ditambahkan ke favorit' : 'Dihapus dari favorit';
+
+        return response()->json([
+            'message' => $message,
+            'is_favorited' => count($changes['attached']) > 0
+        ]);
+    }
+
+    public function myFavorites()
+    {
+        // return respose()->json('masuk');
+        try {
+            $favorites = auth()->user()->favoriteVacancies()->latest()->get();
+
+            return $this->successResponse($favorites, 'Berhasil mengambil data favorit');
+        } catch (\Throwable $th) {
+            return $this->errorResponse('Terjadi kesalahan saat mengambil data favorit', [], 500);
+        }
     }
 }

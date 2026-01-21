@@ -39,8 +39,10 @@ Route::middleware('jwt.auth')->group(function () {
     Route::middleware('role_api:majikan')->group(function () {
         // Cari Mitra
         Route::get('/seek-mitra', [PartnerController::class, 'allPartner']);
+        Route::get('/seek-mitra/my-favorites', [PartnerController::class, 'myFavoriteServants']);
         Route::get('/seek-mitra/detail/{id}', [PartnerController::class, 'showPartner']);
         Route::post('/seek-mitra/detail/{id}/hire', [PartnerController::class, 'hirePartner']);
+        Route::post('/seek-mitra/{servant}/favorite', [PartnerController::class, 'toggleFavoriteServant']);
 
         // Kelola Pelamar
         Route::get('/all-applicant', [ApplicationController::class, 'allApplicant']);
@@ -54,6 +56,7 @@ Route::middleware('jwt.auth')->group(function () {
         Route::put('/all-worker/{application}/reject', [WorkerController::class, 'rejectWorker']);
         Route::post('/all-worker/{application}/complaint-worker', [WorkerController::class, 'complaintWorker']);
         Route::get('/complaints', [ComplaintController::class, 'allComplaintWorkers']);
+        Route::put('/all-worker/{application}/uploadPayment', [WorkerController::class, 'uploadMajikan']);
 
         // Kelola Lowongan
         Route::apiResource('vacancy', VacancyController::class);
@@ -68,7 +71,9 @@ Route::middleware('jwt.auth')->group(function () {
     Route::middleware('role_api:pembantu')->group(function () {
         // Cari Lowongan
         Route::get('/seek-vacancy', [VacancyController::class, 'seekVacancy']);
+        Route::get('/seek-vacancy/my-favorites',[VacancyController::class, 'myFavorites']);
         Route::get('/seek-vacancy/{id}', [VacancyController::class, 'showVacancy']);
+        Route::post('/seek-vacancy/{vacancy}/favorite',[VacancyController::class, 'toggleFavorite']);
 
         // Lamaran
         Route::post('/apply-job', [ApplicationController::class, 'applyJob']);

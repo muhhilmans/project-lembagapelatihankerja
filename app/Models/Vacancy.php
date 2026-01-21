@@ -25,6 +25,22 @@ class Vacancy extends Model
         'status',
     ];
 
+    protected $appends = ['is_favorited'];
+
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'favorite_vacancies', 'vacancy_id', 'user_id')
+            ->withTimestamps();
+    }
+
+    public function getIsFavoritedAttribute()
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+        return $this->favoritedBy()->where('user_id', auth()->id())->exists();
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

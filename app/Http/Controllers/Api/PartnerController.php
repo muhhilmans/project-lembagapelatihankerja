@@ -2,19 +2,25 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Models\Application;
 use App\Models\User;
+use App\Models\Application;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class PartnerController extends Controller
 {
+    use ApiResponse;
+
     public function allPartner()
     {
         $user = auth()->user();
+
+        $favoritedIds = $user->favoriteServants()->pluck('servant_detail_id')->toArray();
+
         $partners = User::with(['roles', 'servantDetails', 'appServant'])
             ->whereHas('roles', function ($query) {
                 $query->where('name', 'pembantu');
@@ -35,9 +41,10 @@ class PartnerController extends Controller
                 'access_token' => $user->access_token,
             ],
             'mitra' => [
-                'data' => $partners->map(function ($partner) {
+                'data' => $partners->map(function ($partner) use ($favoritedIds) {
                     return [
                         'id'                => $partner->id,
+                        'is_favorited'      => in_array($partner->id, $favoritedIds),
                         'name'              => $partner->name,
                         'username'          => $partner->username,
                         'email'             => $partner->email,
@@ -46,6 +53,7 @@ class PartnerController extends Controller
                         'created_at'        => $partner->created_at,
                         'updated_at'        => $partner->updated_at,
                         'servant_details'   => [
+                            'id'               => $partner->servantDetails->id,
                             'user_id'          => $partner->servantDetails->user_id ?? null,
                             'gender'           => $partner->servantDetails->gender ?? 'not_filled',
                             'place_of_birth'   => $partner->servantDetails->place_of_birth ?? '-',
@@ -246,6 +254,41 @@ class PartnerController extends Controller
                     'line' => $th->getLine()
                 ]
             ], 500);
+        }
+    }
+
+    public function toggleFavoriteServant(User $servant)
+    {
+        $majikan = auth()->user();
+
+        if ($majikan->id === $servant->id) {
+            return response()->json(['message' => 'Tidak valid'], 400);
+        }
+
+        $changes = $majikan->favoriteServants()->toggle($servant->id);
+
+        $message = count($changes['attached']) > 0
+            ? 'Berhasil ditambahkan ke favorit'
+            : 'Dihapus dari favorit';
+
+        return response()->json([
+            'message' => $message,
+            'is_favorited' => count($changes['attached']) > 0
+        ]);
+    }
+
+    public function myFavoriteServants()
+    {
+        try {
+            $user = auth()->user();
+
+            $favorites = $user->favoriteServants()
+                ->latest('favorite_servants.created_at')
+                ->get();
+
+            return $this->successResponse($favorites, 'Daftar mitra favorit Anda');
+        } catch (\Throwable $th) {
+            return $this->errorResponse('Gagal mengambil data favorit', $th->getMessage());
         }
     }
 }

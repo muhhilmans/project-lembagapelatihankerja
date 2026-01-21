@@ -127,4 +127,31 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
     {
         return $this->hasMany(Blog::class, 'user_id');
     }
+
+    public function favoriteVacancies()
+    {
+        return $this->belongsToMany(Vacancy::class, 'favorite_vacancies', 'user_id', 'vacancy_id')
+            ->with('user', 'profession')
+            ->withTimestamps();
+    }
+
+    public function favoriteServants()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'favorite_servants',
+            'employe_detail_id',
+            'servant_detail_id'
+        )->withTimestamps();
+    }
+
+    public function favoritedByEmployers()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'favorite_servants',
+            'servant_detail_id',
+            'employe_detail_id'
+        )->withTimestamps();
+    }
 }
