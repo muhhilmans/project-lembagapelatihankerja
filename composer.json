@@ -11,6 +11,7 @@
         "php": "^8.1",
         "barryvdh/laravel-dompdf": "^3.0",
         "dedoc/scramble": "^0.13.10",
+        "doctrine/dbal": "^4.4",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^11.0",
         "laravel/reverb": "^1.0",

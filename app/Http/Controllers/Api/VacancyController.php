@@ -153,6 +153,10 @@ class VacancyController extends Controller
                     'status'        => true
                 ]);
 
+                if ($request->has('profession_ids')) {
+                    $store->professions()->sync($request->profession_ids);
+                }
+
                 return $this->successResponse($store, 'Lowongan berhasil ditambahkan', 201);
 
             } catch (\Throwable $th) {
@@ -204,6 +208,10 @@ class VacancyController extends Controller
                     'benefits' => $data['benefits'] ?? $vacancy->benefits,
                     'status' => $status
                 ]);
+
+                if ($request->has('profession_ids')) {
+                    $store->professions()->sync($request->profession_ids);
+                }
 
                 return $this->successResponse($vacancy, 'Lowongan berhasil diperbarui');
 

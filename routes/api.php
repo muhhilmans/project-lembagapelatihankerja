@@ -3,12 +3,13 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\WorkerController;
+use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\VacancyController;
-use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\ComplaintController;
-use App\Http\Controllers\Api\PartnerController;
-use App\Http\Controllers\Api\WorkerController;
+use App\Http\Controllers\Api\ApplicationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,9 @@ Route::post('/verify-otp/resend', [AuthController::class, 'resendOtpVerification
 
 Route::middleware('jwt.auth')->group(function () {
 
+    Route::post('/pushLaLongtitude', [AuthController::class, 'pushLaLongtitude']);
+
+    // Route
     // Client
     Route::middleware('role_api:majikan')->group(function () {
         // Cari Mitra
@@ -65,6 +69,8 @@ Route::middleware('jwt.auth')->group(function () {
         // Kelola Profil
         Route::get('/profile/majikan/{id}', [ProfileController::class, 'profileMajikan']);
         Route::put('/profile/majikan/{id}/edit', [ProfileController::class, 'updateMajikan']);
+
+
     });
 
     // Mitra
@@ -99,4 +105,6 @@ Route::middleware('jwt.auth')->group(function () {
     // ALL
     Route::get('/schedule-interview', [ApplicationController::class, 'scheduleInterview']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    //review
+    Route::post('/reviews/{application}', [ReviewController::class, 'store']);
 });

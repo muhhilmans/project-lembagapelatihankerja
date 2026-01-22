@@ -51,6 +51,11 @@ class Vacancy extends Model
         return $this->belongsTo(Profession::class);
     }
 
+    public function professions()
+    {
+        return $this->belongsToMany(Profession::class, 'profession_vacancy', 'vacancy_id', 'profession_id');
+    }
+
     public function applications()
     {
         return $this->hasMany(Application::class, 'vacancy_id');

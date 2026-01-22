@@ -297,6 +297,8 @@ class ProfileController extends Controller
             'photo' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             'identity_card' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
             'family_card' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'latitude'  => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         if ($validator->fails()) {
@@ -368,6 +370,8 @@ class ProfileController extends Controller
                 'photo' => $data['photo'],
                 'identity_card' => $data['identity_card'],
                 'family_card' => $data['family_card'],
+                'latitude'  => $data['latitude'],
+                'longitude' => $data['longitude'],
             ]);
 
             $professions = $request->input('profession_ids', []);

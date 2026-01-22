@@ -51,6 +51,8 @@ class PartnerController extends Controller
                         'name'              => $partner->name,
                         'username'          => $partner->username,
                         'email'             => $partner->email,
+                        'rating'            => $partner->average_rating,
+                        'reviews_count'     => $partner->review_count,
                         'email_verified_at' => $partner->email_verified_at,
                         'is_active'         => $partner->is_active,
                         'created_at'        => $partner->created_at,

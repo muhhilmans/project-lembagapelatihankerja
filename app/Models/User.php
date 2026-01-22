@@ -154,4 +154,22 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
             'employe_detail_id'
         )->withTimestamps();
     }
+
+    // Relasi untuk review yang DITERIMA user ini
+    public function receivedReviews()
+    {
+        return $this->hasMany(Review::class, 'reviewee_id');
+    }
+
+    // Mengambil rata-rata rating (Otomatis hitung, baik dia Majikan atau Pembantu)
+    public function getAverageRatingAttribute()
+    {
+        return round($this->receivedReviews()->avg('rating'), 1) ?? 0;
+    }
+
+    // Atribut Virtual untuk menghitung jumlah ulasan
+    public function getReviewCountAttribute()
+    {
+        return $this->receivedReviews()->count();
+    }
 }

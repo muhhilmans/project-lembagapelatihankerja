@@ -58,15 +58,15 @@ class AuthController extends Controller
         if (!empty($user->access_token)) {
             try {
                 auth('api')->setToken($user->access_token);
-                
+
                 auth('api')->invalidate(true);
-            
+
             } catch (\PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException $e) {
                //
             } catch (\PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException $e) {
-                // 
+                //
             } catch (\Throwable $e) {
-                // 
+                //
             } finally {
                 auth('api')->unsetToken();
             }
@@ -269,6 +269,33 @@ class AuthController extends Controller
             });
         } catch (\Exception $e) {
             Log::error("Gagal mengirim email: " . $e->getMessage());
+        }
+    }
+
+    public function pushLaLongtitude(Request $request)
+    {
+        $user = auth()->user();
+        try {
+            $validator = Validator::make($request->all(), [
+                'latitude' => 'required|decimal',
+                'longitude' => 'required|decimal',
+            ]);
+
+            $user->servantDetails->update([
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Berhasil Set Latitude dan Longitude'
+            ], 200);
+        } catch (\Throwable $th) {
+            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan sistem.',
+            ], 500);
         }
     }
 }
