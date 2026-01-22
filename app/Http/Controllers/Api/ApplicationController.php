@@ -8,8 +8,9 @@ use App\Models\Application;
 use App\Models\RecomServant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Events\NotificationDispatched;
 use Illuminate\Support\Facades\Validator;
 
 class ApplicationController extends Controller
@@ -310,6 +311,20 @@ class ApplicationController extends Controller
 
             DB::commit();
 
+            try {
+                $targetUserId = $application->vacancy->user_id;
+                $pembantuName = auth()->user()->name;
+                $jobTitle = $application->vacancy->title;
+
+                NotificationDispatched::dispatch(
+                    "Pelamar baru: {$pembantuName} melamar di lowongan '{$jobTitle}'",
+                    $targetUserId,
+                    'info'
+                );
+            } catch (\Exception $e) {
+                Log::error("Gagal kirim notif applyJob: " . $e->getMessage());
+            }
+
             return response()->json([
                 'success' => 'success',
                 'message' => 'Berhasil mengirimkan lamaran!',
@@ -376,6 +391,17 @@ class ApplicationController extends Controller
             ]);
 
             DB::commit();
+
+            // try {
+            //     $majikanName = auth()->user()->name;
+            //     NotificationDispatched::dispatch(
+            //         "Selamat! Anda diundang interview oleh {$majikanName} melalui rekomendasi.",
+            //         $servant->id,
+            //         'success'
+            //     );
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif applyRecom: " . $e->getMessage());
+            // }
 
             return response()->json([
                 'success' => 'success',
@@ -466,6 +492,39 @@ class ApplicationController extends Controller
             }
 
             DB::commit();
+
+            try {
+                $targetId = $application->servant_id;
+                $majikanName = auth()->user()->name;
+                $statusMsg = "";
+                $type = 'info';
+
+                switch ($data['status']) {
+                    case 'schedule':
+                        $statusMsg = "Undangan Interview baru dari {$majikanName}.";
+                        $type = 'info';
+                        break;
+                    case 'passed':
+                        $statusMsg = "Selamat! Anda lolos seleksi oleh {$majikanName}. Silakan cek penawaran gaji.";
+                        $type = 'success';
+                        break;
+                    case 'rejected':
+                        $statusMsg = "Mohon maaf, lamaran Anda di {$majikanName} belum berhasil.";
+                        $type = 'error'; // atau warning
+                        break;
+                    case 'accepted':
+                        $statusMsg = "Selamat! Anda resmi DITERIMA bekerja oleh {$majikanName}.";
+                        $type = 'success';
+                        break;
+                }
+
+                if ($statusMsg) {
+                    NotificationDispatched::dispatch($statusMsg, $targetId, $type);
+                }
+
+            } catch (\Exception $e) {
+                Log::error("Gagal kirim notif changeStatus: " . $e->getMessage());
+            }
 
             return response()->json([
                 'status'  => 'success',
@@ -752,6 +811,37 @@ class ApplicationController extends Controller
             }
 
             DB::commit();
+
+            try {
+                // Tentukan target ID Majikan
+                $targetId = null;
+                if ($application->vacancy) {
+                    $targetId = $application->vacancy->user_id;
+                } elseif ($application->employe_id) {
+                    $targetId = $application->employe_id;
+                }
+
+                if ($targetId) {
+                    $pembantuName = auth()->user()->name;
+                    $msg = "";
+                    $type = 'info';
+
+                    // Asumsi: 'verify' atau 'choose' berarti setuju/lanjut
+                    if (in_array($data['status'], ['verify', 'choose'])) {
+                        $msg = "Mitra {$pembantuName} MENERIMA/MENYETUJUI penawaran Anda.";
+                        $type = 'success';
+                    } elseif ($data['status'] === 'rejected') {
+                        $msg = "Mitra {$pembantuName} MENOLAK penawaran Anda.";
+                        $type = 'warning';
+                    }
+
+                    if ($msg) {
+                        NotificationDispatched::dispatch($msg, $targetId, $type);
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("Gagal kirim notif chooseStatus: " . $e->getMessage());
+            }
 
             return response()->json([
                 'status'  => 'success',

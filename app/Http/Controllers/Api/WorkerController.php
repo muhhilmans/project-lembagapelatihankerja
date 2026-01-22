@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Events\NotificationDispatched;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -387,6 +388,18 @@ class WorkerController extends Controller
             ]);
 
             DB::commit();
+
+            // try {
+            //     $bulan = Carbon::parse($store->month)->translatedFormat('F Y');
+            //     NotificationDispatched::dispatch(
+            //         "Laporan Absensi & Gaji bulan {$bulan} telah diterbitkan.",
+            //         $application->servant_id,
+            //         'success'
+            //     );
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif presenceWorker: " . $e->getMessage());
+            // }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Absensi pekerja berhasil dikirimkan!',
@@ -506,6 +519,18 @@ class WorkerController extends Controller
             ]);
 
             DB::commit();
+
+            // try {
+            //     $bulan = Carbon::parse($salary->month)->translatedFormat('F Y');
+            //     NotificationDispatched::dispatch(
+            //         "Revisi: Data Absensi bulan {$bulan} telah diperbarui oleh Majikan.",
+            //         $application->servant_id,
+            //         'info'
+            //     );
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif updatePresenceWorker: " . $e->getMessage());
+            // }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Absensi pekerja berhasil diperbarui!',
@@ -564,6 +589,17 @@ class WorkerController extends Controller
                 ]);
             });
 
+            // try {
+            //     $bulan = Carbon::parse($salary->month)->translatedFormat('F Y');
+            //     NotificationDispatched::dispatch(
+            //         "Majikan telah mengunggah bukti pembayaran gaji bulan {$bulan}.",
+            //         $application->servant_id,
+            //         'success'
+            //     );
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif uploadMajikan: " . $e->getMessage());
+            // }
+
             return $this->successResponse($salary, 'Berhasil mengupload bukti pembayaran');
         } catch (\Throwable $th) {
             return $this->errorResponse('kesalahan sistem', $th->getMessage());
@@ -604,6 +640,17 @@ class WorkerController extends Controller
             }
 
             DB::commit();
+
+            try {
+                $majikanName = auth()->user()->name;
+                NotificationDispatched::dispatch(
+                    "PENTING: Kontrak kerja Anda dengan {$majikanName} telah diakhiri (Status: {$datas['status']}).",
+                    $application->servant_id,
+                    'warning'
+                );
+            } catch (\Exception $e) {
+                Log::error("Gagal kirim notif rejectWorker: " . $e->getMessage());
+            }
 
             return response()->json([
                 'status'  => 'success',
@@ -674,6 +721,17 @@ class WorkerController extends Controller
             }
 
             DB::commit();
+
+            // try {
+            //     NotificationDispatched::dispatch(
+            //         "Aduan Baru: Majikan menyampaikan keluhan terkait kinerja Anda.",
+            //         $application->servant_id,
+            //         'error'
+            //     );
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif complaintWorker: " . $e->getMessage());
+            // }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Pengaduan pekerja berhasil dikirimkan!',
@@ -933,6 +991,22 @@ class WorkerController extends Controller
             }
 
             DB::commit();
+
+            // try {
+            //     $employerId = $application->employe_id ?? ($application->vacancy ? $application->vacancy->user_id : null);
+
+            //     if ($employerId) {
+            //         $pembantuName = auth()->user()->name;
+            //         NotificationDispatched::dispatch(
+            //             "Aduan Baru: Pekerja {$pembantuName} menyampaikan keluhan.",
+            //             $employerId,
+            //             'warning'
+            //         );
+            //     }
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif complaintWork: " . $e->getMessage());
+            // }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Pengaduan pekerjaan berhasil dikirimkan!',

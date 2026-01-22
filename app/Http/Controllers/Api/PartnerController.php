@@ -15,9 +15,10 @@ class PartnerController extends Controller
 {
     use ApiResponse;
 
-    public function allPartner()
+    public function allPartner(Request $request)
     {
         $user = auth()->user();
+        $search = $request->input('search');
 
         $favoritedIds = $user->favoriteServants()->pluck('servant_detail_id')->toArray();
 
@@ -29,7 +30,9 @@ class PartnerController extends Controller
             })->whereDoesntHave('appServant', function ($query) use ($user) {
                 $query->where('employe_id', $user->id)
                     ->whereIn('status', ['interview', 'verify', 'passed', 'choose', 'accepted', 'rejected', 'pending']);
-            })->paginate(10);
+            })
+            // ->when(search)
+            ->paginate(10);
 
         $datas = [
             'user' => [
@@ -237,6 +240,19 @@ class PartnerController extends Controller
             }
 
             DB::commit();
+
+            try {
+                $employer = User::find($data['employe_id']);
+                $employerName = $employer ? $employer->name : 'Seseorang';
+
+                \App\Events\NotificationDispatched::dispatch(
+                    "Tawaran Pekerjaan: {$employerName} ingin merekrut Anda secara langsung.", // Pesan
+                    $partner->id,
+                    'info'
+                );
+            } catch (\Exception $e) {
+                Log::error("Gagal kirim notif hirePartner: " . $e->getMessage());
+            }
 
             return response()->json([
                 'status' => 'success',
