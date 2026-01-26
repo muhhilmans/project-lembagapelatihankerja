@@ -18,20 +18,61 @@ class PartnerController extends Controller
     public function allPartner(Request $request)
     {
         $user = auth()->user();
-        $search = $request->input('search');
+        // 1. Ambil semua parameter filter titah Yang Mulia
+        $searchName  = $request->input('name') ?? $request->input('search');
+        $religion    = $request->input('religion');
+        $isInval     = $request->input('is_inval');
+        $isStay      = $request->input('is_stay');
+        $professions = $request->input('professions');
 
         $favoritedIds = $user->favoriteServants()->pluck('servant_detail_id')->toArray();
 
-        $partners = User::with(['roles', 'servantDetails', 'appServant'])
+        $partners = User::with(['roles', 'servantDetails.professions', 'appServant']) 
+            // Filter Role Pembantu & Aktif
             ->whereHas('roles', function ($query) {
                 $query->where('name', 'pembantu');
-            })->where('is_active', true)->whereHas('servantDetails', function ($query) {
-                $query->where('working_status', false);
-            })->whereDoesntHave('appServant', function ($query) use ($user) {
+            })
+            ->where('is_active', true)
+
+            // Filter: TIDAK sedang dalam proses lamaran dengan user ini
+            ->whereDoesntHave('appServant', function ($query) use ($user) {
                 $query->where('employe_id', $user->id)
                     ->whereIn('status', ['interview', 'verify', 'passed', 'choose', 'accepted', 'rejected', 'pending']);
             })
-            // ->when(search)
+
+            // Filter Nama (Search)
+            ->when($searchName, function ($q) use ($searchName) {
+                $q->where('name', 'like', "%{$searchName}%");
+            })
+
+            // Filter Detail Servant (Agama, Inval, Stay)
+            ->whereHas('servantDetails', function ($query) use ($religion, $isInval, $isStay) {
+                $query->where('working_status', false);
+
+                $query->when($religion, function ($sub) use ($religion) {
+                    $sub->where('religion', $religion);
+                });
+
+                $query->when($isInval, function ($sub) {
+                    $sub->where('is_inval', 1);
+                });
+
+                $query->when($isStay, function ($sub) {
+                    $sub->where('is_stay', 1);
+                });
+            })
+
+            // Filter Professions (Many-to-Many via ServantDetail)
+            ->when($professions, function ($query) use ($professions) {
+                $query->whereHas('servantDetails.professions', function ($subQuery) use ($professions) {
+                    $ids = is_array($professions) ? $professions : explode(',', $professions);
+                    
+                    $subQuery->whereIn('professions.id', $ids);
+                    
+                    // $subQuery->whereIn('professions.name', $ids);
+                });
+            })
+            ->latest()
             ->paginate(10);
 
         $datas = [
@@ -93,6 +134,13 @@ class PartnerController extends Controller
                             'is_inval'         => $partner->servantDetails->is_inval ?? 0,
                             'is_stay'          => $partner->servantDetails->is_stay ?? 0,
                             'profession'       => $partner->servantDetails->profession->name ?? null,
+                            'professions'       => $partner->servantDetails->professions?->map(function ($p) {
+                                return [
+                                    'id' => $p->id,
+                                    'name' => $p->name,
+                                    'file_draft' => $p->file_draft
+                                ];
+                            }),
                         ],
                         'servant_skills' => $partner->servantSkills->map(function ($skill) {
                             return [
@@ -188,6 +236,13 @@ class PartnerController extends Controller
                     'is_inval'         => $partner->servantDetails->is_inval ?? 0,
                     'is_stay'          => $partner->servantDetails->is_stay ?? 0,
                     'profession'       => $partner->servantDetails->profession->name ?? null,
+                    'professions'       => $partner->servantDetails->professions?->map(function ($p) {
+                        return [
+                            'id' => $p->id,
+                            'name' => $p->name,
+                            'file_draft' => $p->file_draft
+                        ];
+                    }),
                 ],
                 'servant_skills' => $partner->servantSkills->map(function ($skill) {
                     return [

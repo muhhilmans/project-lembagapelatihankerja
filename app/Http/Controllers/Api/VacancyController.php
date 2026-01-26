@@ -20,10 +20,9 @@ class VacancyController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-
         $user = auth()->user();
 
-        $query = Vacancy::with(['profession:id,name', 'user:id,name'])
+        $query = Vacancy::with(['professions:id,name', 'user:id,name'])
             ->where('user_id', $user->id);
 
         if ($search) {
@@ -65,7 +64,7 @@ class VacancyController extends Controller
     {
         $user = auth()->user();
 
-        $detail = Vacancy::with(['profession:id,name', 'user:id,name'])->find($id);
+        $detail = Vacancy::with(['professions:id,name', 'user:id,name'])->find($id);
 
         if (!$detail) {
             return $this->errorResponse('Data lowongan tidak ditemukan!', [], 404);
@@ -125,7 +124,8 @@ class VacancyController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => ['required', 'string', 'max:255'],
-            'profession_id' => ['required', 'exists:professions,id'],
+            'profession_ids' => ['required', 'array'],
+            'profession_ids.*' => ['exists:professions,id'],
             'closing_date' => ['required', 'date'],
             'limit' => ['required', 'integer'],
             'description' => ['required'],
@@ -139,25 +139,24 @@ class VacancyController extends Controller
 
         $data = $validator->validated();
 
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data, $request) {
             try {
-                $store = Vacancy::create([
-                    'title'         => $data['title'],
-                    'profession_id' => $data['profession_id'],
-                    'closing_date'  => $data['closing_date'],
-                    'user_id'       => auth()->id(),
-                    'limit'         => $data['limit'],
-                    'description'   => $data['description'],
-                    'requirements'  => $data['requirements'],
-                    'benefits'      => $data['benefits'] ?? null,
-                    'status'        => true
+                $vacancy = Vacancy::create([
+                    'title' => $data['title'],
+                    'closing_date' => $data['closing_date'],
+                    'user_id' => auth()->id(),
+                    'limit' => $data['limit'],
+                    'description' => $data['description'],
+                    'requirements' => $data['requirements'],
+                    'benefits' => $data['benefits'] ?? null,
+                    'status' => true
                 ]);
 
-                if ($request->has('profession_ids')) {
-                    $store->professions()->sync($request->profession_ids);
-                }
+                $vacancy->professions()->sync($data['profession_ids']);
+                
+                $vacancy->load('professions');
 
-                return $this->successResponse($store, 'Lowongan berhasil ditambahkan', 201);
+                return $this->successResponse($this->formatVacancy($vacancy), 'Lowongan berhasil ditambahkan', 201);
 
             } catch (\Throwable $th) {
                 Log::error("Store Vacancy Error: " . $th->getMessage());
@@ -170,7 +169,8 @@ class VacancyController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => ['required', 'string', 'max:255'],
-            'profession_id' => ['required', 'exists:professions,id'],
+            'profession_ids' => ['required', 'array'],
+            'profession_ids.*' => ['exists:professions,id'],
             'closing_date' => ['required', 'date'],
             'limit' => ['required', 'integer'],
             'description' => ['required'],
@@ -194,14 +194,13 @@ class VacancyController extends Controller
 
         $data = $validator->validated();
 
-        return DB::transaction(function () use ($vacancy, $data) {
+        return DB::transaction(function () use ($vacancy, $data, $request) {
             try {
                 $status = ($vacancy->limit <= $data['limit']);
 
                 $vacancy->update([
                     'title' => $data['title'],
                     'closing_date' => $data['closing_date'],
-                    'profession_id' => $data['profession_id'],
                     'limit' => $data['limit'],
                     'description' => $data['description'],
                     'requirements' => $data['requirements'],
@@ -209,11 +208,11 @@ class VacancyController extends Controller
                     'status' => $status
                 ]);
 
-                if ($request->has('profession_ids')) {
-                    $store->professions()->sync($request->profession_ids);
-                }
+                $vacancy->professions()->sync($data['profession_ids']);
 
-                return $this->successResponse($vacancy, 'Lowongan berhasil diperbarui');
+                $vacancy->load('professions');
+
+                return $this->successResponse($this->formatVacancy($vacancy), 'Lowongan berhasil diperbarui');
 
             } catch (\Throwable $th) {
                 Log::error("Update Vacancy Error: " . $th->getMessage());
@@ -239,6 +238,7 @@ class VacancyController extends Controller
         }
 
         try {
+            $vacancy->professions()->detach();
             $vacancy->delete();
             return $this->successResponse(true, 'Lowongan berhasil dihapus!');
         } catch (\Throwable $th) {
@@ -249,7 +249,7 @@ class VacancyController extends Controller
 
     public function seekVacancy()
     {
-        $vacancies = Vacancy::with(['user:id,name', 'profession:id,name'])
+        $vacancies = Vacancy::with(['user:id,name', 'professions:id,name'])
             ->where('closing_date', '>=', now())
             ->where('status', true)
             ->paginate(5);
@@ -281,7 +281,7 @@ class VacancyController extends Controller
 
     public function showVacancy($id)
     {
-        $detail = Vacancy::with(['profession:id,name', 'user:id,name'])->find($id);
+        $detail = Vacancy::with(['professions:id,name', 'user:id,name'])->find($id);
 
         if (!$detail) {
             return $this->errorResponse('Data lowongan tidak ditemukan!', [], 404);
@@ -303,7 +303,6 @@ class VacancyController extends Controller
         return $this->successResponse($data, 'Data detail lowongan');
     }
 
-    // --- PRIVATE HELPER METHODS (DRY) ---
     private function formatVacancy($vacancy)
     {
         return [
@@ -316,8 +315,14 @@ class VacancyController extends Controller
             'limit' => $vacancy->limit,
             'status' => $vacancy->status,
             'user' => $vacancy->user->name ?? 'Unknown',
-            'profession' => $vacancy->profession->name ?? 'Unknown',
-            'is_favorited' => $vacancy->is_favorited
+            'is_favorited' => $vacancy->is_favorited,
+            'professions' => $vacancy->professions?->map(function($p) {
+                return [
+                    'id' => $p->id,
+                    'name' => $p->name,
+                ];
+            }) ?? [],
+            'profession' => $vacancy->professions->first()->name ?? 'Umum',
         ];
     }
 
@@ -353,10 +358,8 @@ class VacancyController extends Controller
 
     public function myFavorites()
     {
-        // return respose()->json('masuk');
         try {
             $favorites = auth()->user()->favoriteVacancies()->latest()->get();
-
             return $this->successResponse($favorites, 'Berhasil mengambil data favorit');
         } catch (\Throwable $th) {
             return $this->errorResponse('Terjadi kesalahan saat mengambil data favorit', [], 500);
