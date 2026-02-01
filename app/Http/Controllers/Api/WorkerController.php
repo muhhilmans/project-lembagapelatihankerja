@@ -2,38 +2,62 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Models\Application;
-use App\Models\Complaint;
-use App\Models\Voucher;
-use App\Models\WorkerSalary;
 use Carbon\Carbon;
+use App\Models\Voucher;
+use App\Models\Complaint;
+use App\Models\Application;
+use App\Traits\ApiResponse;
+use App\Models\WorkerSalary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Events\NotificationDispatched;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class WorkerController extends Controller
 {
-    public function allWorker()
-    {
-        $user = auth()->user();
-        $workers = Application::with(['servant', 'employe', 'vacancy'])
-            ->where(function ($query) use ($user) {
-                $query->where('employe_id', $user->id)
-                    ->orWhereHas('vacancy', function ($q) use ($user) {
-                        $q->where('user_id', $user->id);
-                    });
-            })
-            ->where('status', 'accepted')
-            ->paginate(10);
+    use ApiResponse;
 
+    public function allWorker(Request $request)
+    {
         try {
+            $user = auth()->user();
+            $search = $request->input('search');
+
+            $workers = Application::with(['servant', 'employe', 'vacancy'])
+                ->where(function ($query) use ($user) {
+                    $query->where('employe_id', $user->id)
+                        ->orWhereHas('vacancy', function ($q) use ($user) {
+                            $q->where('user_id', $user->id);
+                        });
+                })
+                ->where('status', 'accepted')
+                ->when($search, function ($q) use ($search) {
+                    $q->whereHas('servant', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+                })
+                ->paginate(10);
+
+
             if ($workers->isEmpty()) {
                 return response()->json([
                     'success' => 'success',
                     'message' => 'Data semua pekerja.',
-                    'data' => 'Belum ada pekerja.'
+                    'data' =>  [
+                        'user' => [
+                                'id' => $user->id,
+                                'name' => $user->name,
+                                'username' => $user->username,
+                                'email' => $user->email,
+                                'role' => $user->roles->first()->name,
+                                'access_token' => $user->access_token,
+                            ],
+                        'worker' => 'Belum ada pekerja.'
+                        ]
                 ], 200);
             }
 
@@ -217,6 +241,13 @@ class WorkerController extends Controller
                         'is_inval'         => $worker->servant->servantDetails->is_inval ?? 0,
                         'is_stay'          => $worker->servant->servantDetails->is_stay ?? 0,
                         'profession'       => $worker->servant->servantDetails->profession->name ?? null,
+                        'professions'       => $worker->servant->servantDetails?->professions->map(function ($p) {
+                                                return [
+                                                    'id' => $p->id,
+                                                    'name' => $p->name,
+                                                    'file_draft' => $p->file_draft
+                                                ];
+                                            }),
                         'skills' => $worker->servant->servantSkills->map(function ($skill) {
                             return [
                                 'id' => $skill->id,
@@ -357,6 +388,18 @@ class WorkerController extends Controller
             ]);
 
             DB::commit();
+
+            // try {
+            //     $bulan = Carbon::parse($store->month)->translatedFormat('F Y');
+            //     NotificationDispatched::dispatch(
+            //         "Laporan Absensi & Gaji bulan {$bulan} telah diterbitkan.",
+            //         $application->servant_id,
+            //         'success'
+            //     );
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif presenceWorker: " . $e->getMessage());
+            // }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Absensi pekerja berhasil dikirimkan!',
@@ -476,6 +519,18 @@ class WorkerController extends Controller
             ]);
 
             DB::commit();
+
+            // try {
+            //     $bulan = Carbon::parse($salary->month)->translatedFormat('F Y');
+            //     NotificationDispatched::dispatch(
+            //         "Revisi: Data Absensi bulan {$bulan} telah diperbarui oleh Majikan.",
+            //         $application->servant_id,
+            //         'info'
+            //     );
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif updatePresenceWorker: " . $e->getMessage());
+            // }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Absensi pekerja berhasil diperbarui!',
@@ -493,6 +548,61 @@ class WorkerController extends Controller
                     'line' => $th->getLine()
                 ]
             ], 500);
+        }
+    }
+
+    public function uploadMajikan(Request $request, Application $application)
+    {
+        $validator = Validator::make($request->all(), [
+            'proof_majikan' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'worker_salary_id' => 'required|exists:worker_salaries,id'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->messages()->all()[0]);
+        }
+
+        $data = $validator->validated();
+
+        try {
+            $salary = WorkerSalary::find($request->worker_salary_id);
+            if(!$salary) {
+                return $this->errorResponse('salary tidak ditemukan');
+            }
+
+            $majikanName = str_replace(' ', '_', ($application->vacancy ? $application->vacancy->user->name : $application->employe->name));
+            $servantName = str_replace(' ', '_', $application->servant->name);
+            $date = Carbon::parse($salary->month)->format('M-Y');
+
+            $directory = "payments/{$majikanName}/{$servantName}";
+            $fileName = "proof_majikan_" . $date . "_{$servantName}." . $request->file('proof_majikan')->getClientOriginalExtension();
+
+            if ($salary->payment_majikan_image && Storage::disk('public')->exists("payments/" . $salary->payment_majikan_image)) {
+                Storage::disk('public')->delete("payments/" . $salary->payment_majikan_image);
+            }
+
+            $path = $request->file('proof_majikan')->storeAs($directory, $fileName, 'public');
+
+            DB::transaction(function () use ($salary, $path) {
+                $salary->update([
+                    'payment_majikan_image' => $path,
+                ]);
+            });
+
+            // try {
+            //     $bulan = Carbon::parse($salary->month)->translatedFormat('F Y');
+            //     NotificationDispatched::dispatch(
+            //         "Majikan telah mengunggah bukti pembayaran gaji bulan {$bulan}.",
+            //         $application->servant_id,
+            //         'success'
+            //     );
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif uploadMajikan: " . $e->getMessage());
+            // }
+
+            return $this->successResponse($salary, 'Berhasil mengupload bukti pembayaran');
+        } catch (\Throwable $th) {
+            return $this->errorResponse('kesalahan sistem', $th->getMessage());
         }
     }
 
@@ -530,6 +640,17 @@ class WorkerController extends Controller
             }
 
             DB::commit();
+
+            try {
+                $majikanName = auth()->user()->name;
+                NotificationDispatched::dispatch(
+                    "PENTING: Kontrak kerja Anda dengan {$majikanName} telah diakhiri (Status: {$datas['status']}).",
+                    $application->servant_id,
+                    'warning'
+                );
+            } catch (\Exception $e) {
+                Log::error("Gagal kirim notif rejectWorker: " . $e->getMessage());
+            }
 
             return response()->json([
                 'status'  => 'success',
@@ -600,6 +721,17 @@ class WorkerController extends Controller
             }
 
             DB::commit();
+
+            // try {
+            //     NotificationDispatched::dispatch(
+            //         "Aduan Baru: Majikan menyampaikan keluhan terkait kinerja Anda.",
+            //         $application->servant_id,
+            //         'error'
+            //     );
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif complaintWorker: " . $e->getMessage());
+            // }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Pengaduan pekerja berhasil dikirimkan!',
@@ -620,12 +752,24 @@ class WorkerController extends Controller
         }
     }
 
-    public function allWork()
+    public function allWork(Request $request)
     {
         $user = auth()->user();
+        $search = $request->input('search');
+
         $workers = Application::with(['servant', 'employe', 'vacancy'])
             ->where('servant_id', $user->id)
             ->where('status', 'accepted')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('employe', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('vacancy.user', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
+                });
+            })
             ->paginate(10);
 
         try {
@@ -847,6 +991,22 @@ class WorkerController extends Controller
             }
 
             DB::commit();
+
+            // try {
+            //     $employerId = $application->employe_id ?? ($application->vacancy ? $application->vacancy->user_id : null);
+
+            //     if ($employerId) {
+            //         $pembantuName = auth()->user()->name;
+            //         NotificationDispatched::dispatch(
+            //             "Aduan Baru: Pekerja {$pembantuName} menyampaikan keluhan.",
+            //             $employerId,
+            //             'warning'
+            //         );
+            //     }
+            // } catch (\Exception $e) {
+            //     Log::error("Gagal kirim notif complaintWork: " . $e->getMessage());
+            // }
+
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Pengaduan pekerjaan berhasil dikirimkan!',

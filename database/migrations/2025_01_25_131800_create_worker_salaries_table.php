@@ -16,9 +16,9 @@ return new class extends Migration
             $table->foreignUuid('application_id')->references('id')->on('applications')->onDelete('cascade');
             $table->date('month');
             $table->integer('presence');
-            $table->unsignedDouble('total_salary');
-            $table->unsignedDouble('total_salary_majikan');
-            $table->unsignedDouble('total_salary_pembantu');
+            $table->double('total_salary')->unsigned();
+            $table->double('total_salary_majikan')->unsigned();
+            $table->double('total_salary_pembantu')->unsigned();
             $table->string('status')->nullable();
             $table->string('payment_majikan_image')->nullable();
             $table->string('payment_pembantu_image')->nullable();

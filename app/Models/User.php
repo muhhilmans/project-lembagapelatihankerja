@@ -127,4 +127,49 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
     {
         return $this->hasMany(Blog::class, 'user_id');
     }
+
+    public function favoriteVacancies()
+    {
+        return $this->belongsToMany(Vacancy::class, 'favorite_vacancies', 'user_id', 'vacancy_id')
+            ->with('user', 'profession')
+            ->withTimestamps();
+    }
+
+    public function favoriteServants()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'favorite_servants',
+            'employe_detail_id',
+            'servant_detail_id'
+        )->withTimestamps();
+    }
+
+    public function favoritedByEmployers()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'favorite_servants',
+            'servant_detail_id',
+            'employe_detail_id'
+        )->withTimestamps();
+    }
+
+    // Relasi untuk review yang DITERIMA user ini
+    public function receivedReviews()
+    {
+        return $this->hasMany(Review::class, 'reviewee_id');
+    }
+
+    // Mengambil rata-rata rating (Otomatis hitung, baik dia Majikan atau Pembantu)
+    public function getAverageRatingAttribute()
+    {
+        return round($this->receivedReviews()->avg('rating'), 1) ?? 0;
+    }
+
+    // Atribut Virtual untuk menghitung jumlah ulasan
+    public function getReviewCountAttribute()
+    {
+        return $this->receivedReviews()->count();
+    }
 }

@@ -42,6 +42,8 @@ class ServantDetail extends Model
         'identity_card',
         'family_card',
         'working_status',
+        'latitude',
+        'longitude',
     ];
 
     public function user()
@@ -52,5 +54,15 @@ class ServantDetail extends Model
     public function profession()
     {
         return $this->belongsTo(Profession::class);
+    }
+
+    public function professions()
+    {
+        return $this->belongsToMany(
+            Profession::class,
+            'profession_servant_detail',
+            'servant_detail_id',
+            'profession_id'
+        )->withTimestamps();
     }
 }

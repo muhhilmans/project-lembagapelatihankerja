@@ -2,28 +2,78 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Models\Application;
 use App\Models\User;
+use App\Models\Application;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class PartnerController extends Controller
 {
-    public function allPartner()
+    use ApiResponse;
+
+    public function allPartner(Request $request)
     {
         $user = auth()->user();
-        $partners = User::with(['roles', 'servantDetails', 'appServant'])
+        // 1. Ambil semua parameter filter titah Yang Mulia
+        $searchName  = $request->input('name') ?? $request->input('search');
+        $religion    = $request->input('religion');
+        $isInval     = $request->input('is_inval');
+        $isStay      = $request->input('is_stay');
+        $professions = $request->input('professions');
+
+        $favoritedIds = $user->favoriteServants()->pluck('servant_detail_id')->toArray();
+
+        $partners = User::with(['roles', 'servantDetails.professions', 'appServant']) 
+            // Filter Role Pembantu & Aktif
             ->whereHas('roles', function ($query) {
                 $query->where('name', 'pembantu');
-            })->where('is_active', true)->whereHas('servantDetails', function ($query) {
-                $query->where('working_status', false);
-            })->whereDoesntHave('appServant', function ($query) use ($user) {
+            })
+            ->where('is_active', true)
+
+            // Filter: TIDAK sedang dalam proses lamaran dengan user ini
+            ->whereDoesntHave('appServant', function ($query) use ($user) {
                 $query->where('employe_id', $user->id)
                     ->whereIn('status', ['interview', 'verify', 'passed', 'choose', 'accepted', 'rejected', 'pending']);
-            })->paginate(10);
+            })
+
+            // Filter Nama (Search)
+            ->when($searchName, function ($q) use ($searchName) {
+                $q->where('name', 'like', "%{$searchName}%");
+            })
+
+            // Filter Detail Servant (Agama, Inval, Stay)
+            ->whereHas('servantDetails', function ($query) use ($religion, $isInval, $isStay) {
+                $query->where('working_status', false);
+
+                $query->when($religion, function ($sub) use ($religion) {
+                    $sub->where('religion', $religion);
+                });
+
+                $query->when($isInval, function ($sub) {
+                    $sub->where('is_inval', 1);
+                });
+
+                $query->when($isStay, function ($sub) {
+                    $sub->where('is_stay', 1);
+                });
+            })
+
+            // Filter Professions (Many-to-Many via ServantDetail)
+            ->when($professions, function ($query) use ($professions) {
+                $query->whereHas('servantDetails.professions', function ($subQuery) use ($professions) {
+                    $ids = is_array($professions) ? $professions : explode(',', $professions);
+                    
+                    $subQuery->whereIn('professions.id', $ids);
+                    
+                    // $subQuery->whereIn('professions.name', $ids);
+                });
+            })
+            ->latest()
+            ->paginate(10);
 
         $datas = [
             'user' => [
@@ -35,17 +85,21 @@ class PartnerController extends Controller
                 'access_token' => $user->access_token,
             ],
             'mitra' => [
-                'data' => $partners->map(function ($partner) {
+                'data' => $partners->map(function ($partner) use ($favoritedIds) {
                     return [
                         'id'                => $partner->id,
+                        'is_favorited'      => in_array($partner->id, $favoritedIds),
                         'name'              => $partner->name,
                         'username'          => $partner->username,
                         'email'             => $partner->email,
+                        'rating'            => $partner->average_rating,
+                        'reviews_count'     => $partner->review_count,
                         'email_verified_at' => $partner->email_verified_at,
                         'is_active'         => $partner->is_active,
                         'created_at'        => $partner->created_at,
                         'updated_at'        => $partner->updated_at,
                         'servant_details'   => [
+                            'id'               => $partner->servantDetails->id,
                             'user_id'          => $partner->servantDetails->user_id ?? null,
                             'gender'           => $partner->servantDetails->gender ?? 'not_filled',
                             'place_of_birth'   => $partner->servantDetails->place_of_birth ?? '-',
@@ -80,6 +134,13 @@ class PartnerController extends Controller
                             'is_inval'         => $partner->servantDetails->is_inval ?? 0,
                             'is_stay'          => $partner->servantDetails->is_stay ?? 0,
                             'profession'       => $partner->servantDetails->profession->name ?? null,
+                            'professions'       => $partner->servantDetails->professions?->map(function ($p) {
+                                return [
+                                    'id' => $p->id,
+                                    'name' => $p->name,
+                                    'file_draft' => $p->file_draft
+                                ];
+                            }),
                         ],
                         'servant_skills' => $partner->servantSkills->map(function ($skill) {
                             return [
@@ -175,6 +236,13 @@ class PartnerController extends Controller
                     'is_inval'         => $partner->servantDetails->is_inval ?? 0,
                     'is_stay'          => $partner->servantDetails->is_stay ?? 0,
                     'profession'       => $partner->servantDetails->profession->name ?? null,
+                    'professions'       => $partner->servantDetails->professions?->map(function ($p) {
+                        return [
+                            'id' => $p->id,
+                            'name' => $p->name,
+                            'file_draft' => $p->file_draft
+                        ];
+                    }),
                 ],
                 'servant_skills' => $partner->servantSkills->map(function ($skill) {
                     return [
@@ -230,6 +298,19 @@ class PartnerController extends Controller
 
             DB::commit();
 
+            try {
+                $employer = User::find($data['employe_id']);
+                $employerName = $employer ? $employer->name : 'Seseorang';
+
+                \App\Events\NotificationDispatched::dispatch(
+                    "Tawaran Pekerjaan: {$employerName} ingin merekrut Anda secara langsung.", // Pesan
+                    $partner->id,
+                    'info'
+                );
+            } catch (\Exception $e) {
+                Log::error("Gagal kirim notif hirePartner: " . $e->getMessage());
+            }
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Hire mitra berhasil disimpan'
@@ -246,6 +327,41 @@ class PartnerController extends Controller
                     'line' => $th->getLine()
                 ]
             ], 500);
+        }
+    }
+
+    public function toggleFavoriteServant(User $servant)
+    {
+        $majikan = auth()->user();
+
+        if ($majikan->id === $servant->id) {
+            return response()->json(['message' => 'Tidak valid'], 400);
+        }
+
+        $changes = $majikan->favoriteServants()->toggle($servant->id);
+
+        $message = count($changes['attached']) > 0
+            ? 'Berhasil ditambahkan ke favorit'
+            : 'Dihapus dari favorit';
+
+        return response()->json([
+            'message' => $message,
+            'is_favorited' => count($changes['attached']) > 0
+        ]);
+    }
+
+    public function myFavoriteServants()
+    {
+        try {
+            $user = auth()->user();
+
+            $favorites = $user->favoriteServants()
+                ->latest('favorite_servants.created_at')
+                ->get();
+
+            return $this->successResponse($favorites, 'Daftar mitra favorit Anda');
+        } catch (\Throwable $th) {
+            return $this->errorResponse('Gagal mengambil data favorit', $th->getMessage());
         }
     }
 }

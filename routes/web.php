@@ -21,6 +21,12 @@ use App\Http\Controllers\WorkerController;
 |
 */
 
+Route::get('/test-notif/{id}', function ($id) {
+    auth()->loginUsingId($id);
+
+    return view('test-notif', ['userId' => $id]);
+});
+
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 
