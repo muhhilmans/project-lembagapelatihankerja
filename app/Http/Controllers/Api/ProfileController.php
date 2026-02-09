@@ -127,8 +127,8 @@ class ProfileController extends Controller
 
             $user->update([
                 'name' => $data['name'],
-                'username' => $data['username'],
-                'email' => $data['email'],
+                'username' => $data['username'] ?? $user->username,
+                'email' => $data['email'] ?? $user->email,
             ]);
 
             $user->employeDetails()->update([
@@ -337,8 +337,8 @@ class ProfileController extends Controller
 
             $user->update([
                 'name' => $data['name'],
-                'username' => $data['username'],
-                'email' => $data['email'],
+                'username' => $data['username'] ?? $user->username,
+                'email' => $data['email'] ?? $user->email,
             ]);
 
             $user->servantDetails()->update([
@@ -348,7 +348,7 @@ class ProfileController extends Controller
                 'religion' => $data['religion'],
                 'marital_status' => $data['marital_status'],
                 'children' => $data['children'],
-                'profession_id' => $data['profession_id'],
+                'profession_id' => $data['profession_id'] ?? $user->servantDetails->profession_id,
                 'last_education' => $data['last_education'],
                 'phone' => $data['phone'],
                 'emergency_number' => $data['emergency_number'],
@@ -360,18 +360,18 @@ class ProfileController extends Controller
                 'district' => $data['district'],
                 'village' => $data['village'],
                 'is_bank' => $data['is_bank'],
-                'bank_name' => $data['bank_name'],
-                'account_number' => $data['account_number'],
+                'bank_name' => $data['bank_name'] ?? $user->servantDetails->bank_name,
+                'account_number' => $data['account_number'] ?? $user->servantDetails->account_number,
                 'is_bpjs' => $data['is_bpjs'],
-                'type_bpjs' => $data['type_bpjs'],
-                'number_bpjs' => $data['number_bpjs'],
+                'type_bpjs' => $data['type_bpjs'] ?? $user->servantDetails->type_bpjs,
+                'number_bpjs' => $data['number_bpjs'] ?? $user->servantDetails->number_bpjs,
                 'experience' => $data['experience'],
                 'description' => $data['description'],
                 'photo' => $data['photo'],
                 'identity_card' => $data['identity_card'],
                 'family_card' => $data['family_card'],
-                'latitude'  => $data['latitude'],
-                'longitude' => $data['longitude'],
+                'latitude'  => $data['latitude'] ?? $user->servantDetails->latitude,
+                'longitude' => $data['longitude'] ?? $user->servantDetails->longitude,
             ]);
 
             $professions = $request->input('profession_ids', []);

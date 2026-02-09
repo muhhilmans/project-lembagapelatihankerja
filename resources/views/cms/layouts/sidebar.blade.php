@@ -73,24 +73,10 @@
             </li>
 
             <!-- Nav Item - Lamaran -->
-            <li class="nav-item {{ Route::is('application-hire', 'application-indie') ? 'active' : '' }}">
-                <a class="nav-link {{ Route::is('application-hire', 'application-indie') ? '' : 'collapsed' }}"
-                    href="#" data-toggle="collapse" data-target="#collapseApplication"
-                    aria-expanded="{{ Route::is('application-hire', 'application-indie') ? 'true' : 'false' }}"
-                    aria-controls="collapseApplication">
+            <li class="nav-item {{ Route::is('application.index', 'application-hire', 'application-indie') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('application.index') }}">
                     <i class="fas fa-fw fa-file-alt"></i>
-                    <span>Lamaran</span>
-                </a>
-                <div id="collapseApplication"
-                    class="collapse {{ Route::is('application-hire', 'application-indie') ? 'show' : '' }}"
-                    aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item {{ Route::is('application-hire') ? 'active' : '' }}"
-                            href="{{ route('application-hire') }}">Hire</a>
-                        <a class="collapse-item {{ Route::is('application-indie') ? 'active' : '' }}"
-                            href="{{ route('application-indie') }}">Mandiri</a>
-                    </div>
-                </div>
+                    <span>Lamaran</span></a>
             </li>
 
             @hasrole('pembantu')
@@ -100,6 +86,16 @@
                         href="{{ route('complaints.index') }}">
                         <i class="fas fa-fw fa-bullhorn"></i>
                         <span>Pengaduan</span></a>
+                </li>
+            @endhasrole
+
+            @hasrole('superadmin')
+                <!-- Nav Item - Tracking -->
+                <li class="nav-item {{ Route::is('tracking.*') ? 'active' : '' }}">
+                    <a class="nav-link {{ Route::is('tracking.*') ? 'active' : '' }}"
+                        href="{{ route('tracking.index') }}">
+                        <i class="fas fa-fw fa-map-marker-alt"></i>
+                        <span>Tracking</span></a>
                 </li>
             @endhasrole
 
@@ -129,24 +125,10 @@
             </li>
 
             <!-- Nav Item - Pelamar -->
-            <li class="nav-item {{ Route::is('applicant-hire', 'applicant-indie') ? 'active' : '' }}">
-                <a class="nav-link {{ Route::is('applicant-hire', 'applicant-indie') ? '' : 'collapsed' }}" href="#"
-                    data-toggle="collapse" data-target="#collapseApplicant"
-                    aria-expanded="{{ Route::is('applicant-hire', 'applicant-indie') ? 'true' : 'false' }}"
-                    aria-controls="collapseApplicant">
+            <li class="nav-item {{ Route::is('applicant.index', 'applicant-hire', 'applicant-indie') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('applicant.index') }}">
                     <i class="fas fa-fw fa-user-tie"></i>
-                    <span>Pelamar</span>
-                </a>
-                <div id="collapseApplicant"
-                    class="collapse {{ Route::is('applicant-all', 'applicant-hire', 'applicant-indie') ? 'show' : '' }}"
-                    aria-labelledby="headingApplicant" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item {{ Route::is('applicant-hire') ? 'active' : '' }}"
-                            href="{{ route('applicant-hire') }}">Hire</a>
-                        <a class="collapse-item {{ Route::is('applicant-indie') ? 'active' : '' }}"
-                            href="{{ route('applicant-indie') }}">Mandiri</a>
-                    </div>
-                </div>
+                    <span>Pelamar</span></a>
             </li>
 
             <!-- Nav Item - Pengaduan -->

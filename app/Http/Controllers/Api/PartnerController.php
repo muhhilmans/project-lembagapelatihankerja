@@ -27,7 +27,7 @@ class PartnerController extends Controller
 
         $favoritedIds = $user->favoriteServants()->pluck('servant_detail_id')->toArray();
 
-        $partners = User::with(['roles', 'servantDetails.professions', 'appServant'])
+        $partners = User::with(['roles', 'servantDetails.professions', 'appServant']) 
             // Filter Role Pembantu & Aktif
             ->whereHas('roles', function ($query) {
                 $query->where('name', 'pembantu');
@@ -66,9 +66,9 @@ class PartnerController extends Controller
             ->when($professions, function ($query) use ($professions) {
                 $query->whereHas('servantDetails.professions', function ($subQuery) use ($professions) {
                     $ids = is_array($professions) ? $professions : explode(',', $professions);
-
+                    
                     $subQuery->whereIn('professions.id', $ids);
-
+                    
                     // $subQuery->whereIn('professions.name', $ids);
                 });
             })
@@ -356,7 +356,6 @@ class PartnerController extends Controller
             $user = auth()->user();
 
             $favorites = $user->favoriteServants()
-                ->with(['servantDetails', 'servantSkills', 'servantDetails.professions'])
                 ->latest('favorite_servants.created_at')
                 ->get();
 

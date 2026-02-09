@@ -23,6 +23,15 @@ class UtilityController extends Controller
     {
         $path = storage_path('app/public/img/' . $path . '/' . $imageName);
         if (!File::exists($path)) {
+            // Check if it's a generic profile request or try to serve a default
+            $defaultPath = public_path('assets/img/undraw_profile.svg');
+            if (File::exists($defaultPath)) {
+                $file = File::get($defaultPath);
+                $type = File::mimeType($defaultPath);
+                $response = Response::make($file, 200);
+                $response->header('Content-Type', $type);
+                return $response;
+            }
             abort(404);
         }
 
@@ -123,7 +132,7 @@ class UtilityController extends Controller
 
     public function allVacancy()
     {
-        $datas = Vacancy::where('closing_date', '>=', now())->where('status', true)->get();
+        $datas = Vacancy::where('status', true)->get();
 
         $professions = Profession::all();
 
@@ -151,6 +160,45 @@ class UtilityController extends Controller
 
             return view('cms.seek-vacancy.partial.detail', compact(['data', 'servants', 'professions']));
         }
+    }
+
+    public function applicantIndex(Request $request)
+    {
+        $type = $request->get('type', 'all'); // all, hire, mandiri
+        
+        if (auth()->user()->roles->first()->name == 'majikan') {
+            $hireQuery = Application::where('employe_id', auth()->user()->id)
+                ->whereNotNull('employe_id')
+                ->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff']);
+                
+            $indieQuery = Application::whereHas('vacancy.user', function ($query) {
+                $query->where('id', auth()->user()->id);
+            })
+                ->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])
+                ->whereNotNull('vacancy_id');
+        } else {
+            $hireQuery = Application::whereNotNull('employe_id')
+                ->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff']);
+                
+            $indieQuery = Application::whereNotNull('vacancy_id')
+                ->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff']);
+        }
+        
+        // Apply filter
+        if ($type === 'hire') {
+            $hireData = $hireQuery->get();
+            $indieData = collect([]);
+        } elseif ($type === 'mandiri') {
+            $hireData = collect([]);
+            $indieData = $indieQuery->get();
+        } else {
+            $hireData = $hireQuery->get();
+            $indieData = $indieQuery->get();
+        }
+        
+        $schemas = Salary::all();
+        
+        return view('cms.applicant.index', compact('hireData', 'indieData', 'type', 'schemas'));
     }
 
     public function allApplicant()
@@ -226,6 +274,35 @@ class UtilityController extends Controller
         }
 
         return view('cms.application.independent', compact('datas'));
+    }
+
+    public function applicationIndex(Request $request)
+    {
+        $type = $request->get('type', 'all'); // all, hire, mandiri
+        
+        if (auth()->user()->roles->first()->name == 'pembantu') {
+            $hireQuery = Application::where('servant_id', auth()->user()->id)
+                ->whereNotNull('employe_id');
+            $indieQuery = Application::where('servant_id', auth()->user()->id)
+                ->whereNotNull('vacancy_id');
+        } else {
+            $hireQuery = Application::whereNotNull('employe_id');
+            $indieQuery = Application::whereNotNull('vacancy_id');
+        }
+        
+        // Apply filter
+        if ($type === 'hire') {
+            $hireData = $hireQuery->get();
+            $indieData = collect([]);
+        } elseif ($type === 'mandiri') {
+            $hireData = collect([]);
+            $indieData = $indieQuery->get();
+        } else {
+            $hireData = $hireQuery->get();
+            $indieData = $indieQuery->get();
+        }
+        
+        return view('cms.application.index', compact('hireData', 'indieData', 'type'));
     }
 
     public function storeRecom(Request $request, string $id)

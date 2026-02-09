@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Application;
-use App\Models\Complaint;
+use App\Models\Pengaduan; // Updated
 use App\Models\User;
 use App\Models\Vacancy;
 use Illuminate\Http\Request;
@@ -39,7 +39,7 @@ class DashboardController extends Controller
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get();
 
-        $complaints = Complaint::whereBetween('created_at', [$startDate, $endDate])->get();
+        $complaints = Pengaduan::whereBetween('created_at', [$startDate, $endDate])->get();
         $vacancies = Vacancy::whereBetween('created_at', [$startDate, $endDate])->get();
 
         $pendingApp = $applications->where('status', 'pending')->count();
@@ -48,8 +48,11 @@ class DashboardController extends Controller
         $rejectedApp = $applications->whereIn('status', ['rejected', 'laidoff'])->count();
         $vacancy = $vacancies->where('status', true)->count();
         $worker = $applications->whereIn('status', ['accepted', 'review'])->count();
-        $rejectedComp = $complaints->where('status', 'rejected')->count();
-        $acceptedComp = $complaints->where('status', 'accepted')->count();
+        
+        // Map new statuses to old metrics for view compatibility
+        $rejectedComp = 0; // 'rejected' status no longer exists
+        $acceptedComp = $complaints->where('status', 'resolved')->count(); // Map resolved to accepted
+        
         $datasApp = $applications->where('status', 'interview')->sortByDesc('updated_at');
 
         $chartWorker = $applications->whereIn('status', ['accepted', 'review'])->map(function ($item) {
@@ -142,28 +145,35 @@ class DashboardController extends Controller
 
     public function dashboardEmploye()
     {
+        $id = auth()->user()->id;
         $applications = Application::with('vacancy')
-            ->where('employe_id', auth()->user()->id)
-            ->orWhereHas('vacancy', function ($query) {
-                $query->where('user_id', auth()->user()->id);
+            ->where('employe_id', $id)
+            ->orWhereHas('vacancy', function ($query) use ($id) {
+                $query->where('user_id', $id);
             })
             ->get();
-        $complaints = Complaint::where('employe_id', auth()->user()->id)->get();
+            
+        // Get complaints involving this user
+        $complaints = Pengaduan::where('reporter_id', $id)
+                        ->orWhere('reported_user_id', $id)
+                        ->get();
 
         $pendingApp = $applications->where('status', 'pending')->count();
         $processApp = $applications->whereIn('status', ['interview', 'schedule', 'verify', 'contract'])->count();
         $acceptedApp = $applications->where('status', 'accepted')->count();
         $rejectedApp = $applications->whereIn('status', ['rejected', 'laidoff'])->count();
-        $vacancy = Vacancy::where('user_id', auth()->user()->id)->where('status', true)->count();
+        $vacancy = Vacancy::where('user_id', $id)->where('status', true)->count();
         $worker = Application::whereIn('status', ['accepted', 'review'])
-            ->where(function ($query) {
-                $query->where('employe_id', auth()->user()->id)
-                    ->orWhereHas('vacancy.user', function ($q) {
-                        $q->where('id', auth()->user()->id);
+            ->where(function ($query) use ($id) {
+                $query->where('employe_id', $id)
+                    ->orWhereHas('vacancy.user', function ($q) use ($id) {
+                        $q->where('id', $id);
                     });
             })->count();
-        $rejectedComp = $complaints->where('status', 'rejected')->count();
-        $acceptedComp = $complaints->where('status', 'accepted')->count();
+            
+        $rejectedComp = 0; 
+        $acceptedComp = $complaints->where('status', 'resolved')->count();
+        
         $datasApp = $applications->where('status', 'interview')->sortByDesc('updated_at');
 
         $data = [

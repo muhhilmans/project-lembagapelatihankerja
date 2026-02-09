@@ -30,9 +30,14 @@ class VacancyController extends Controller
             $users = User::whereHas('roles', function ($query) {
                 $query->where('name', 'majikan');
             })->where('is_active', true)->get();
+            $archives = Vacancy::onlyTrashed()->get();
         }
 
-        return view('cms.vacancy.index', compact(['datas', 'users', 'professions']));
+        if (auth()->user()->roles->first()->name == 'majikan') {
+            $archives = Vacancy::onlyTrashed()->where('user_id', auth()->id())->get();
+        }
+
+        return view('cms.vacancy.index', compact(['datas', 'users', 'professions', 'archives']));
     }
 
     /**
@@ -163,12 +168,16 @@ class VacancyController extends Controller
     {
         $data = Vacancy::findOrFail($id);
 
-        if ($data->applications->count() > 0) {
-            return redirect()->route('vacancies.index')->with('toast_error', 'Lowongan masih digunakan oleh pelamar!');
-        }
-
         $data->delete();
 
-        return redirect()->route('vacancies.index')->with('toast_success', 'Lowongan berhasil dihapus!');
+        return redirect()->route('vacancies.index')->with('toast_success', 'Lowongan berhasil dihapus (diarsipkan)!');
+    }
+
+    public function restore($id)
+    {
+        $vacancy = Vacancy::withTrashed()->findOrFail($id);
+        $vacancy->restore();
+
+        return redirect()->route('vacancies.index')->with('toast_success', 'Lowongan berhasil dipulihkan!');
     }
 }

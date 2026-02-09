@@ -12,6 +12,7 @@ use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\User\AdminController;
 use App\Http\Controllers\User\EmployeController;
 use App\Http\Controllers\User\ServantController;
+use App\Http\Controllers\TrackingController;
 
 Route::group(['middleware' => ['role:admin|superadmin|owner']], function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
@@ -48,4 +49,5 @@ Route::group(['middleware' => ['role:superadmin|owner']], function () {
 Route::group(['middleware' => ['role:superadmin']], function () {
     Route::resource('vouchers', VoucherController::class)->except(['create', 'show', 'edit']);
     Route::put('vouchers/{id}/change', [VoucherController::class, 'changeStatus'])->name('vouchers.change');
+    Route::get('tracking', [TrackingController::class, 'index'])->name('tracking.index');
 });

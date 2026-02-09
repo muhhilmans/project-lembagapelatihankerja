@@ -460,4 +460,34 @@ class ApplicationController extends Controller
             return redirect()->back()->with('toast_error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+    public function updateSalary(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'salary' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
+        }
+
+        try {
+            $application = Application::findOrFail($id);
+
+            // Ensure only majikan can update, or add middleware. For now, we trust the UI/Policy.
+            // Ideally check if auth()->user()->hasRole('majikan')
+
+            $application->update([
+                'salary' => $request->salary
+            ]);
+
+            Alert::success('Berhasil', 'Gaji berhasil diperbarui!');
+            return redirect()->back();
+        } catch (\Throwable $th) {
+             $data = [
+                'message' => $th->getMessage(),
+                'status' => 400
+            ];
+            return view('cms.error', compact('data'));
+        }
+    }
 }

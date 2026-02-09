@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Complaint;
+use App\Models\Pengaduan;
+use App\Models\Urgency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,23 +16,40 @@ class ComplaintController extends Controller
      */
     public function index()
     {
-        if (auth()->user()->roles->first()->name == 'majikan') {
-            $datas = Complaint::where('employe_id', auth()->user()->id)->get();
-        } elseif (auth()->user()->roles->first()->name == 'pembantu') {
-            $datas = Complaint::where('servant_id', auth()->user()->id)->get();
+        $user = auth()->user();
+        $activeContracts = [];
+        $urgencies = Urgency::where('is_active', true)->get();
+
+        if ($user->hasRole('admin') || $user->hasRole('superadmin')) { 
+            $datas = Pengaduan::with('complaintType')->get();
         } else {
-            $datas = Complaint::all();
+            // Show complaints where user is reporter or reported
+            $datas = Pengaduan::with('complaintType')
+                ->where('reporter_id', $user->id)
+                ->orWhere('reported_user_id', $user->id)
+                ->get();
+
+            // Fetch active contracts for dropdown
+            // Assuming 'accepted' status means active contract. ADD 'contract' if that is a valid status too.
+            // Based on DashboardController, 'accepted' seems to be the main active status.
+            $activeContracts = \App\Models\Application::where(function($q) use ($user) {
+                    $q->where('servant_id', $user->id)
+                      ->orWhere('employe_id', $user->id);
+                })
+                ->whereIn('status', ['accepted', 'contract']) // Include 'contract' if used
+                ->with(['servant', 'employe', 'vacancy'])
+                ->get();
         }
 
-        return view('cms.complaint.index', compact('datas'));
+        return view('cms.complaint.index', compact('datas', 'activeContracts', 'urgencies'));
     }
 
     public function changeStatus(Request $request, string $id)
     {
         $validator = Validator::make($request->all(), [
-            'status' => ['required'],
-            'file' => 'sometimes|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'notes' => ['nullable', 'string'],
+            'status' => ['required', 'in:open,investigating,resolved'],
+            // 'file' removed as per new schema
+            // 'notes' logic removed as no column for it
         ]);
 
         if ($validator->fails()) {
@@ -41,38 +58,16 @@ class ComplaintController extends Controller
 
         $data = $validator->validated();
 
-        $update = Complaint::findOrFail($id);
+        $update = Pengaduan::findOrFail($id);
 
         try {
-            DB::transaction(function () use ($data, $update, $request) {
-                if ($data['status'] == 'accepted') {
-                    $directory = "complaints/vacancy_{$update->servant->name}";
-                    $fileName = "memorandum_{$update->servant->name}." . $request->file('file')->getClientOriginalExtension();
-                    $storagePath = "public/{$directory}";
+            $update->update([
+                'status' => $data['status'],
+                // Set resolved_at if resolved?
+                'resolved_at' => $data['status'] == 'resolved' ? now() : null,
+            ]);
 
-                    if (!Storage::exists($directory)) {
-                        Storage::makeDirectory($directory);
-                    }
-
-                    if ($update->file && Storage::exists($update->file)) {
-                        Storage::delete($update->file);
-                    }
-
-                    $path = $request->file('file')->storeAs($storagePath, $fileName);
-
-                    $update->update([
-                        'status' => $data['status'],
-                        'file' => str_replace('public/', '', $path),
-                    ]);
-                } else {
-                    $update->update([
-                        'status' => $data['status'],
-                        'notes_rejected' => $data['notes'],
-                    ]);
-                }
-            });
-
-            Alert::success('Berhasil', 'Status keluhan berhasil diubah!');
+            Alert::success('Berhasil', 'Status pengaduan berhasil diubah!');
             return redirect()->back();
         } catch (\Throwable $th) {
             $data = [
@@ -89,11 +84,10 @@ class ComplaintController extends Controller
      */
     public function store(Request $request)
     {
+        // Validasi input pengaduan
         $validator = Validator::make($request->all(), [
-            'application_id' => ['required', 'exists:applications,id'],
-            'servant_id' => ['sometimes', 'exists:users,id'],
-            'employe_id' => ['sometimes', 'exists:users,id'],
-            'message' => ['required'],
+            'complaint_type_id' => ['required', 'exists:urgencies,id'], // Jenis pengaduan/urgensi
+            'message' => ['required'], // Deskripsi masalah
         ]);
 
         if ($validator->fails()) {
@@ -101,19 +95,22 @@ class ComplaintController extends Controller
         }
 
         $data = $validator->validated();
+        $user = auth()->user();
+
+        // Get urgency level from the selected complaint type
+        $urgency = Urgency::find($data['complaint_type_id']);
+        $urgencyLevel = $urgency ? $urgency->default_urgency : 'LOW';
 
         try {
-            DB::transaction(function () use ($data) {
-                Complaint::create([
-                    'application_id' => $data['application_id'],
-                    'servant_id' => $data['servant_id'] ?? null,
-                    'employe_id' => $data['employe_id'] ?? null,
-                    'message' => $data['message'],
-                    'status' => 'pending',
-                ]);
-            });
+            Pengaduan::create([
+                'complaint_type_id' => $data['complaint_type_id'],
+                'urgency_level' => $urgencyLevel,
+                'reporter_id' => $user->id,
+                'description' => $data['message'],
+                'status' => 'open',
+            ]);
 
-            Alert::success('Berhasil', 'Berhasil mengirimkan keluhan!');
+            Alert::success('Berhasil', 'Berhasil mengirimkan pengaduan!');
             return redirect()->back();
         } catch (\Throwable $th) {
             $data = [

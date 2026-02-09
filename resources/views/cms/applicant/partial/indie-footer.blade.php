@@ -123,6 +123,24 @@
             @endif
         @endhasrole
 
+        {{-- Button Gaji - Muncul ketika status accepted, schedule, atau interview --}}
+        @if (in_array($d->status, ['accepted', 'schedule', 'interview']))
+            <a href="#" class="btn btn-sm btn-warning mr-1" data-toggle="modal"
+                data-target="#salaryModal-{{ $d->id }}" title="Lihat Informasi Gaji">
+                <i class="fas fa-money-bill-wave"></i>
+            </a>
+            @include('cms.applicant.modal.salary', ['data' => $d])
+        @endif
+
+        {{-- Button Penjadwalan - Muncul ketika status schedule atau interview --}}
+        @if (in_array($d->status, ['schedule', 'interview']))
+            <a href="#" class="btn btn-sm btn-primary mr-1" data-toggle="modal"
+                data-target="#scheduleInfoModal-{{ $d->id }}" title="Lihat Jadwal Interview">
+                <i class="fas fa-calendar-alt"></i>
+            </a>
+            @include('cms.applicant.modal.schedule-info', ['data' => $d])
+        @endif
+
         @hasrole('majikan')
             @if ($d->status == 'verify')
                 <a href="#" class="btn btn-sm btn-secondary mr-1" data-toggle="modal"
@@ -162,7 +180,7 @@
                 class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
         @endif
 
-        @if ($d->status == 'pending')
+        @if (in_array($d->status, ['pending', 'schedule', 'interview', 'contract', 'verify']))
             <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                 data-target="#rejectModal-{{ $d->id }}">
                 <i class="fas fa-times"></i>

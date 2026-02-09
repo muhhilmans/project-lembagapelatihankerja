@@ -250,7 +250,6 @@ class VacancyController extends Controller
     public function seekVacancy()
     {
         $vacancies = Vacancy::with(['user:id,name', 'professions:id,name'])
-            ->where('closing_date', '>=', now())
             ->where('status', true)
             ->paginate(5);
 

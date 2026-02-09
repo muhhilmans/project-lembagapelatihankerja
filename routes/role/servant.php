@@ -15,6 +15,9 @@ Route::group(['middleware' => ['role:pembantu|admin|superadmin']], function () {
     Route::put('/applicant-hire/{id}/change', [ApplicationController::class, 'changeStatusHire'])->name('applicant-hire.change');
     Route::get('/application-indie', [UtilityController::class, 'indieApplication'])->name('application-indie');
     
+    Route::get('/application', [UtilityController::class, 'applicationIndex'])->name('application.index');
+    
     Route::put('profile/{user}/change-inval', [ProfileController::class, 'changeInval'])->name('profile.change-inval');
     Route::put('profile/{user}/change-stay', [ProfileController::class, 'changeStay'])->name('profile.change-stay');
+    Route::post('update-location', [ProfileController::class, 'updateLocation'])->name('update-location');
 });

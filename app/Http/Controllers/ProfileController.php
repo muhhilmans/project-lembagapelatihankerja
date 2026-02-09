@@ -371,4 +371,52 @@ class ProfileController extends Controller
         Alert::success('Berhasil!', 'Anda ' . $statusMessage . ' melakukan pulang pergi!');
         return redirect()->route('profile', $user->id);
     }
+
+    /**
+     * Memperbarui lokasi (latitude & longitude) pembantu dari browser
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateLocation(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'latitude' => ['required', 'numeric'],
+            'longitude' => ['required', 'numeric'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data lokasi tidak valid.',
+            ], 422);
+        }
+
+        $user = auth()->user();
+
+        if (!$user->servantDetails) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data pembantu tidak ditemukan.',
+            ], 404);
+        }
+
+        try {
+            $user->servantDetails->update([
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Lokasi berhasil diperbarui.',
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan sistem.',
+            ], 500);
+        }
+    }
 }
+

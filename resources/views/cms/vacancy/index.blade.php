@@ -57,6 +57,54 @@
             </div>
         </div>
     </div>
+
+    <!-- Archived Data -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Arsip Lowongan</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTableResult" width="100%" cellspacing="0">
+                    <thead>
+                        <tr class="text-center">
+                            <th>No</th>
+                            <th>Judul</th>
+                            <th>Lokasi</th>
+                            <th>Status</th>
+                            <th>Tanggal Hapus</th>
+                            @role('majikan')
+                                <th>Aksi</th>
+                            @endrole
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($archives as $archive)
+                            <tr>
+                                <td class="text-center">{{ $loop->iteration }}</td>
+                                <td>{{ $archive->title }}</td>
+                                <td>{{ $archive->user->employeDetails->address }}</td>
+                                <td class="text-center"><span class="badge badge-secondary">Diarsipkan</span></td>
+                                <td class="text-center">{{ $archive->deleted_at->format('d M Y H:i') }}</td>
+                                @role('majikan')
+                                    <td class="text-center">
+                                        <form action="{{ route('vacancies.restore', $archive->id) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="btn btn-success btn-sm"
+                                                onclick="return confirm('Apakah Anda yakin ingin mengaktifkan kembali lowongan ini?')">
+                                                <i class="fas fa-trash-restore"></i> Restore
+                                            </button>
+                                        </form>
+                                    </td>
+                                @endrole
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('custom-style')

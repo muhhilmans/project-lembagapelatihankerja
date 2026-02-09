@@ -17,6 +17,8 @@ Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     
     Route::get('/applicant-all', [UtilityController::class, 'allApplicant'])->name('applicant-all');
 
+    Route::get('/applicant', [UtilityController::class, 'applicantIndex'])->name('applicant.index');
+
     Route::get('/applicant-hire', [UtilityController::class, 'hireApplicant'])->name('applicant-hire');
 
     Route::get('/applicant-indie', [UtilityController::class, 'indieApplicant'])->name('applicant-indie');

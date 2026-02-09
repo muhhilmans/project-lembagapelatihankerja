@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
 use App\Models\Voucher;
-use App\Models\Complaint;
+use App\Models\Pengaduan; // Updated
 use App\Models\Application;
 use App\Traits\ApiResponse;
 use App\Models\WorkerSalary;
@@ -18,8 +18,17 @@ use Illuminate\Support\Facades\Validator;
 
 class WorkerController extends Controller
 {
+    /**
+     * Menangani trait ApiResponse untuk respon JSON yang konsisten.
+     */
     use ApiResponse;
 
+    /**
+     * Mengambil semua data pekerja aktif yang terkait dengan majikan yang terautentikasi.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function allWorker(Request $request)
     {
         try {
@@ -166,6 +175,12 @@ class WorkerController extends Controller
         }
     }
 
+    /**
+     * Mengambil detail pekerja spesifik berdasarkan ID.
+     *
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function showWorker($id)
     {
         $user = auth()->user();
@@ -280,6 +295,13 @@ class WorkerController extends Controller
         }
     }
 
+    /**
+     * Menyimpan absensi pekerja dan menghitung gaji.
+     *
+     * @param Request $request
+     * @param Application $application
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function presenceWorker(Request $request, Application $application)
     {
         if (!$application) {
@@ -420,6 +442,14 @@ class WorkerController extends Controller
         }
     }
 
+    /**
+     * Memperbarui absensi pekerja dan menghitung ulang gaji.
+     *
+     * @param Request $request
+     * @param Application $application
+     * @param WorkerSalary $salary
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updatePresenceWorker(Request $request, Application $application, WorkerSalary $salary)
     {
         if (!$salary) {
@@ -551,6 +581,13 @@ class WorkerController extends Controller
         }
     }
 
+    /**
+     * Mengunggah bukti pembayaran majikan.
+     *
+     * @param Request $request
+     * @param Application $application
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function uploadMajikan(Request $request, Application $application)
     {
         $validator = Validator::make($request->all(), [
@@ -606,6 +643,13 @@ class WorkerController extends Controller
         }
     }
 
+    /**
+     * Menolak atau menghentikan kontrak pekerja.
+     *
+     * @param Request $request
+     * @param Application $application
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function rejectWorker(Request $request, Application $application)
     {
         $validator = Validator::make($request->all(), [
@@ -672,6 +716,13 @@ class WorkerController extends Controller
         }
     }
 
+    /**
+     * Mengirimkan pengaduan tentang pekerja.
+     *
+     * @param Request $request
+     * @param Application $application
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function complaintWorker(Request $request, Application $application)
     {
         $validator = Validator::make($request->all(), [
@@ -693,7 +744,9 @@ class WorkerController extends Controller
 
             $user = auth()->user();
 
-            $complaint = Complaint::where('application_id', $application->id)->where('employe_id', $user->id)->first();
+            $complaint = Pengaduan::where('contract_id', $application->id)
+                ->where('reporter_id', $user->id)
+                ->first();
 
             if ($complaint) {
                 DB::rollBack();
@@ -704,12 +757,12 @@ class WorkerController extends Controller
                 ], 409);
             }
 
-            $store = Complaint::create([
-                'application_id' => $application->id,
-                'servant_id' => null,
-                'employe_id' => $user->id,
-                'message' => $data['message'],
-                'status' => 'pending',
+            $store = Pengaduan::create([
+                'contract_id' => $application->id,
+                'reporter_id' => $user->id,
+                'reported_user_id' => $application->servant_id,
+                'description' => $data['message'],
+                'status' => 'open',
             ]);
 
             if (!$store) {
@@ -722,15 +775,7 @@ class WorkerController extends Controller
 
             DB::commit();
 
-            // try {
-            //     NotificationDispatched::dispatch(
-            //         "Aduan Baru: Majikan menyampaikan keluhan terkait kinerja Anda.",
-            //         $application->servant_id,
-            //         'error'
-            //     );
-            // } catch (\Exception $e) {
-            //     Log::error("Gagal kirim notif complaintWorker: " . $e->getMessage());
-            // }
+            // Notify...
 
             return response()->json([
                 'status'  => 'success',
@@ -752,6 +797,12 @@ class WorkerController extends Controller
         }
     }
 
+    /**
+     * Mengambil semua pekerjaan untuk pembantu yang terautentikasi.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function allWork(Request $request)
     {
         $user = auth()->user();
@@ -840,6 +891,12 @@ class WorkerController extends Controller
         }
     }
 
+    /**
+     * Mengambil detail pekerjaan spesifik untuk pembantu.
+     *
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function showWork($id)
     {
         $user = auth()->user();
@@ -942,6 +999,13 @@ class WorkerController extends Controller
         }
     }
 
+    /**
+     * Mengirimkan pengaduan tentang pekerjaan/majikan.
+     *
+     * @param Request $request
+     * @param Application $application
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function complaintWork(Request $request, Application $application)
     {
         $validator = Validator::make($request->all(), [
@@ -963,7 +1027,9 @@ class WorkerController extends Controller
 
             $user = auth()->user();
 
-            $complaint = Complaint::where('application_id', $application->id)->where('servant_id', $user->id)->first();
+            $complaint = Pengaduan::where('contract_id', $application->id)
+                ->where('reporter_id', $user->id)
+                ->first();
 
             if ($complaint) {
                 DB::rollBack();
@@ -974,12 +1040,14 @@ class WorkerController extends Controller
                 ], 409);
             }
 
-            $store = Complaint::create([
-                'application_id' => $application->id,
-                'servant_id' => $user->id,
-                'employe_id' => null,
-                'message' => $data['message'],
-                'status' => 'pending',
+            $employerId = $application->employe_id ?? ($application->vacancy ? $application->vacancy->user_id : null);
+
+            $store = Pengaduan::create([
+                'contract_id' => $application->id,
+                'reporter_id' => $user->id,
+                'reported_user_id' => $employerId,
+                'description' => $data['message'],
+                'status' => 'open',
             ]);
 
             if (!$store) {
@@ -992,20 +1060,7 @@ class WorkerController extends Controller
 
             DB::commit();
 
-            // try {
-            //     $employerId = $application->employe_id ?? ($application->vacancy ? $application->vacancy->user_id : null);
-
-            //     if ($employerId) {
-            //         $pembantuName = auth()->user()->name;
-            //         NotificationDispatched::dispatch(
-            //             "Aduan Baru: Pekerja {$pembantuName} menyampaikan keluhan.",
-            //             $employerId,
-            //             'warning'
-            //         );
-            //     }
-            // } catch (\Exception $e) {
-            //     Log::error("Gagal kirim notif complaintWork: " . $e->getMessage());
-            // }
+             // Notify...
 
             return response()->json([
                 'status'  => 'success',

@@ -34,9 +34,9 @@
             </div>
         @else
             @foreach ($datas as $data)
-                <div class="col-lg-3 mb-3 mb-lg-0 vacancy-card" data-profession-id="{{ $data->profession_id }}"
+                <div class="col-lg-3 mb-4 vacancy-card" data-profession-id="{{ $data->profession_id }}"
                     data-title="{{ strtolower($data->title) }}" data-employer="{{ strtolower($data->user->name) }}">
-                    <div class="card shadow-sm">
+                    <div class="card shadow-sm h-100">
                         <div class="card-body">
                             <a href="{{ route('show-vacancy', $data->id) }}" class="text-secondary">
                                 <h5 class="card-title"><strong>{{ $data->title }}</strong></h5>
@@ -48,16 +48,20 @@
                                 <strong>Batas Lamaran:</strong>
                                 @php
                                     $closingDate = \Carbon\Carbon::parse($data->closing_date);
-                                    $daysRemaining = $closingDate->diffInDays(now());
+                                    $startOfDayUser = now()->startOfDay();
+                                    $startOfDayClosing = $closingDate->startOfDay();
+                                    $diff = $startOfDayUser->diffInDays($startOfDayClosing, false);
 
-                                    if ($closingDate->isPast()) {
+                                    if ($diff < 0) {
                                         echo 'Lamaran telah ditutup.';
+                                    } elseif ($diff == 0) {
+                                        echo 'Hari ini terakhir.';
                                     } else {
-                                        echo $daysRemaining . ' hari lagi';
+                                        echo $diff . ' hari lagi';
                                     }
                                 @endphp
                             </p>
-                            <p class="card-text">{!! \Illuminate\Support\Str::limit($data->description, 100, '...') !!}</p>
+                            <p class="card-text">{{ \Illuminate\Support\Str::limit(strip_tags(str_replace(['<br>', '</p>', '</div>'], ' ', $data->description)), 100, '...') }}</p>
                         </div>
                     </div>
                 </div>

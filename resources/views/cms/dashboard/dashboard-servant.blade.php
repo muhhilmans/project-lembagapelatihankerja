@@ -116,3 +116,68 @@
         </div>
     </div>
 @endsection
+
+@push('custom-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cek apakah browser mendukung geolocation
+            if ('geolocation' in navigator) {
+                // Request permission dan dapatkan lokasi
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Berhasil mendapatkan lokasi
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        // Kirim lokasi ke server
+                        fetch('{{ route("update-location") }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    latitude: latitude,
+                                    longitude: longitude
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    console.log('Lokasi berhasil diperbarui:', latitude, longitude);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Gagal memperbarui lokasi:', error);
+                            });
+                    },
+                    function(error) {
+                        // Gagal mendapatkan lokasi
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                console.log('Pengguna menolak akses lokasi.');
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                console.log('Informasi lokasi tidak tersedia.');
+                                break;
+                            case error.TIMEOUT:
+                                console.log('Request lokasi timeout.');
+                                break;
+                            default:
+                                console.log('Terjadi kesalahan saat mengambil lokasi.');
+                                break;
+                        }
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000 // Cache lokasi selama 5 menit
+                    }
+                );
+            } else {
+                console.log('Browser tidak mendukung geolocation.');
+            }
+        });
+    </script>
+@endpush
+

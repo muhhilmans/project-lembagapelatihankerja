@@ -223,8 +223,8 @@
 
                                     @hasrole('majikan')
                                         @if (
-                                            !$data->complaint->contains('application_id', $data->id) ||
-                                                !$data->complaint->contains('employe_id', auth()->user()->id))
+                                            !$data->pengaduan->contains('contract_id', $data->id) ||
+                                                !$data->pengaduan->contains('reporter_id', auth()->user()->id))
                                             <a href="#" class="btn btn-sm btn-danger mb-1" data-toggle="modal"
                                                 data-target="#complaintModal-{{ $data->id }}">
                                                 <i class="fas fa-bullhorn"></i>
@@ -235,8 +235,8 @@
 
                                     @hasrole('pembantu')
                                         @if (
-                                            !$data->complaint->contains('application_id', $data->id) ||
-                                                !$data->complaint->contains('servant_id', auth()->user()->id))
+                                            !$data->pengaduan->contains('contract_id', $data->id) ||
+                                                !$data->pengaduan->contains('reporter_id', auth()->user()->id))
                                             <a href="#" class="btn btn-sm btn-danger mb-1" data-toggle="modal"
                                                 data-target="#complaintModal-{{ $data->id }}">
                                                 <i class="fas fa-bullhorn"></i>

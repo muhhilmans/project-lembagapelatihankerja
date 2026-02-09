@@ -46,9 +46,9 @@ class Application extends Model
         return $this->belongsTo(User::class, 'employe_id');
     }
 
-    public function complaint()
+    public function pengaduan()
     {
-        return $this->hasMany(Complaint::class, 'application_id');
+        return $this->hasMany(Pengaduan::class, 'contract_id');
     }
 
     public function workerSalary()

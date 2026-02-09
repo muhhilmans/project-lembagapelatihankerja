@@ -113,14 +113,14 @@ class User extends Authenticatable implements MustVerifyEmail, JWTSubject
         return $this->hasMany(RecomServant::class, 'servant_id');
     }
 
-    public function complaintEmployes()
+    public function reportedPengaduan()
     {
-        return $this->hasMany(Complaint::class, 'employe_id');
+        return $this->hasMany(Pengaduan::class, 'reported_user_id');
     }
 
-    public function complaintServants()
+    public function reporterPengaduan()
     {
-        return $this->hasMany(Complaint::class, 'servant_id');
+        return $this->hasMany(Pengaduan::class, 'reporter_id');
     }
 
     public function blogs()

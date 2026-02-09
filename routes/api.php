@@ -68,7 +68,7 @@ Route::middleware('jwt.auth')->group(function () {
 
         // Kelola Profil
         Route::get('/profile/majikan/{id}', [ProfileController::class, 'profileMajikan']);
-        Route::put('/profile/majikan/{id}/edit', [ProfileController::class, 'updateMajikan']);
+        Route::post('/profile/majikan/{id}/edit', [ProfileController::class, 'updateMajikan']);
 
 
     });
@@ -94,7 +94,7 @@ Route::middleware('jwt.auth')->group(function () {
 
         // Kelola Profil
         Route::get('/profile/pembantu/{id}', [ProfileController::class, 'profilePembantu']);
-        Route::put('/profile/pembantu/{id}/edit', [ProfileController::class, 'updatePembantu']);
+        Route::post('/profile/pembantu/{id}/edit', [ProfileController::class, 'updatePembantu']);
         Route::post('profile/pembantu/{id}/skill', [ProfileController::class, 'storeSkill']);
         Route::put('/profile/pembantu/{id}/skill/{skill_id}', [ProfileController::class, 'updateSkill']);
         Route::delete('/profile/pembantu/{id}/skill/{skill_id}', [ProfileController::class, 'destroySkill']);

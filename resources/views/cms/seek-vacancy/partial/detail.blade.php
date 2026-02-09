@@ -43,12 +43,16 @@
                     <i class="fas fa-fw fa-clock"></i> {{ \Carbon\Carbon::parse($data->closing_date)->format('d F Y') }} (
                     @php
                         $closingDate = \Carbon\Carbon::parse($data->closing_date);
-                        $daysRemaining = $closingDate->diffInDays(now());
+                        $startOfDayUser = now()->startOfDay();
+                        $startOfDayClosing = $closingDate->startOfDay();
+                        $diff = $startOfDayUser->diffInDays($startOfDayClosing, false);
 
-                        if ($closingDate->isPast()) {
+                        if ($diff < 0) {
                             echo 'Lamaran telah ditutup.';
+                        } elseif ($diff == 0) {
+                            echo 'Hari ini terakhir.';
                         } else {
-                            echo $daysRemaining . ' hari lagi';
+                            echo $diff . ' hari lagi';
                         }
                     @endphp
                     )

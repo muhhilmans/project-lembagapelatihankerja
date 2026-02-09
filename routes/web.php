@@ -9,6 +9,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WorkerController;
+use App\Http\Controllers\VacancyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,9 +74,11 @@ Route::middleware(['auth'])->group(function () {
     require __DIR__ . '/role/employe.php';
     require __DIR__ . '/role/servant.php';
     Route::put('/applicant-hire/{id}/change', [ApplicationController::class, 'changeStatusHire'])->name('applicant-hire.change');
+    Route::put('/applicant/{id}/salary', [ApplicationController::class, 'updateSalary'])->name('applicant.salary.update');
     Route::put('/applicant-hire/{id}/contract', [ApplicationController::class, 'hireContract'])->name('applicant-hire.contract');
     Route::put('/applicant-hire/{id}/reject', [ApplicationController::class, 'hireReject'])->name('applicant-hire.reject');
     Route::put('vacancies/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('vacancies.change');
+    Route::put('vacancies/{id}/restore', [VacancyController::class, 'restore'])->name('vacancies.restore');
 
     Route::get('contract/download/{applicationId}', [ApplicationController::class, 'downloadContract'])->name('contract.download');
 
