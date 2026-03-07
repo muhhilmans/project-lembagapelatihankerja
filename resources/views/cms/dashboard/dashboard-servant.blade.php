@@ -91,9 +91,8 @@
                         <tr class="text-center">
                             <th>No</th>
                             <th>Nama Majikan</th>
-                            <th>Nama Lowongan</th>
-                            <th>Status</th>
-                            <th>Tanggal Interview</th>
+                            <th>Status Lamaran</th>
+                            <th>Info Gaji & Kontrak</th>
                             <th>Keterangan</th>
                         </tr>
                     </thead>
@@ -102,10 +101,40 @@
                             <tr>
                                 <td class="text-center">{{ $loop->iteration }}</td>
                                 <td>{{ $data->vacancy_id ? $data->vacancy->user->name : $data->employe->name }}</td>
-                                <td class="text-center">{{ $data->vacancy_id ? $data->vacancy->title : '-' }}</td>
-                                <td class="text-center">{{ $data->vacancy_id ? 'Mandiri' : 'Hire' }}</td>
                                 <td class="text-center">
-                                    {{ \Carbon\Carbon::parse($data->interview_date ? $data->interview_date : '')->format('d-M-Y') }}
+                                    @if($data->status == 'interview')
+                                        <span class="badge badge-info">Interview</span>
+                                    @elseif($data->status == 'passed')
+                                        <span class="badge badge-success">Lolos / Penawaran</span>
+                                    @else
+                                        <span class="badge badge-secondary">{{ $data->status }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($data->status == 'passed' || ($data->salary && $data->salary > 0))
+                                        <small class="d-block"><strong>Jenis:</strong> {{ $data->salary_type == 'contract' ? 'Kontrak' : 'Fee/Infal' }}</small>
+                                        <small class="d-block"><strong>Gaji:</strong> Rp {{ number_format($data->salary, 0, ',', '.') }}</small>
+                                         @if($data->salary_type != 'contract')
+                                            @if($data->is_infal)
+                                                 <small class="d-block"><strong>Mode:</strong> Infal ({{ $data->infal_frequency }})</small>
+                                            @else
+                                                 <small class="d-block"><strong>Mode:</strong> Reguler</small>
+                                            @endif
+                                        @else
+                                            <small class="d-block"><strong>Garansi:</strong> {{ $data->warranty_duration }}</small>
+                                        @endif
+                                        @if($data->work_start_date)
+                                            <small class="d-block text-muted">Mulai: {{ \Carbon\Carbon::parse($data->work_start_date)->format('d M Y') }}</small>
+                                        @endif
+                                    @else
+                                        @if($data->interview_date)
+                                            <small><i class="fas fa-calendar mr-1"></i> {{ \Carbon\Carbon::parse($data->interview_date)->format('d M Y') }}</small>
+                                        @elseif($data->link_interview)
+                                            <small><a href="{{ $data->link_interview }}" target="_blank">Link Meeting</a></small>
+                                        @else
+                                            <small class="text-muted">-</small>
+                                        @endif
+                                    @endif
                                 </td>
                                 <td class="text-center">{!! $data->notes_interview !!}</td>
                             </tr>

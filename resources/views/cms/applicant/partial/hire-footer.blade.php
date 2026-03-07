@@ -1,57 +1,51 @@
-<div class="d-flex justify-content-between align-items-center">
-    <span
-        class="p-2 badge badge-{{ match ($d->status) {
-            'accepted' => 'success',
-            'rejected' => 'danger',
-            'laidoff' => 'danger',
-            'pending' => 'warning',
-            'interview' => 'info',
-            'schedule' => 'info',
-            'verify' => 'success',
-            'contract' => 'success',
-            default => 'secondary',
-        } }}">
-        {{ match ($d->status) {
-            'accepted' => 'Diterima',
-            'rejected' => 'Ditolak',
-            'laidoff' => 'Diberhentikan',
-            'pending' => 'Pending',
-            'schedule' => 'Penjadwalan',
-            'interview' => 'Interview',
-            'passed' => 'Lolos Interview',
-            'choose' => 'Verifikasi',
-            'verify' => 'Persiapan Kerja',
-            'contract' => 'Perjanjian',
-            default => 'Status Tidak Diketahui',
-        } }}
-    </span>
+<div class="d-flex flex-column">
+    <div class="mb-2">
+        <span
+            class="p-2 badge badge-{{ match ($d->status) {
+                'accepted' => 'success',
+                'rejected' => 'danger',
+                'laidoff' => 'danger',
+                'pending' => 'warning',
+                'interview' => 'info',
+                'schedule' => 'info',
+                'verify' => 'success',
+                'contract' => 'success',
+                default => 'secondary',
+            } }}">
+            {{ match ($d->status) {
+                'accepted' => 'Diterima',
+                'rejected' => 'Ditolak',
+                'laidoff' => 'Diberhentikan',
+                'pending' => 'Pending',
+                'schedule' => 'Penjadwalan',
+                'interview' => 'Interview',
+                'passed' => 'Lolos Interview',
+                'choose' => 'Verifikasi',
+                'verify' => 'Persiapan Kerja',
+                'contract' => 'Perjanjian',
+                default => 'Status Tidak Diketahui',
+            } }}
+        </span>
+    </div>
 
-    <div class="row">
+    <div class="d-flex flex-wrap" style="gap: 4px;">
         @if ($d->status == 'pending')
             <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                 data-target="#scheduleModal-{{ $d->id }}">
                 <i class="fas fa-check"></i>
             </a>
-            @include('cms.applicant.modal.status.schedule', [
+            @include('cms.applicant.modal.schedule', [
                 'data' => $d,
             ])
         @endif
 
         @hasrole('superadmin|admin')
             @if ($d->status == 'interview')
-                <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                    data-target="#passedModal-{{ $d->id }}">
-                    <i class="fas fa-check"></i>
-                </a>
-                @include('cms.applicant.modal.status.passed', [
-                    'data' => $d,
-                ])
-
                 <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                     data-target="#rejectModal-{{ $d->id }}">
                     <i class="fas fa-times"></i>
                 </a>
-                @include('cms.applicant.modal.status.reject', [
+                @include('cms.applicant.modal.reject', [
                     'data' => $d,
                 ])
             @endif
@@ -61,7 +55,7 @@
                     data-target="#interviewModal-{{ $d->id }}">
                     <i class="fas fa-calendar-day"></i>
                 </a>
-                @include('cms.applicant.modal.status.interview', [
+                @include('cms.applicant.modal.interview', [
                     'data' => $d,
                 ])
             @endif
@@ -71,7 +65,7 @@
                     <td class="text-center">
                         <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                             data-target="#chooseModal-{{ $d->id }}"><i class="fas fa-check"></i></a>
-                        @include('cms.applicant.modal.status.choose', [
+                        @include('cms.applicant.modal.choose', [
                             'data' => $d,
                         ])
 
@@ -79,7 +73,7 @@
                             data-target="#rejectModal-{{ $d->id }}">
                             <i class="fas fa-times"></i>
                         </a>
-                        @include('cms.applicant.modal.status.reject', [
+                        @include('cms.applicant.modal.reject', [
                             'data' => $d,
                         ])
                     </td>
@@ -90,7 +84,7 @@
                 <td class="text-center">
                     <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                         data-target="#verifyModal-{{ $d->id }}"><i class="fas fa-check-double"></i></a>
-                    @include('cms.applicant.modal.status.verify', [
+                    @include('cms.applicant.modal.verify', [
                         'data' => $d,
                     ])
 
@@ -98,7 +92,7 @@
                         data-target="#rejectModal-{{ $d->id }}">
                         <i class="fas fa-times"></i>
                     </a>
-                    @include('cms.applicant.modal.status.reject', [
+                    @include('cms.applicant.modal.reject', [
                         'data' => $d,
                     ])
                 </td>
@@ -108,7 +102,7 @@
                 <td class="text-center">
                     <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                         data-target="#agreeModal-{{ $d->id }}"><i class="fas fa-check-double"></i></a>
-                    @include('cms.applicant.modal.status.agree', [
+                    @include('cms.applicant.modal.agree', [
                         'data' => $d,
                     ])
 
@@ -116,7 +110,7 @@
                         data-target="#rejectModal-{{ $d->id }}">
                         <i class="fas fa-times"></i>
                     </a>
-                    @include('cms.applicant.modal.status.reject', [
+                    @include('cms.applicant.modal.reject', [
                         'data' => $d,
                     ])
                 </td>
@@ -124,13 +118,15 @@
         @endhasrole
 
         {{-- Button Gaji - Muncul ketika status accepted, schedule, atau interview --}}
-        @if (in_array($d->status, ['accepted', 'schedule', 'interview']))
-            <a href="#" class="btn btn-sm btn-warning mr-1" data-toggle="modal"
-                data-target="#salaryModal-{{ $d->id }}" title="Lihat Informasi Gaji">
-                <i class="fas fa-money-bill-wave"></i>
-            </a>
-            @include('cms.applicant.modal.salary', ['data' => $d])
-        @endif
+        @hasrole('superadmin|admin')
+            @if (in_array($d->status, ['accepted', 'schedule', 'interview']))
+                <a href="#" class="btn btn-sm btn-warning mr-1" data-toggle="modal"
+                    data-target="#salaryModal-{{ $d->id }}" title="Lihat Informasi Gaji">
+                    <i class="fas fa-money-bill-wave"></i>
+                </a>
+                @include('cms.applicant.modal.salary', ['data' => $d])
+            @endif
+        @endhasrole
 
         {{-- Button Penjadwalan - Muncul ketika status schedule atau interview --}}
         @if (in_array($d->status, ['schedule', 'interview']))
@@ -141,34 +137,14 @@
             @include('cms.applicant.modal.schedule-info', ['data' => $d])
         @endif
 
-        @hasrole('majikan')
-            @if ($d->status == 'verify')
-                <a href="#" class="btn btn-sm btn-secondary mr-1" data-toggle="modal"
-                    data-target="#draftModal-{{ $d->id }}"><i class="fas fa-file-alt"></i></a>
-                @include('cms.applicant.modal.status.draft', [
-                    'data' => $d,
-                ])
-            @endif
-        @endhasrole
 
-        @if ($d->status == 'contract')
-            <a href="#" class="btn btn-sm btn-primary mr-1" data-toggle="modal"
-                data-target="#contractModal-{{ $d->id }}">
-                <i class="fas fa-file-contract"></i>
-            </a>
-            @include('cms.applicant.modal.status.contract', [
-                'data' => $d,
-            ])
-        @endif
 
         @if ($d->status == 'accepted')
             @php
-                $hasComplaintWithSameServant = $d->complaint->contains(function ($complaint) use ($d) {
-                    return $complaint->servant_id == $d->servant_id;
-                });
+                $alreadyComplained = $d->pengaduan->where('reporter_id', auth()->user()->id)->isNotEmpty();
             @endphp
 
-            @if (!$hasComplaintWithSameServant)
+            @if (!$alreadyComplained)
                 <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                     data-target="#complaintModal-{{ $d->id }}">
                     <i class="fas fa-bullhorn"></i>
@@ -176,16 +152,14 @@
                 @include('cms.applicant.modal.complaint', ['data' => $d])
             @endif
 
-            <a href="{{ route('contract.download', ['applicationId' => $d->id]) }}"
-                class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
         @endif
 
-        @if (in_array($d->status, ['pending', 'schedule', 'interview', 'contract', 'verify']))
+        @if ($d->status == 'pending')
             <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal" 
                 data-target="#rejectModal-{{ $d->id }}">
                 <i class="fas fa-times"></i>
             </a>
-            @include('cms.applicant.modal.status.reject', [
+            @include('cms.applicant.modal.reject', [
                 'data' => $d,
             ])
         @endif

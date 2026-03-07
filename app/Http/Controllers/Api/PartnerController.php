@@ -298,18 +298,6 @@ class PartnerController extends Controller
 
             DB::commit();
 
-            try {
-                $employer = User::find($data['employe_id']);
-                $employerName = $employer ? $employer->name : 'Seseorang';
-
-                \App\Events\NotificationDispatched::dispatch(
-                    "Tawaran Pekerjaan: {$employerName} ingin merekrut Anda secara langsung.", // Pesan
-                    $partner->id,
-                    'info'
-                );
-            } catch (\Exception $e) {
-                Log::error("Gagal kirim notif hirePartner: " . $e->getMessage());
-            }
 
             return response()->json([
                 'status' => 'success',

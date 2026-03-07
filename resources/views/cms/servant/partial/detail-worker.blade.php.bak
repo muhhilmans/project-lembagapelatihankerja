@@ -1,0 +1,1153 @@
+@extends('cms.layouts.main', ['title' => 'Detail Pekerja'])
+
+@section('content')
+    <!-- Page Heading -->
+    <div class="d-flex justify-content-between align-items-baseline">
+        <h1 class="h3 mb-4 text-gray-800">Detail Pekerja</h1>
+        <div class="d-flex">
+            <a href="{{ route('worker-all') }}" class="btn btn-sm btn-secondary shadow"><i
+                    class="fas fa-fw fa-arrow-left"></i></a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-4 mb-3 mb-lg-0">
+            <div class="card shadow p-2">
+                <div class="card-body">
+                    @if ($data->servant && $data->servant->servantDetails && $data->servant->servantDetails->photo)
+                        <img src="{{ route('getImage', ['path' => 'photo', 'imageName' => $data->servant->servantDetails->photo]) }}"
+                            class="img-fluid rounded mx-auto d-block zoomable-image" style="max-height: 150px;"
+                            alt="...">
+                    @else
+                        <img src="{{ asset('assets/img/undraw_rocket.svg') }}"
+                            class="img-fluid rounded mx-auto d-block zoomable-image" style="max-height: 150px;"
+                            alt="...">
+                    @endif
+
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-user mr-2 mb-2"></i> {{ $data->servant ? $data->servant->name : '-' }}</li>
+                        <li><i class="fas fa-user-tie mr-2 mb-2"></i>
+                            @if ($data->vacancy_id != null && $data->vacancy && $data->vacancy->user)
+                                {{ $data->vacancy->user->name }}
+                            @elseif($data->employe)
+                                {{ $data->employe->name }}
+                            @else
+                                -
+                            @endif
+                        </li>
+                        <li><i class="fas fa-clock mr-2 mb-2"></i>
+                            {{ \Carbon\Carbon::parse($data->work_start_date)->format('d F Y') }}</li>
+                        <li><i class="fas fa-money-bill-wave mr-1 mb-2"></i>
+                            Rp. {{ number_format($data->salary, 0, ',', '.') }}
+                        </li>
+                        <li><i class="fas fa-tags mr-1 mb-2"></i>
+                            Tipe Pekerja: @if(in_array($data->salary_type, ['fee', 'fee_langsung'])) Fee @elseif($data->salary_type == 'infal') Infal @else Kontrak @endif
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            {{-- Contract Information Card --}}
+            <div class="card shadow p-2 mt-3">
+                <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                    <h6 class="font-weight-bold mb-0"><i class="fas fa-file-contract mr-1"></i> Informasi Kontrak</h6>
+                    @hasrole('majikan|admin|superadmin')
+                        <a href="#" class="btn btn-sm btn-primary" data-toggle="modal"
+                            data-target="#uploadContractModal-{{ $data->id }}">
+                            <i class="fas fa-upload mr-1"></i>
+                            {{ $data->file_contract ? 'Ganti Kontrak' : 'Upload Kontrak' }}
+                        </a>
+                    @endhasrole
+                </div>
+                <div class="card-body">
+                    {{-- Validation Timeline --}}
+                    @if ($data->validation_date)
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1"><i class="fas fa-calendar-check mr-1"></i> <b>Validasi:</b></small>
+                            <small>
+                                <i class="fas fa-calendar mr-1"></i> {{ \Carbon\Carbon::parse($data->validation_date)->format('d F Y') }}<br>
+                                <i class="fas fa-map-marker-alt mr-1"></i> {{ $data->validation_location ?? '-' }}
+                                @if ($data->validated_at)
+                                    <br><span class="badge badge-success"><i class="fas fa-check mr-1"></i> Tervalidasi {{ $data->validated_at->format('d M Y') }}</span>
+                                @endif
+                            </small>
+                            @if ($data->validation_notes)
+                                <br><small class="text-muted">Catatan: {{ $data->validation_notes }}</small>
+                            @endif
+                        </div>
+                        <hr>
+                    @endif
+
+                    {{-- ART Signature --}}
+                    @if ($data->art_signature_file)
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1"><i class="fas fa-signature mr-1"></i> <b>TTD ART:</b></small>
+                            @php
+                                $artSigPath = storage_path('app/public/' . $data->art_signature_file);
+                            @endphp
+                            @if (file_exists($artSigPath))
+                                @if (Str::endsWith($data->art_signature_file, ['.jpg', '.jpeg', '.png', '.gif']))
+                                    <img src="{{ route('getFile', ['path' => dirname($data->art_signature_file), 'fileName' => basename($data->art_signature_file)]) }}"
+                                        alt="TTD ART" class="img-fluid rounded zoomable-image" style="max-height: 120px;">
+                                @elseif (Str::endsWith($data->art_signature_file, ['.pdf']))
+                                    <a href="{{ route('getFile', ['path' => dirname($data->art_signature_file), 'fileName' => basename($data->art_signature_file)]) }}" 
+                                        target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-file-pdf mr-1"></i> Lihat PDF
+                                    </a>
+                                @endif
+                            @else
+                                <small class="text-danger">File tidak ditemukan</small>
+                            @endif
+                            @if ($data->art_signed_at)
+                                <br><small class="text-muted">Ditandatangani: {{ $data->art_signed_at->format('d M Y H:i') }}</small>
+                            @endif
+                        </div>
+                        <hr>
+                    @endif
+
+                    {{-- Employer Signature --}}
+                    @if ($data->employer_signature_file)
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1"><i class="fas fa-file-signature mr-1"></i> <b>Kontrak Majikan:</b></small>
+                            @php
+                                $empSigPath = storage_path('app/public/' . $data->employer_signature_file);
+                            @endphp
+                            @if (file_exists($empSigPath))
+                                @if (Str::endsWith($data->employer_signature_file, ['.jpg', '.jpeg', '.png', '.gif']))
+                                    <img src="{{ route('getFile', ['path' => dirname($data->employer_signature_file), 'fileName' => basename($data->employer_signature_file)]) }}"
+                                        alt="Kontrak Majikan" class="img-fluid rounded zoomable-image" style="max-height: 120px;">
+                                @elseif (Str::endsWith($data->employer_signature_file, ['.pdf']))
+                                    <a href="{{ route('getFile', ['path' => dirname($data->employer_signature_file), 'fileName' => basename($data->employer_signature_file)]) }}" 
+                                        target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-file-pdf mr-1"></i> Lihat PDF
+                                    </a>
+                                @endif
+                            @else
+                                <small class="text-danger">File tidak ditemukan</small>
+                            @endif
+                        </div>
+                        <hr>
+                    @endif
+
+                    {{-- Original Contract File --}}
+                    @if ($data->file_contract)
+                        <div class="mb-2">
+                            <small class="text-muted d-block mb-1"><i class="fas fa-file-alt mr-1"></i> <b>File Kontrak:</b></small>
+                            @php
+                                $contractPath = storage_path('app/public/' . $data->file_contract);
+                            @endphp
+                            @if (file_exists($contractPath))
+                                @if (Str::endsWith($data->file_contract, ['.jpg', '.jpeg', '.png', '.gif']))
+                                    <img src="{{ route('getFile', ['path' => dirname($data->file_contract), 'fileName' => basename($data->file_contract)]) }}"
+                                        alt="Kontrak" class="img-fluid rounded zoomable-image mb-2" style="max-height: 200px;">
+                                @elseif (Str::endsWith($data->file_contract, ['.pdf']))
+                                    <a href="{{ route('getFile', ['path' => dirname($data->file_contract), 'fileName' => basename($data->file_contract)]) }}" 
+                                        target="_blank" class="btn btn-sm btn-outline-info mb-2">
+                                        <i class="fas fa-file-pdf mr-1"></i> Lihat PDF
+                                    </a>
+                                @endif
+                            @endif
+                            <br>
+                            <a href="{{ route('contract.download', ['applicationId' => $data->id]) }}" 
+                                class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-download mr-1"></i> Download Kontrak
+                            </a>
+                        </div>
+                    @else
+                        <div class="text-center py-3">
+                            <i class="fas fa-file-upload fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0"><small>Belum ada file kontrak yang diunggah.</small></p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Include Upload Contract Modal --}}
+            @hasrole('majikan|admin|superadmin')
+                @include('cms.servant.modal.upload-contract', ['data' => $data])
+            @endhasrole
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1 class="h5 font-weight-bold">
+                            {{ $data->salary_type == 'fee' || $data->is_infal ? 'Detail Kehadiran' : 'Informasi Pembayaran Kontrak' }}
+                        </h1>
+                        @if($data->salary_type == 'fee' || $data->is_infal)
+                            @if (!$salaries->contains(fn($data) => \Carbon\Carbon::parse($data->month)->format('Y-m') == \Carbon\Carbon::now()->format('Y-m')))
+                                <a href="#" class="btn btn-sm btn-primary" data-toggle="modal"
+                                    data-target="#createKehadiranModal-{{ $data->id }}"><i class="fas fa-plus mr-1"></i>
+                                    Kehadiran</a>
+                                @include('cms.servant.modal.create-presence', ['data' => $data])
+                            @else
+                                <a href="#" class="btn btn-sm btn-secondary disabled">Sudah Mengisi Kehadiran</a>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if($data->salary_type == 'fee' || $data->is_infal)
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th>#</th>
+                                        <th>Periode (Bulan)</th>
+                                        <th>Skema</th>
+                                        <th>Total Durasi (Jam/Hari)</th>
+                                        @hasrole('superadmin|admin|owner|majikan')
+                                            <th>Estimasi Tagihan</th>
+                                            <th>Bukti Pembayaran</th>
+                                        @endhasrole
+                                        @hasrole('superadmin|admin|owner|pembantu')
+                                            <th>Estimasi Gaji (Diterima)</th>
+                                            <th>Bukti Dibayar</th>
+                                        @endhasrole
+                                        @hasrole('superadmin|admin|majikan')
+                                            <th>Aksi</th>
+                                        @endhasrole
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($salaries as $salary)
+                                        <tr>
+                                            <td class="text-center">{{ $loop->iteration }}</td>
+                                            <td class="text-center">{{ \Carbon\Carbon::parse($salary->month)->format('F Y') }}</td>
+                                            <td class="text-center">
+                                                @if($data->salary_type == 'fee' && $data->infal_frequency)
+                                                    <span class="badge badge-info">{{ ucfirst($data->infal_frequency) }}</span>
+                                                @else
+                                                    <span class="badge badge-secondary">Bulanan</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                {{ $salary->presence }} 
+                                                @if($data->infal_frequency == 'daily') Hari @elseif($data->infal_frequency == 'hourly') Jam @else Hari @endif
+                                            </td>
+                                            @hasrole('superadmin|admin|owner|majikan')
+                                                <td class="text-center">
+                                                    Rp. {{ number_format($salary->total_salary_majikan, 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">
+                                                    @if ($salary->payment_majikan_image)
+                                                        @php
+                                                            $filePath = storage_path(
+                                                                'app/public/payments/' . $salary->payment_majikan_image,
+                                                            );
+                                                        @endphp
+    
+                                                        @if (file_exists($filePath))
+                                                            @if (Str::endsWith($salary->payment_majikan_image, ['.jpg', '.jpeg', '.png', '.gif']))
+                                                                <img src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salary->payment_majikan_image]) }}"
+                                                                    alt="Preview" class="img-fluid zoomable-image"
+                                                                    style="max-height: 100px;">
+                                                            @elseif (Str::endsWith($salary->payment_majikan_image, ['.pdf']))
+                                                                <iframe
+                                                                    src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salary->payment_majikan_image]) }}"
+                                                                    width="100%" height="100px"></iframe>
+                                                            @else
+                                                                <p>Format file tidak didukung untuk preview.</p>
+                                                            @endif
+                                                        @else
+                                                            <p>File tidak ditemukan di server.</p>
+                                                        @endif
+                                                    @else
+                                                        Majikan Belum Membayar
+                                                    @endif
+                                                </td>
+                                            @endhasrole
+                                            @hasrole('superadmin|admin|owner|pembantu')
+                                                <td class="text-center">
+                                                    Rp. {{ number_format($salary->total_salary_pembantu, 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">
+                                                    @if ($salary->payment_pembantu_image)
+                                                        @php
+                                                            $filePath = storage_path(
+                                                                'app/public/payments/' . $salary->payment_pembantu_image,
+                                                            );
+                                                        @endphp
+    
+                                                        @if (file_exists($filePath))
+                                                            @if (Str::endsWith($salary->payment_pembantu_image, ['.jpg', '.jpeg', '.png', '.gif']))
+                                                                <img src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salary->payment_pembantu_image]) }}"
+                                                                    alt="Preview" class="img-fluid zoomable-image"
+                                                                    style="max-height: 300px;">
+                                                            @elseif (Str::endsWith($salary->payment_pembantu_image, ['.pdf']))
+                                                                <iframe
+                                                                    src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salary->payment_pembantu_image]) }}"
+                                                                    width="100%" height="300px"></iframe>
+                                                            @else
+                                                                <p>Format file tidak didukung untuk preview.</p>
+                                                            @endif
+                                                        @else
+                                                            <p>File tidak ditemukan di server.</p>
+                                                        @endif
+                                                    @else
+                                                        Belum Dibayarkan
+                                                    @endif
+                                                </td>
+                                            @endhasrole
+                                            @hasrole('superadmin|admin|majikan')
+                                                <td class="text-center">
+                                                    <!-- Tombol Detail Log (Mockup) -->
+                                                    <a href="#" class="btn btn-sm btn-info mb-1" data-toggle="modal"
+                                                       data-target="#detailKehadiranModal-{{ $salary->id }}" title="Lihat Log Harian">
+                                                        <i class="fas fa-list"></i>
+                                                    </a>
+
+                                                    @hasrole('majikan')
+                                                        @if (!$salary->payment_majikan_image)
+                                                            <a href="#" class="btn btn-sm btn-primary mb-1" data-toggle="modal"
+                                                                data-target="#paymentMajikanModal-{{ $salary->id }}"><i
+                                                                    class="fas fa-money-check-alt"></i></a>
+                                                            @include('cms.servant.modal.payment-majikan', [
+                                                                'data' => $salary,
+                                                            ])
+    
+                                                            <a href="#" class="btn btn-sm btn-warning mb-1" data-toggle="modal"
+                                                                data-target="#editKehadiranModal-{{ $salary->id }}"><i
+                                                                    class="fas fa-edit"></i></a>
+                                                            @include('cms.servant.modal.edit-presence', [
+                                                                'data' => $salary,
+                                                            ])
+                                                        @endif
+                                                    @endhasrole
+    
+                                                    @hasrole('superadmin|admin')
+                                                        <a href="#" class="btn btn-sm btn-primary mb-1" data-toggle="modal"
+                                                            data-target="#paymentMajikanModal-{{ $salary->id }}"><i
+                                                                class="fas fa-money-check-alt"></i></a>
+                                                        @include('cms.servant.modal.payment-majikan', [
+                                                            'data' => $salary,
+                                                        ])
+    
+                                                        <a href="#" class="btn btn-sm btn-info mb-1" data-toggle="modal"
+                                                            data-target="#paymentAdminModal-{{ $salary->id }}"><i
+                                                                class="fas fa-money-bill-wave"></i></a>
+                                                        @include('cms.servant.modal.payment-admin', [
+                                                            'data' => $salary,
+                                                        ])
+    
+                                                        <a href="#" class="btn btn-sm btn-warning mb-1" data-toggle="modal"
+                                                            data-target="#editKehadiranModal-{{ $salary->id }}"><i
+                                                                class="fas fa-edit"></i></a>
+                                                        @include('cms.servant.modal.edit-presence', [
+                                                            'data' => $salary,
+                                                        ])
+                                                    @endhasrole
+                                                </td>
+                                            @endhasrole
+                                        </tr>
+
+                                        <!-- Modal Detail Log Kehadiran (Mockup Presentasi) -->
+                                        <div class="modal fade" id="detailKehadiranModal-{{ $salary->id }}" tabindex="-1" role="dialog" aria-labelledby="detailKehadiranLabel-{{ $salary->id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg text-left" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title font-weight-bold" id="detailKehadiranLabel-{{ $salary->id }}">
+                                                            <i class="fas fa-clock mr-1"></i> Rincian Log Kehadiran: {{ \Carbon\Carbon::parse($salary->month)->format('F Y') }}
+                                                        </h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body text-left">
+                                                        <div class="alert alert-info">
+                                                           <i class="fas fa-info-circle"></i> Ini adalah preview rincian sesi kerja harian/jam. Data ini bersifat <strong>Mockup</strong> untuk presentasi.
+                                                        </div>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-sm table-bordered table-striped">
+                                                                <thead class="bg-light">
+                                                                    <tr>
+                                                                        <th>Tanggal</th>
+                                                                        <th>Masuk</th>
+                                                                        <th>Selesai</th>
+                                                                        <th>Durasi</th>
+                                                                        <th>Catatan Pekerja</th>
+                                                                        <th>Status</th>
+                                                                        @hasrole('superadmin|admin|majikan')
+                                                                        <th>Validasi</th>
+                                                                        @endhasrole
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td>{{ \Carbon\Carbon::parse($salary->month)->startOfMonth()->format('d M Y') }}</td>
+                                                                        <td>08:00</td>
+                                                                        <td>15:00</td>
+                                                                        <td>7 Jam</td>
+                                                                        <td>Menyetrika, cuci piring, dan bersihkan halaman</td>
+                                                                        <td><span class="badge badge-success">Disetujui</span></td>
+                                                                        @hasrole('superadmin|admin|majikan')
+                                                                        <td>-</td>
+                                                                        @endhasrole
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>{{ \Carbon\Carbon::parse($salary->month)->startOfMonth()->addDays(1)->format('d M Y') }}</td>
+                                                                        <td>09:00</td>
+                                                                        <td>12:30</td>
+                                                                        <td>3.5 Jam</td>
+                                                                        <td>Memasak makan siang dan berbelanja</td>
+                                                                        <td><span class="badge badge-warning">Menunggu</span></td>
+                                                                        @hasrole('superadmin|admin|majikan')
+                                                                        <td>
+                                                                            <button class="btn btn-xs btn-primary py-0 px-1" title="Setujui"><i class="fas fa-check"></i></button>
+                                                                            <button class="btn btn-xs btn-danger py-0 px-1" title="Tolak"><i class="fas fa-times"></i></button>
+                                                                        </td>
+                                                                        @endhasrole
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>{{ \Carbon\Carbon::parse($salary->month)->startOfMonth()->addDays(2)->format('d M Y') }}</td>
+                                                                        <td>07:30</td>
+                                                                        <td>11:30</td>
+                                                                        <td>4 Jam</td>
+                                                                        <td>Membersihkan 3 kamar mandi</td>
+                                                                        <td><span class="badge badge-danger">Ditolak</span></td>
+                                                                        @hasrole('superadmin|admin|majikan')
+                                                                        <td><small class="text-danger">Alasan: Jam tidak sesuai</small></td>
+                                                                        @endhasrole
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @elseif($data->salary_type == 'contract')
+                        @php
+                            $start = $data->work_start_date ? \Carbon\Carbon::parse($data->work_start_date) : null;
+                            $end = $data->work_end_date ? \Carbon\Carbon::parse($data->work_end_date) : null;
+                            $monthsDiff = 0;
+                            if ($start && $end && $start->lessThan($end)) {
+                                $monthsDiff = $start->diffInMonths($end);
+                            }
+                        @endphp
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-1"></i> Mode Kontrak: Berikut adalah daftar bulan yang perlu dibayarkan oleh majikan sesuai dengan durasi (<strong class="text-primary">{{ $monthsDiff }} Bulan</strong>).
+                        </div>
+
+                        @if($monthsDiff > 0)
+                            <div class="table-responsive">
+                                <table class="table table-bordered text-center" width="100%">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Bulan</th>
+                                            <th>Nominal Gaji</th>
+                                            @hasrole('superadmin|admin|owner|majikan')
+                                                <th>Bukti Pembayaran (Majikan)</th>
+                                            @endhasrole
+                                            @hasrole('superadmin|admin|owner|pembantu')
+                                                <th>Bukti Dibayar (Mitra)</th>
+                                            @endhasrole
+                                            @hasrole('superadmin|admin|majikan')
+                                                <th>Aksi</th>
+                                            @endhasrole
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for($i = 0; $i < $monthsDiff; $i++)
+                                            @php
+                                                $monthDate = $start->copy()->addMonths($i);
+                                                $monthStr = $monthDate->format('Y-m');
+                                                $salaryRecord = collect($salaries)->first(function($s) use ($monthStr) {
+                                                    return \Carbon\Carbon::parse($s->month)->format('Y-m') === $monthStr;
+                                                });
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $i + 1 }}</td>
+                                                <td>{{ $monthDate->format('F Y') }}</td>
+                                                <td>Rp. {{ number_format($data->salary, 0, ',', '.') }}</td>
+                                                
+                                                @hasrole('superadmin|admin|owner|majikan')
+                                                    <td class="text-center">
+                                                    @if ($salaryRecord && $salaryRecord->payment_majikan_image)
+                                                        @php
+                                                            $filePath = storage_path('app/public/payments/' . $salaryRecord->payment_majikan_image);
+                                                        @endphp
+                                                        @if (file_exists($filePath))
+                                                            @if (Str::endsWith($salaryRecord->payment_majikan_image, ['.jpg', '.jpeg', '.png', '.gif']))
+                                                                <img src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salaryRecord->payment_majikan_image]) }}" class="img-fluid zoomable-image" style="max-height: 100px;">
+                                                            @elseif (Str::endsWith($salaryRecord->payment_majikan_image, ['.pdf']))
+                                                                <iframe src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salaryRecord->payment_majikan_image]) }}" width="100%" height="100px"></iframe>
+                                                            @else
+                                                                <p>Format tidak didukung.</p>
+                                                            @endif
+                                                        @else
+                                                            <p>File tidak ditemukan.</p>
+                                                        @endif
+                                                    @else
+                                                        Majikan Belum Membayar
+                                                    @endif
+                                                    </td>
+                                                @endhasrole
+
+                                                @hasrole('superadmin|admin|owner|pembantu')
+                                                    <td class="text-center">
+                                                    @if ($salaryRecord && $salaryRecord->payment_pembantu_image)
+                                                        @php
+                                                            $filePath = storage_path('app/public/payments/' . $salaryRecord->payment_pembantu_image);
+                                                        @endphp
+                                                        @if (file_exists($filePath))
+                                                            @if (Str::endsWith($salaryRecord->payment_pembantu_image, ['.jpg', '.jpeg', '.png', '.gif']))
+                                                                <img src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salaryRecord->payment_pembantu_image]) }}" class="img-fluid zoomable-image" style="max-height: 100px;">
+                                                            @elseif (Str::endsWith($salaryRecord->payment_pembantu_image, ['.pdf']))
+                                                                <iframe src="{{ route('getFile', ['path' => 'payments', 'fileName' => $salaryRecord->payment_pembantu_image]) }}" width="100%" height="100px"></iframe>
+                                                            @else
+                                                                <p>Format tidak didukung.</p>
+                                                            @endif
+                                                        @else
+                                                            <p>File tidak ditemukan.</p>
+                                                        @endif
+                                                    @else
+                                                        Belum Dibayarkan
+                                                    @endif
+                                                    </td>
+                                                @endhasrole
+
+                                                @hasrole('superadmin|admin|majikan')
+                                                    <td class="text-center">
+                                                    @hasrole('majikan')
+                                                        @if (!$salaryRecord || !$salaryRecord->payment_majikan_image)
+                                                            <a href="#" class="btn btn-sm btn-primary mb-1" data-toggle="modal" data-target="#paymentMajikanContractModal-{{ $i }}"><i class="fas fa-upload mr-1"></i> Upload Pembayaran</a>
+                                                            @include('cms.servant.modal.payment-majikan-contract', ['data' => $data, 'month' => $monthStr, 'index' => $i])
+                                                        @endif
+                                                    @endhasrole
+                                                    @hasrole('superadmin|admin')
+                                                        @if (!$salaryRecord || !$salaryRecord->payment_majikan_image)
+                                                            <a href="#" class="btn btn-sm btn-primary mb-1" data-toggle="modal" data-target="#paymentMajikanContractModal-{{ $i }}"><i class="fas fa-upload mr-1"></i> Upload Majikan</a>
+                                                            @include('cms.servant.modal.payment-majikan-contract', ['data' => $data, 'month' => $monthStr, 'index' => $i])
+                                                        @endif
+                                                        <a href="#" class="btn btn-sm btn-info mb-1" data-toggle="modal" data-target="#paymentAdminContractModal-{{ $i }}"><i class="fas fa-money-bill-wave mr-1"></i> Bayar Mitra</a>
+                                                        @include('cms.servant.modal.payment-admin-contract', ['data' => $data, 'month' => $monthStr, 'index' => $i, 'salaryRecord' => $salaryRecord])
+                                                    @endhasrole
+                                                    </td>
+                                                @endhasrole
+                                            </tr>
+                                        @endfor
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-4">
+                                <p class="text-muted"><i class="fas fa-calendar-times mb-2 fa-2x"></i><br>Durasi kontrak kurang dari 1 bulan atau tanggal belum diatur dengan benar.</p>
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            </div>
+            
+            {{-- INFORMASI PEMBAYARAN GARANSI --}}
+            @if($data->salary_type == 'contract' && $data->garansi_id)
+            <div class="card shadow mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-shield-alt mr-1"></i> Informasi Pembayaran Garansi (ke Sipembantu)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle mr-1"></i> Pembayaran tagihan garansi ini ditujukan ke pihak Sipembantu sesuai dengan kesepakatan paket <strong class="text-primary">{{ $data->garansi->name }}</strong>.
+                    </div>
+                    @if(isset($warrantyPayments) && $warrantyPayments->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center" width="100%">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Bulan</th>
+                                    <th>Nominal Tagihan</th>
+                                    <th>Bukti Pembayaran</th>
+                                    <th>Status</th>
+                                    @hasrole('majikan|superadmin|admin')
+                                    <th>Aksi</th>
+                                    @endhasrole
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($warrantyPayments as $index => $wp)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($wp->month_date)->format('F Y') }}</td>
+                                    <td>Rp. {{ number_format($wp->amount, 0, ',', '.') }}</td>
+                                    <td>
+                                        @if ($wp->payment_image)
+                                            @php
+                                                $wpPath = storage_path('app/public/warranty_payments/' . $wp->payment_image);
+                                            @endphp
+                                            @if (file_exists($wpPath))
+                                                @if (Str::endsWith($wp->payment_image, ['.jpg', '.jpeg', '.png', '.gif']))
+                                                    <img src="{{ route('getFile', ['path' => 'warranty_payments', 'fileName' => basename($wp->payment_image)]) }}" class="img-fluid zoomable-image" style="max-height: 80px;">
+                                                @else
+                                                    <a href="{{ route('getFile', ['path' => 'warranty_payments', 'fileName' => basename($wp->payment_image)]) }}" target="_blank" class="btn btn-sm btn-info"><i class="fas fa-file"></i> Lihat Bukti</a>
+                                                @endif
+                                            @else
+                                                <small class="text-danger">File tidak ditemukan</small>
+                                            @endif
+                                        @else
+                                            <small class="text-muted">Belum Diupload</small>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($wp->status == 'pending')
+                                            <span class="badge badge-warning py-1 px-2">Belum Bayar</span>
+                                        @elseif($wp->status == 'waiting')
+                                            <span class="badge badge-info py-1 px-2">Menunggu Verifikasi</span>
+                                        @elseif($wp->status == 'paid')
+                                            <span class="badge badge-success py-1 px-2">Lunas</span>
+                                        @endif
+                                    </td>
+                                    @hasrole('majikan|superadmin|admin')
+                                    <td>
+                                        @hasrole('majikan')
+                                            @if($wp->status != 'paid')
+                                                <a href="#" class="btn btn-sm btn-primary mb-1" data-toggle="modal" data-target="#uploadWarrantyPaymentModal-{{ $wp->id }}"><i class="fas fa-upload mr-1"></i> Upload Bukti</a>
+                                                @include('cms.servant.modal.upload-warranty', ['wp' => $wp, 'appId' => $data->id])
+                                            @endif
+                                        @endhasrole
+                                        @hasrole('superadmin|admin')
+                                            @if(in_array($wp->status, ['pending', 'waiting']))
+                                                <a href="#" class="btn btn-sm btn-info mb-1" data-toggle="modal" data-target="#verifyWarrantyPaymentModal-{{ $wp->id }}"><i class="fas fa-check-circle mr-1"></i> Verifikasi</a>
+                                                @include('cms.servant.modal.verify-warranty', ['wp' => $wp, 'appId' => $data->id])
+                                            @endif
+                                        @endhasrole
+                                    </td>
+                                    @endhasrole
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @else
+                    <div class="text-center py-4">
+                        <p class="text-muted">Data tagihan belum tersedia.</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- SUPERADMIN DETAIL KONTRAK SECTION --}}
+    @hasrole('superadmin|admin')
+        @if($data->salary_type == 'contract')
+            @php
+                // Informasi Kontrak Calculation
+            $startKontrak = $data->work_start_date ? \Carbon\Carbon::parse($data->work_start_date) : null;
+            $endKontrak = $data->work_end_date ? \Carbon\Carbon::parse($data->work_end_date) : ($startKontrak ? $startKontrak->copy()->addMonths(12) : null);
+            $durasiKontrak = $startKontrak && $endKontrak ? round($startKontrak->floatDiffInMonths($endKontrak)) : 12;
+            $statusKontrakHtml = '<span class="badge badge-success px-2 py-1" style="border-radius:12px">Aktif</span>';
+            if ($endKontrak && now()->gt($endKontrak)) {
+                $statusKontrakHtml = '<span class="badge badge-danger px-2 py-1" style="border-radius:12px">Habis</span>';
+            }
+
+            // Garansi (Mock/Derived Logic)
+            $garansiDuration = 3; // default 3 months
+            $garansiEnd = $startKontrak ? $startKontrak->copy()->addMonths($garansiDuration) : null;
+            $garansiTukarCount = 5;
+            
+            // History ART Query
+            $historyArts = collect();
+            if ($data->vacancy_id) {
+                // Get all applications for this vacancy that are either contracted, done, or replaced.
+                $historyArts = \App\Models\Application::with('servant')
+                    ->where('vacancy_id', $data->vacancy_id)
+                    ->orderBy('work_start_date', 'asc')
+                    ->get();
+            }
+        @endphp
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <h5 class="font-weight-bold text-dark mb-0"><i class="fas fa-file-contract mr-2"></i> Admin - Detail Kontrak</h5>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-6 mb-4 mb-lg-0">
+                            {{-- Informasi Kontrak --}}
+                            <div class="mb-4">
+                                <h6 class="font-weight-bold text-dark border-bottom pb-2 mb-3">Informasi Kontrak</h6>
+                                <p class="mb-1 text-dark">Durasi: {{ $durasiKontrak }} Bulan</p>
+                                <p class="mb-1 text-dark">Mulai: {{ $startKontrak ? $startKontrak->format('d M Y') : '-' }}</p>
+                                <p class="mb-1 text-dark">Selesai: {{ $endKontrak ? $endKontrak->format('d M Y') : '-' }}</p>
+                                <p class="mb-1 text-dark">Status: {!! $statusKontrakHtml !!}</p>
+                            </div>
+                            
+                            {{-- Garansi --}}
+                            <div class="mb-3">
+                                <h6 class="font-weight-bold text-dark border-bottom pb-2 mb-3">Garansi</h6>
+                                <p class="mb-1 text-dark">Paket Garansi: {{ $data->garansi ? $data->garansi->name : '-' }}</p>
+                                <p class="mb-1 text-dark">Berakhir: {{ $garansiEnd ? $garansiEnd->format('d F Y') : '-' }}</p>
+                                <p class="mb-1 text-dark">Batas Tukar: {{ $data->garansi ? $data->garansi->max_replacements : 0 }}x</p>
+                                <p class="mb-3 text-dark">Sudah Digunakan: -</p>
+                                
+                                <div class="d-flex" style="gap: 10px; flex-wrap: wrap;">
+                                    <button class="btn btn-primary btn-sm mb-1" style="border-radius:6px;" data-toggle="modal" data-target="#extendWarrantyModal-{{ $data->id }}"><i class="fas fa-sync-alt mr-1"></i> Perpanjang Garansi</button>
+                                    <button class="btn btn-info btn-sm mb-1" style="border-radius:6px;" data-toggle="modal" data-target="#extendContractModal-{{ $data->id }}"><i class="fas fa-file-contract mr-1"></i> Perpanjang Kontrak</button>
+                                    <button class="btn btn-success btn-sm mb-1" style="border-radius:6px;" data-toggle="modal" data-target="#swapModal-{{ $data->id }}"><i class="fas fa-exchange-alt mr-1"></i> Tukar Pembantu</button>
+                                    <button class="btn btn-danger btn-sm mb-1" style="border-radius:6px;" data-toggle="modal" data-target="#endContractModal-{{ $data->id }}"><i class="fas fa-times mr-1"></i> Akhiri Kontrak</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-lg-6 border-left">
+                            {{-- History ART --}}
+                            <div class="mb-4">
+                                <h6 class="font-weight-bold text-dark border-bottom pb-2 mb-3">History ART</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm text-dark mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="border-top-0">Ke</th>
+                                                <th class="border-top-0">Nama</th>
+                                                <th class="border-top-0">Mulai</th>
+                                                <th class="border-top-0">Selesai</th>
+                                                <th class="border-top-0">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($historyArts as $index => $history)
+                                                @php
+                                                    $histEnd = $history->work_end_date ? \Carbon\Carbon::parse($history->work_end_date) : null;
+                                                    
+                                                    // Logic simplifier for historical status
+                                                    $histBadge = '<span class="badge badge-success px-2 py-1" style="border-radius:12px">Aktif</span>';
+                                                    if ($history->status == 'reject' || $history->status == 'laidoff') {
+                                                        $histBadge = '<span class="badge badge-danger px-2 py-1" style="border-radius:12px">Diganti</span>';
+                                                    } else if ($histEnd && now()->gt($histEnd)) {
+                                                        $histBadge = '<span class="badge badge-secondary px-2 py-1" style="border-radius:12px">Selesai</span>';
+                                                    }
+                                                @endphp
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>{{ $history->servant ? $history->servant->name : '-' }}</td>
+                                                    <td>{{ $history->work_start_date ? \Carbon\Carbon::parse($history->work_start_date)->format('d M y') : '-' }}</td>
+                                                    <td>{{ $histEnd ? $histEnd->format('d M y') : '-' }}</td>
+                                                    <td>{!! $histBadge !!}</td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="5" class="text-center text-muted">Belum ada history ART</td></tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            {{-- Riwayat Perpanjangan Garansi --}}
+                            <div>
+                                <h6 class="font-weight-bold text-dark border-bottom pb-2 mb-3">Riwayat Perpanjangan Garansi</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm text-dark mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="border-top-0">Tanggal</th>
+                                                <th class="border-top-0 text-right">Tambahan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="2" class="text-center text-muted">Belum ada perpanjangan</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endhasrole
+    
+    {{-- MAJIKAN KONTRAK SAYA SECTION --}}
+    @hasrole('majikan')
+        @php
+            // Calculate Contract Information for Employer
+            $startKontrak = $data->work_start_date ? \Carbon\Carbon::parse($data->work_start_date) : null;
+            $endKontrak = $data->work_end_date ? \Carbon\Carbon::parse($data->work_end_date) : ($startKontrak ? $startKontrak->copy()->addMonths(12) : null);
+            $durasiKontrak = $startKontrak && $endKontrak ? round($startKontrak->floatDiffInMonths($endKontrak)) : 12;
+            
+            $sisaKontrak = 0;
+            if ($endKontrak && now()->lessThan($endKontrak)) {
+                $sisaKontrak = round(now()->floatDiffInMonths($endKontrak));
+            }
+            
+            $statusKontrakHtml = '<span class="badge badge-success px-2 py-1" style="border-radius:12px">Aktif</span>';
+            if ($endKontrak && now()->gt($endKontrak)) {
+                $statusKontrakHtml = '<span class="badge badge-danger px-2 py-1" style="border-radius:12px">Habis</span>';
+            }
+
+            // Garansi (Only if salary type is contract)
+            $isContract = $data->salary_type == 'contract';
+            $garansiDuration = 3; // Mock default 3 months
+            $garansiEnd = $startKontrak ? $startKontrak->copy()->addMonths($garansiDuration) : null;
+            $sisaGaransi = 0;
+            if ($garansiEnd && now()->lessThan($garansiEnd)) {
+                $sisaGaransi = round(now()->floatDiffInMonths($garansiEnd));
+            }
+            $sisaPergantian = 3; // Mock defaults
+            
+            // History ART Query removed per user request (moved to worker list page)
+        @endphp
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <h5 class="font-weight-bold text-dark mb-0"><i class="fas fa-file-contract mr-2"></i> Kontrak Saya</h5>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-12 mb-4 mb-lg-0">
+                            {{-- Status Kontrak --}}
+                            <div class="mb-4">
+                                <h6 class="font-weight-bold text-dark border-bottom pb-2 mb-3">Status Kontrak</h6>
+                                <p class="mb-1 text-dark">Durasi: {{ $durasiKontrak }} Bulan</p>
+                                <p class="mb-1 text-dark">Sisa Kontrak: {{ $sisaKontrak }} Bulan</p>
+                                <p class="mb-1 text-dark">Status: {!! $statusKontrakHtml !!}</p>
+                                
+                                @if($isContract)
+                                    <div class="mt-4">
+                                        <h6 class="font-weight-bold text-dark border-bottom pb-2 mb-3">Garansi</h6>
+                                        <p class="mb-1 text-dark">Sisa Garansi: {{ $sisaGaransi }} Bulan</p>
+                                        <p class="mb-3 text-dark">Sisa Pergantian: {{ $data->garansi ? $data->garansi->max_replacements : 0 }}x</p>
+                                        
+                                        <div class="d-flex" style="gap: 10px;">
+                                            <button class="btn btn-primary btn-sm" style="border-radius:6px;" data-toggle="modal" data-target="#extendWarrantyModal-{{ $data->id }}"><i class="fas fa-sync-alt mr-1"></i> Perpanjang Garansi</button>
+                                            <button class="btn btn-success btn-sm" style="border-radius:6px;" data-toggle="modal" data-target="#swapModal-{{ $data->id }}"><i class="fas fa-exchange-alt mr-1"></i> Tukar Pembantu</button>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endhasrole
+    {{-- PEMBANTU STATUS KERJA SAYA SECTION --}}
+    @hasrole('pembantu')
+        @php
+            $startKontrak = $data->work_start_date ? \Carbon\Carbon::parse($data->work_start_date) : null;
+            $endKontrak = $data->work_end_date ? \Carbon\Carbon::parse($data->work_end_date) : ($startKontrak ? $startKontrak->copy()->addMonths(12) : null);
+            
+            // Menggunakan ceil atau round untuk memastikan pembulatan jika ada koma (contohnya 2.166... menjadi 2 atau 3). 
+            // Kita gunakan round() saja.
+            $durasiKontrak = $startKontrak && $endKontrak ? round($startKontrak->floatDiffInMonths($endKontrak)) : 12;
+
+            $sisaMasaKerja = 0;
+            if ($startKontrak && $endKontrak && now()->lessThan($endKontrak)) {
+                $sisaMasaKerja = round(now()->floatDiffInMonths($endKontrak));
+            }
+            $bulanBerjalan = max(0, $durasiKontrak - $sisaMasaKerja);
+            $progressPersen = $durasiKontrak > 0 ? min(100, max(0, ($bulanBerjalan / $durasiKontrak) * 100)) : 0;
+
+             $statusKontrakHtml = '<span class="badge badge-success px-2 py-1" style="border-radius:12px">Aktif</span>';
+            if ($endKontrak && now()->gt($endKontrak)) {
+                $statusKontrakHtml = '<span class="badge badge-danger px-2 py-1" style="border-radius:12px">Habis</span>';
+            }
+
+            $employerName = $data->vacancy_id != null && $data->vacancy && $data->vacancy->user ? $data->vacancy->user->name : ($data->employe ? $data->employe->name : '-');
+
+            $gajiPokok = $data->salary;
+            $totalNilaiKontrak = $gajiPokok * $durasiKontrak;
+
+            $totalDibayar = 0;
+            $statusGajiBulanIni = '<span class="badge badge-warning px-2 py-1" style="border-radius:12px">Belum Bayar</span>';
+            
+            foreach($salaries as $sal) {
+                if ($sal->payment_pembantu_image) {
+                    $totalDibayar += $sal->total_salary_pembantu;
+                }
+                
+                // Cek status bulan ini
+                if (\Carbon\Carbon::parse($sal->month)->format('Y-m') == \Carbon\Carbon::now()->format('Y-m')) {
+                    if ($sal->payment_pembantu_image) {
+                        $statusGajiBulanIni = '<span class="badge badge-success px-2 py-1" style="border-radius:12px">Lunas</span>';
+                    } else if ($sal->payment_majikan_image) {
+                        $statusGajiBulanIni = '<span class="badge badge-info px-2 py-1" style="border-radius:12px">Diproses Admin</span>';
+                    }
+                }
+            }
+            
+            $riwayatPenempatan = \App\Models\Application::with(['vacancy.user', 'employe'])
+                ->where('servant_id', $data->servant_id)
+                ->whereIn('status', ['accepted', 'review', 'passed', 'verify', 'contract', 'choose'])
+                ->orderBy('work_start_date', 'asc')
+                ->get();
+        @endphp
+
+        <style>
+            .pembantu-card { border-radius: 8px; border: none; }
+            .pembantu-section { font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px; color: #333; }
+            .pembantu-info { margin-bottom: 8px; color: #555; }
+            .pembantu-progress { background: #eee; height: 10px; border-radius: 20px; overflow: hidden; margin-top: 5px; }
+            .pembantu-progress-bar { height: 100%; background: #2f80ed; }
+            .pembantu-summary-box { background: #f9fafc; padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid #e3e6f0; }
+            .pembantu-table th { background: #f8f9fc; color: #4e73df; font-weight: bold; border-bottom: 2px solid #e3e6f0; }
+            /* border-left-lg utility for larger screens */
+            @media (min-width: 992px) {
+                .border-left-lg { border-left: 1px solid #eee; }
+            }
+        </style>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow p-4 pembantu-card">
+                    <h5 class="font-weight-bold text-dark mb-4 border-bottom pb-2"><i class="fas fa-file-contract mr-2"></i> Status Kerja Saya (Kontrak)</h5>
+                    
+                    <div class="row">
+                        <!-- LEFT SIDE -->
+                        <div class="col-lg-6 mb-4 mb-lg-0">
+                            <div class="pembantu-section">Informasi Kontrak</div>
+                            <div class="pembantu-info">Majikan: <strong>{{ $employerName }}</strong></div>
+                            <div class="pembantu-info">Durasi Kontrak: <strong>{{ $durasiKontrak }} Bulan</strong></div>
+                            <div class="pembantu-info">Mulai: <strong>{{ $startKontrak ? $startKontrak->format('d F Y') : '-' }}</strong></div>
+                            <div class="pembantu-info">Selesai: <strong>{{ $endKontrak ? $endKontrak->format('d F Y') : '-' }}</strong></div>
+
+                            <div class="pembantu-info mt-3">
+                                Sisa Masa Kerja: <strong>{{ $sisaMasaKerja }} Bulan</strong>
+                                <div class="pembantu-progress">
+                                    <div class="pembantu-progress-bar" style="width: {{ $progressPersen }}%;"></div>
+                                </div>
+                                <small class="text-muted">{{ $bulanBerjalan }} dari {{ $durasiKontrak }} Bulan (Estimasi)</small>
+                            </div>
+
+                            <div class="pembantu-info mt-3">
+                                Status Kontrak: {!! $statusKontrakHtml !!}
+                            </div>
+                        </div>
+
+                        <!-- RIGHT SIDE -->
+                        <div class="col-lg-6 border-left-lg pl-lg-4">
+                            <div class="pembantu-section">Informasi Gaji</div>
+                            <div class="pembantu-info">Gaji Pokok: <strong>Rp {{ number_format($gajiPokok, 0, ',', '.') }} / Bulan</strong></div>
+                            <div class="pembantu-info">Total Nilai Kontrak: <strong>Rp {{ number_format($totalNilaiKontrak, 0, ',', '.') }}</strong></div>
+
+                            <div class="pembantu-info mt-3">
+                                Status Gaji Bulan Ini: {!! $statusGajiBulanIni !!}
+                            </div>
+
+                            <div class="pembantu-summary-box">
+                                Total Gaji Sudah Diterima:<br>
+                                <b class="text-success" style="font-size: 1.2rem;">Rp {{ number_format($totalDibayar, 0, ',', '.') }}</b>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HISTORY GAJI -->
+                    <div class="row mt-4 pt-3 border-top">
+                        <div class="col-12">
+                            <div class="pembantu-section">History Pembayaran Gaji</div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered pembantu-table" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Bulan</th>
+                                            <th>Nominal Pembantu</th>
+                                            <th>Status</th>
+                                            <th>Tanggal Bayar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($salaries as $sal)
+                                            @php
+                                                $stat = '<span class="badge badge-warning px-2 py-1" style="border-radius:12px">Belum Bayar</span>';
+                                                $tanggalBayar = '-';
+
+                                                if ($sal->payment_pembantu_image) {
+                                                    $stat = '<span class="badge badge-success px-2 py-1" style="border-radius:12px">Lunas</span>';
+                                                    $tanggalBayar = $sal->updated_at ? $sal->updated_at->format('d-m-Y') : '-';
+                                                } else if ($sal->payment_majikan_image) {
+                                                    $stat = '<span class="badge badge-info px-2 py-1" style="border-radius:12px">Diproses Admin</span>';
+                                                }
+                                            @endphp
+                                            <tr>
+                                                <td>{{ \Carbon\Carbon::parse($sal->month)->format('F Y') }}</td>
+                                                <td>Rp {{ number_format($sal->total_salary_pembantu, 0, ',', '.') }}</td>
+                                                <td>{!! $stat !!}</td>
+                                                <td>{{ $tanggalBayar }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted">Belum ada history pembayaran gaji</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIWAYAT PENEMPATAN -->
+                    <div class="row mt-4 pt-3 border-top">
+                        <div class="col-12">
+                            <div class="pembantu-section">Riwayat Penempatan</div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered pembantu-table" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Majikan</th>
+                                            <th>Mulai</th>
+                                            <th>Selesai</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($riwayatPenempatan as $riwayat)
+                                            @php
+                                                $rStart = $riwayat->work_start_date ? \Carbon\Carbon::parse($riwayat->work_start_date) : null;
+                                                $rEnd = $riwayat->work_end_date ? \Carbon\Carbon::parse($riwayat->work_end_date) : null;
+                                                
+                                                $rEmployer = $riwayat->vacancy_id != null && $riwayat->vacancy && $riwayat->vacancy->user ? $riwayat->vacancy->user->name : ($riwayat->employe ? $riwayat->employe->name : '-');
+                                                
+                                                $rBadge = '<span class="badge badge-success px-2 py-1" style="border-radius:12px">Aktif</span>';
+                                                if ($riwayat->status == 'reject' || $riwayat->status == 'laidoff') {
+                                                    $rBadge = '<span class="badge badge-danger px-2 py-1" style="border-radius:12px">Diganti/Keluar</span>';
+                                                } else if ($rEnd && now()->gt($rEnd)) {
+                                                    $rBadge = '<span class="badge badge-secondary px-2 py-1" style="border-radius:12px">Selesai</span>';
+                                                }
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $rEmployer }}</td>
+                                                <td>{{ $rStart ? $rStart->format('d M Y') : '-' }}</td>
+                                                <td>{{ $rEnd ? $rEnd->format('d M Y') : '-' }}</td>
+                                                <td>{!! $rBadge !!}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted">Belum ada riwayat penempatan</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    @endhasrole
+
+    {{-- ULASAN & RATING SECTION --}}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow p-4 pembantu-card">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <h5 class="font-weight-bold text-dark mb-0"><i class="fas fa-star text-warning mr-2"></i> Ulasan & Rating</h5>
+                    @if($data->status === 'laidoff' && auth()->user()->hasAnyRole(['majikan', 'pembantu']))
+                        @php
+                            $hasReviewed = $data->reviews->where('reviewer_id', auth()->id())->isNotEmpty();
+                        @endphp
+                        @if(!$hasReviewed)
+                            <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#reviewModal"><i class="fas fa-pen mr-1"></i> Berikan Ulasan</button>
+                        @endif
+                    @endif
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        @if($data->reviews->isEmpty())
+                            <p class="text-muted text-center my-3">Belum ada ulasan untuk kontrak ini.</p>
+                        @else
+                            <div class="list-group">
+                                @foreach($data->reviews as $review)
+                                    <div class="list-group-item flex-column align-items-start border-left-warning mb-2 shadow-sm rounded">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1 font-weight-bold">
+                                                {{ $review->reviewer->name }} 
+                                                <small class="text-muted">({{ $review->reviewer->roles->first()->name }})</small>
+                                                <i class="fas fa-arrow-right mx-1 text-muted" style="font-size: 0.8rem;"></i>
+                                                {{ $review->reviewee->name }}
+                                            </h6>
+                                            <small class="text-muted">{{ $review->created_at->diffForHumans() }}</small>
+                                        </div>
+                                        <div class="mb-2">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <i class="fas fa-star {{ $i <= $review->rating ? 'text-warning' : 'text-body' }}"></i>
+                                            @endfor
+                                        </div>
+                                        <p class="mb-1 text-dark">"{{ $review->comment }}"</p>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modals --}}
+    @if($data->status === 'laidoff' && auth()->user()->hasAnyRole(['majikan', 'pembantu']))
+        <div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title font-weight-bold" id="reviewModalLabel"><i class="fas fa-star text-warning mr-1"></i> Berikan Ulasan</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="{{ route('worker.store-review', $data->id) }}" method="POST">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="form-group text-center">
+                                <label class="font-weight-bold text-dark">Rating (1-5)</label>
+                                <div class="rating-stars mb-3" style="font-size: 2rem; display: flex; justify-content: center; gap: 10px; cursor: pointer;">
+                                    <input type="radio" name="rating" id="star1" value="1" class="d-none" required> <label for="star1" class="mb-0"><i class="far fa-star text-warning" onclick="setRating(1)"></i></label>
+                                    <input type="radio" name="rating" id="star2" value="2" class="d-none"> <label for="star2" class="mb-0"><i class="far fa-star text-warning" onclick="setRating(2)"></i></label>
+                                    <input type="radio" name="rating" id="star3" value="3" class="d-none"> <label for="star3" class="mb-0"><i class="far fa-star text-warning" onclick="setRating(3)"></i></label>
+                                    <input type="radio" name="rating" id="star4" value="4" class="d-none"> <label for="star4" class="mb-0"><i class="far fa-star text-warning" onclick="setRating(4)"></i></label>
+                                    <input type="radio" name="rating" id="star5" value="5" class="d-none"> <label for="star5" class="mb-0"><i class="far fa-star text-warning" onclick="setRating(5)"></i></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="comment" class="font-weight-bold text-dark">Komentar <span class="text-danger">*</span></label>
+                                <textarea name="comment" id="comment" class="form-control" rows="4" required maxlength="1000" placeholder="Tuliskan pengalaman Anda bekerja sama..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-warning text-dark font-weight-bold"><i class="fas fa-paper-plane mr-1"></i> Kirim Ulasan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        @push('custom-script')
+        <script>
+            function setRating(rating) {
+                const stars = document.querySelectorAll('.rating-stars i');
+                stars.forEach((star, index) => {
+                    if (index < rating) {
+                        star.classList.remove('far');
+                        star.classList.add('fas');
+                    } else {
+                        star.classList.remove('fas');
+                        star.classList.add('far');
+                    }
+                });
+            }
+        </script>
+        @endpush
+    @endif
+    @include('cms.servant.modal.contract-actions')
+@endsection

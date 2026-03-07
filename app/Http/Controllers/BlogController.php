@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Blog;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class BlogController extends Controller
      */
     public function index()
     {
-        $datas = Blog::all();
+        $datas = Blog::orderBy('created_at', 'desc')->get();
 
         return view('cms.blog.index', compact('datas'));
     }
@@ -38,17 +39,30 @@ class BlogController extends Controller
             'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'tags' => 'required|string',
             'category' => 'required|string',
+            'publish_type' => 'required|in:now,schedule',
+            'published_date' => 'required_if:publish_type,schedule|nullable|date',
+            'published_time' => 'required_if:publish_type,schedule|nullable|date_format:H:i',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->with('toast_error', $validator->messages()->all()[0]);
+            return redirect()->back()->withInput()->with('toast_error', $validator->messages()->all()[0]);
         }
 
         $data = $validator->validated();
 
+        // Determine status and published_at
+        if ($data['publish_type'] === 'schedule') {
+            $status = 'scheduled';
+            $publishedAt = Carbon::parse($data['published_date'] . ' ' . $data['published_time']);
+        } else {
+            $status = 'published';
+            $publishedAt = now();
+        }
+
         try {
-            DB::transaction(function () use ($data) {
-                $photo = $data['image'];
+            DB::transaction(function () use ($data, $status, $publishedAt) {
+                $photo = $data['image'] ?? null;
+                $photoName = null;
                 if (isset($photo)) {
                     $newFile = $photo;
                     $newFileName = "blog_" . Str::slug($data['title']) . "." . $photo->getClientOriginalExtension();
@@ -64,6 +78,8 @@ class BlogController extends Controller
                     'content' => $data['content'],
                     'image' => $photoName,
                     'tags' => $data['tags'],
+                    'status' => $status,
+                    'published_at' => $publishedAt,
                 ]);
             });
 
@@ -110,16 +126,28 @@ class BlogController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'tags' => 'required|string',
             'category' => 'required|string',
+            'publish_type' => 'required|in:now,schedule',
+            'published_date' => 'required_if:publish_type,schedule|nullable|date',
+            'published_time' => 'required_if:publish_type,schedule|nullable|date_format:H:i',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->with('toast_error', $validator->messages()->all()[0]);
+            return redirect()->back()->withInput()->with('toast_error', $validator->messages()->all()[0]);
         }
 
         $data = $validator->validated();
 
+        // Determine status and published_at
+        if ($data['publish_type'] === 'schedule') {
+            $status = 'scheduled';
+            $publishedAt = Carbon::parse($data['published_date'] . ' ' . $data['published_time']);
+        } else {
+            $status = 'published';
+            $publishedAt = now();
+        }
+
         try {
-            DB::transaction(function () use ($data, $blog) {
+            DB::transaction(function () use ($data, $blog, $status, $publishedAt) {
                 $photoName = $blog->image;
 
                 if (isset($data['image'])) {
@@ -141,6 +169,8 @@ class BlogController extends Controller
                     'content' => $data['content'],
                     'image' => $photoName,
                     'tags' => $data['tags'],
+                    'status' => $status,
+                    'published_at' => $publishedAt,
                 ]);
             });
 

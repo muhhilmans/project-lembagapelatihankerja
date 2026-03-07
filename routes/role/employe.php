@@ -30,4 +30,7 @@ Route::group(['middleware' => ['role:majikan|admin|superadmin']], function () {
     Route::post('/worker/{id}/presence', [WorkerController::class, 'presenceWorker'])->name('worker.presence.store');
     Route::put('/worker/{app}/presence/{salary}', [WorkerController::class, 'updatePresenceWorker'])->name('worker.presence.update');
     Route::put('/worker/{app}/salary/{salary}/upload-majikan', [WorkerController::class, 'uploadMajikan'])->name('payment-majikan.upload');
+    Route::put('/worker/{app}/salary-contract/upload-majikan', [WorkerController::class, 'uploadMajikanContract'])->name('payment-majikan-contract.upload');
+    Route::put('/worker/{app}/salary-fee/upload-majikan', [WorkerController::class, 'uploadMajikanFee'])->name('payment-majikan-fee.upload');
+    Route::put('/worker/{app}/upload-contract', [WorkerController::class, 'uploadContractWorker'])->name('worker.upload-contract');
 });

@@ -102,7 +102,7 @@
                                 data-target="#recomModal-{{ $d->id }}">
                                 <i class="fas fa-check"></i>
                             </a>
-                            @include('cms.vacancy.modal.status.recom', ['data' => $d])
+                            @include('cms.applicant.modal.recom', ['data' => $d])
                         @endif
 
                         <a class="btn btn-sm btn-info" href="#" data-toggle="modal"

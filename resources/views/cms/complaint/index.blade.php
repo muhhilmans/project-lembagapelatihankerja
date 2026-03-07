@@ -35,6 +35,8 @@
                             <th>Status</th>
                             @hasrole('superadmin|admin')
                                 <th>Aksi</th>
+                            @else
+                                <th>Catatan Penyelesaian</th>
                             @endhasrole
                         </tr>
                     </thead>
@@ -83,13 +85,46 @@
                                     </span>
                                 </td>
                                 @hasrole('superadmin|admin')
-                                    <td class="text-center">
-                                        <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailModal{{ $data->id }}">
+                                    <td class="text-center" style="white-space: nowrap;">
+                                        <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailModal{{ $data->id }}" title="Detail">
                                             <i class="fas fa-eye"></i>
                                         </button>
+                                        @if($data->status === 'open')
+                                            <form action="{{ route('complaints.change', $data->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="investigating">
+                                                <button type="submit" class="btn btn-sm btn-warning" title="Investigasi">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                        @if($data->status !== 'resolved')
+                                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#resolveModal{{ $data->id }}" title="Selesaikan">
+                                                <i class="fas fa-check-circle"></i>
+                                            </button>
+                                        @endif
+                                    </td>
+                                @else
+                                    <td>
+                                        @if($data->status === 'resolved' && $data->resolution_notes)
+                                            <span class="text-success"><i class="fas fa-check-circle mr-1"></i></span>
+                                            {!! Str::limit($data->resolution_notes, 80) !!}
+                                            @if($data->resolvedBy)
+                                                <br><small class="text-muted">Oleh: {{ $data->resolvedBy->name }}</small>
+                                            @endif
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
                                     </td>
                                 @endhasrole
                             </tr>
+
+                            {{-- Admin Detail Modal --}}
+                            @hasrole('superadmin|admin')
+                                @include('cms.complaint.modal.detail', ['data' => $data])
+                                @include('cms.complaint.modal.resolve', ['data' => $data])
+                            @endhasrole
                         @endforeach
                     </tbody>
                 </table>
@@ -111,6 +146,57 @@
                         </button>
                     </div>
                     <div class="modal-body">
+                        {{-- Pilih Pekerja/Majikan yang diadukan --}}
+                        <div class="form-group">
+                            <label for="contract_select"><strong>
+                                @if(auth()->user()->hasRole('majikan'))
+                                    Pilih Pekerja yang Diadukan
+                                @else
+                                    Pilih Majikan yang Diadukan
+                                @endif
+                            </strong></label>
+                            <select class="form-control" name="contract_id" id="contract_select" required>
+                                <option value="">-- Pilih --</option>
+                                @if(isset($activeContracts))
+                                    @foreach($activeContracts as $contract)
+                                        @php
+                                            // Determine the other party
+                                            $isMajikan = auth()->user()->hasRole('majikan');
+                                            if ($isMajikan) {
+                                                $otherParty = $contract->servant;
+                                                $reportedUserId = $contract->servant_id;
+                                            } else {
+                                                // Pembantu: show the employer
+                                                $otherParty = $contract->employe ?? ($contract->vacancy?->user);
+                                                $reportedUserId = $contract->employe_id ?? $contract->vacancy?->user_id;
+                                            }
+                                            $otherName = $otherParty?->name ?? 'N/A';
+                                            
+                                            // Build label with type info
+                                            $typeLabel = $contract->salary_type == 'contract' ? 'Kontrak' : 'Fee';
+                                            if ($contract->is_infal && $contract->infal_frequency) {
+                                                $typeLabel .= ' ' . match($contract->infal_frequency) {
+                                                    'hourly' => 'Per Jam', 'daily' => 'Harian', 'weekly' => 'Mingguan', 'monthly' => 'Bulanan', default => ''
+                                                };
+                                            }
+                                        @endphp
+                                        <option value="{{ $contract->id }}" data-reported-user-id="{{ $reportedUserId }}">
+                                            {{ $otherName }} — {{ $typeLabel }} (Rp {{ number_format($contract->salary, 0, ',', '.') }})
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <small class="form-text text-muted">
+                                @if(auth()->user()->hasRole('majikan'))
+                                    Pilih pekerja yang ingin Anda adukan.
+                                @else
+                                    Pilih majikan yang ingin Anda adukan.
+                                @endif
+                            </small>
+                            {{-- Hidden field for reported_user_id, set via JS --}}
+                            <input type="hidden" name="reported_user_id" id="reported_user_id" value="">
+                        </div>
+
                         <div class="form-group">
                             <label for="complaint_type_id"><strong>Jenis Pengaduan</strong></label>
                             <select class="form-control" name="complaint_type_id" id="complaint_type_id" required>
@@ -127,7 +213,7 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="message">Pesan Pengaduan</label>
+                            <label for="message"><strong>Pesan Pengaduan</strong></label>
                             <textarea class="form-control" id="message" name="message" rows="4" required placeholder="Jelaskan masalah anda..."></textarea>
                         </div>
                     </div>
@@ -144,20 +230,13 @@
 
 @push('custom-script')
 <script>
-    $('#application_id').change(function() {
-        // We need to pass the ID of the person we are reporting.
-        // Since we don't have that ID easily in the option value (only app ID),
-        // we might need to change the option value or use data attributes.
-        // Let's reload the page with data attributes? No.
-        // Better: render data attributes on the options.
+    // Auto-set reported_user_id when contract is selected
+    $(document).ready(function() {
+        $('#contract_select').change(function() {
+            var selectedOption = $(this).find('option:selected');
+            var reportedUserId = selectedOption.data('reported-user-id') || '';
+            $('#reported_user_id').val(reportedUserId);
+        });
     });
 </script>
-@endpush
-
-@push('custom-style')
-    <link rel="stylesheet" href="{{ asset('assets/vendor/summernote/summernote-bs4.min.css') }}">
-@endpush
-
-@push('custom-script')
-    <script src="{{ asset('assets/vendor/summernote/summernote-bs4.min.js') }}"></script>
 @endpush

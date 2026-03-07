@@ -16,8 +16,8 @@
                                 class="text-danger">*</span></label>
                         <select class="form-control" id="profession" name="profession" required>
                             <option value="">Pilih Profesi</option>
-                            @foreach ($professions as $data)
-                                <option value="{{ $data->id }}">{{ $data->name }}</option>
+                            @foreach ($professions as $profession)
+                                <option value="{{ $profession->id }}">{{ $profession->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -58,11 +58,11 @@
             function populateServants(professionId) {
                 servantSelect.innerHTML = '<option value="">Pilih Pembantu</option>';
 
-                @foreach ($servants as $data)
-                    if ('{{ $data->servantDetails->profession_id }}' == professionId) {
+                @foreach ($servants as $servant)
+                    if ('{{ $servant->servantDetails->profession_id }}' == professionId) {
                         const option = document.createElement('option');
-                        option.value = '{{ $data->id }}';
-                        option.textContent = '{{ $data->name }}';
+                        option.value = '{{ $servant->id }}';
+                        option.textContent = '{{ $servant->name }}';
                         servantSelect.appendChild(option);
                     }
                 @endforeach

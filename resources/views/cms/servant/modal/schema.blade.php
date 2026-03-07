@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editModal">Edit Pengaturan Gaji</h5>
+                <h5 class="modal-title" id="editModal">Edit Skema Biaya</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -15,12 +15,12 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="schema_salary">Pengaturan Gaji <span class="text-danger">*</span></label>
-                                <select class="form-control" id="schema_salary" name="schema_salary" required>
-                                    <option selected disabled>Pilih Pengaturan Gaji...</option>
+                                <label for="scheme_id">Skema Biaya <span class="text-danger">*</span></label>
+                                <select class="form-control" id="scheme_id" name="scheme_id" required>
+                                    <option selected disabled>Pilih Skema Biaya...</option>
                                     @foreach ($schemas as $item)
-                                        <option value="{{ $item->id }}" {{ $data->schema_salary == $item->id ? 'selected' : '' }} class="text-wrap">
-                                            Client ({{ $item->adds_client }}, {{ $item->bpjs_client == 1 ? 'dengan BPJS' : 'Tidak dengan BPJS' }}) | Mitra ({{ $item->adds_mitra }}, {{ $item->bpjs_mitra == 1 ? 'dengan BPJS' : 'Tidak dengan BPJS' }})
+                                        <option value="{{ $item->id }}" {{ $data->scheme_id == $item->id ? 'selected' : '' }} class="text-wrap">
+                                            {{ $item->name }}
                                         </option>    
                                     @endforeach
                                 </select>

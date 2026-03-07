@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Events\NotificationDispatched;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 

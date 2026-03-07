@@ -16,6 +16,17 @@
                         <input type="text" name="status" value="laidoff" hidden>
 
                         <div class="form-group">
+                            <label for="end_reason">Alasan Berhenti <span class="text-danger">*</span></label>
+                            <select class="form-control" name="end_reason" required>
+                                <option value="" disabled selected>-- Pilih Alasan --</option>
+                                <option value="selesai_kontrak">Selesai Kontrak</option>
+                                <option value="diberhentikan">Diberhentikan</option>
+                                <option value="diganti">Diganti</option>
+                                <option value="mengundurkan_diri">Mengundurkan Diri</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label for="work_end_date">Tanggal Diberhentikan <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" id="work_end_date" name="work_end_date" required>
                         </div>
@@ -38,6 +49,17 @@
                     @method('PUT')
                     <div class="modal-body text-left">
                         <input type="text" name="status" value="laidoff" hidden>
+
+                        <div class="form-group">
+                            <label for="end_reason">Alasan Berhenti <span class="text-danger">*</span></label>
+                            <select class="form-control" name="end_reason" required>
+                                <option value="" disabled selected>-- Pilih Alasan --</option>
+                                <option value="selesai_kontrak">Selesai Kontrak</option>
+                                <option value="diberhentikan">Diberhentikan</option>
+                                <option value="diganti">Diganti</option>
+                                <option value="mengundurkan_diri">Mengundurkan Diri</option>
+                            </select>
+                        </div>
 
                         <div class="form-group">
                             <label for="work_end_date">Tanggal Diberhentikan <span class="text-danger">*</span></label>

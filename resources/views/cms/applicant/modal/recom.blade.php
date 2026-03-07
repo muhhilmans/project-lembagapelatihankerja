@@ -1,4 +1,4 @@
-<div class="modal fade" id="recomModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="recomModal-{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -7,19 +7,19 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('apply.recommendation', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
+            <form method="POST" action="{{ route('apply.recommendation', ['vacancy' => $data->vacancy_id, 'user' => $data->servant_id]) }}">
                 @csrf
                 <div class="modal-body text-left">
                     <input type="text" name="status" value="schedule" hidden>
 
                     <div class="form-group">
-                        <label for="interview_date">Tanggal Interview <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="interview_date" name="interview_date" required>
+                        <label for="interview_date-recom-{{ $data->id }}">Tanggal Interview <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="interview_date-recom-{{ $data->id }}" name="interview_date" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="notes">Catatan <span class="text-danger">*Berikan rentang waktu</span></label>
-                        <textarea id="notes-editor" name="notes" class="form-control" required></textarea>
+                        <label for="notes-editor-recom-{{ $data->id }}">Catatan <span class="text-danger">*Berikan rentang waktu</span></label>
+                        <textarea id="notes-editor-recom-{{ $data->id }}" name="notes" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -34,24 +34,26 @@
 @push('custom-script')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const closingDateInput = document.getElementById('interview_date');
-            const today = new Date();
+            const closingDateInput = document.getElementById('interview_date-recom-{{ $data->id }}');
+            if (closingDateInput) {
+                const today = new Date();
 
-            // Konversi ke timezone Indonesia (UTC+7)
-            const utcOffset = 7 * 60 * 60 * 1000;
-            const indonesiaTime = new Date(today.getTime() + (today.getTimezoneOffset() * 60 * 1000) + utcOffset);
+                // Konversi ke timezone Indonesia (UTC+7)
+                const utcOffset = 7 * 60 * 60 * 1000;
+                const indonesiaTime = new Date(today.getTime() + (today.getTimezoneOffset() * 60 * 1000) + utcOffset);
 
-            const year = indonesiaTime.getFullYear();
-            const month = String(indonesiaTime.getMonth() + 1).padStart(2, '0');
-            const date = String(indonesiaTime.getDate()).padStart(2, '0');
-            const formattedDate = `${year}-${month}-${date}`;
+                const year = indonesiaTime.getFullYear();
+                const month = String(indonesiaTime.getMonth() + 1).padStart(2, '0');
+                const date = String(indonesiaTime.getDate()).padStart(2, '0');
+                const formattedDate = `${year}-${month}-${date}`;
 
-            closingDateInput.setAttribute('min', formattedDate);
+                closingDateInput.setAttribute('min', formattedDate);
+            }
         });
         
         $(document).ready(function() {
-            $('#recomModal-{{ $d->id }}').on('shown.bs.modal', function () {
-                $('#notes-editor').summernote({
+            $('#recomModal-{{ $data->id }}').on('shown.bs.modal', function () {
+                $('#notes-editor-recom-{{ $data->id }}').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
                     height: 150,
@@ -62,8 +64,8 @@
                 });
             });
 
-            $('#recomModal-{{ $d->id }}').on('hidden.bs.modal', function () {
-                $('#notes-editor').summernote('destroy');
+            $('#recomModal-{{ $data->id }}').on('hidden.bs.modal', function () {
+                $('#notes-editor-recom-{{ $data->id }}').summernote('destroy');
             });
         });
     </script>

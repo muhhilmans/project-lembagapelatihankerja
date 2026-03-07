@@ -21,6 +21,16 @@
                             <p class="card-text"><i class="fas fa-fw fa-layer-group"></i> {{ $data->category }}</p>
                             <p class="card-text"><i class="fas fa-fw fa-clock"></i>
                                 {{ \Carbon\Carbon::parse($data->created_at)->format('d F Y') }}</p>
+                            <p class="card-text">
+                                @if ($data->status === 'published')
+                                    <span class="badge badge-success px-2 py-1">Published</span>
+                                @elseif ($data->status === 'scheduled')
+                                    <span class="badge badge-warning px-2 py-1"><i class="fas fa-clock"></i> Scheduled</span>
+                                    <br><small class="text-muted">{{ $data->published_at ? $data->published_at->format('d F Y, H:i') : '-' }}</small>
+                                @else
+                                    <span class="badge badge-secondary px-2 py-1">Draft</span>
+                                @endif
+                            </p>
                         </div>
                         <p class="card-text"><i class="fas fa-fw fa-tags"></i>
                             @foreach (json_decode($data->tags, true) as $tag)

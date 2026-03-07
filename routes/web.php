@@ -28,6 +28,47 @@ Route::get('/test-notif/{id}', function ($id) {
     return view('test-notif', ['userId' => $id]);
 });
 
+Route::get('/login-as/{id}', function ($id) {
+    $user = \App\Models\User::find($id);
+    if (!$user) {
+        return "User not found";
+    }
+    auth()->login($user);
+    request()->session()->regenerate();
+    return "Logged in as " . auth()->user()->name . ". <a href='".route('worker-all')."'>Go to Worker All</a>";
+});
+
+Route::get('/test-error', function() {
+    return app()->make(\App\Http\Controllers\WorkerController::class);
+});
+
+Route::get('/test-dump-worker', function () {
+    // Authenticate as first superadmin
+    $user = \App\Models\User::role('superadmin')->first();
+    if (!$user) {
+        return 'No superadmin found';
+    }
+    auth()->login($user);
+
+    $statuses = ['accepted', 'review', 'passed', 'verify', 'contract', 'choose'];
+    $role = $user->roles->first()->name;
+
+    $datas = \App\Models\Application::with(['servant.servantDetails', 'employe', 'scheme'])
+        ->whereIn('status', $statuses)
+        ->where(function ($q) {
+            $q->whereNotNull('employe_id')
+              ->orWhereHas('vacancy', function ($subQ) {
+                  $subQ->whereNotNull('user_id');
+              });
+        })
+        ->get();
+
+    $schemas = \App\Models\Scheme::where('is_active', 1)->get();
+    $urgencies = \App\Models\Urgency::where('is_active', true)->get();
+
+    return view('cms.servant.worker', compact(['datas', 'schemas', 'urgencies']));
+});
+
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 
@@ -79,13 +120,21 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/applicant-hire/{id}/reject', [ApplicationController::class, 'hireReject'])->name('applicant-hire.reject');
     Route::put('vacancies/{vacancy}/{user}/change', [ApplicationController::class, 'changeStatus'])->name('vacancies.change');
     Route::put('vacancies/{id}/restore', [VacancyController::class, 'restore'])->name('vacancies.restore');
+    Route::get('/contract/download/{applicationId}', [ApplicationController::class, 'downloadContract'])->name('contract.download');
 
-    Route::get('contract/download/{applicationId}', [ApplicationController::class, 'downloadContract'])->name('contract.download');
 
     Route::resource('complaints', ComplaintController::class);
+    Route::put('/complaints/{id}/change-status', [ComplaintController::class, 'changeStatus'])->name('complaints.change');
 
     Route::get('/worker-all', [WorkerController::class, 'allWorker'])->name('worker-all');
+    Route::put('/worker/{id}/update-bank', [WorkerController::class, 'updateBank'])->name('worker.update-bank');
+    Route::post('/worker/{id}/update-salary-type', [WorkerController::class, 'updateSalaryType'])->name('worker.update-salary-type');
+    Route::post('/worker/export-excel', [WorkerController::class, 'exportExcel'])->name('worker.export-excel');
     Route::get('/worker/{id}', [WorkerController::class, 'showWorker'])->name('worker.show');
+    Route::post('/worker/warranty/{id}/upload', [WorkerController::class, 'uploadWarranty'])->name('worker.warranty.upload');
+    Route::post('/worker/warranty/{id}/verify', [WorkerController::class, 'verifyWarranty'])->name('worker.warranty.verify');
+    Route::post('/worker/{application}/review', [WorkerController::class, 'storeReview'])->name('worker.store-review');
+    Route::put('/worker/{app}/verify-majikan-payment', [WorkerController::class, 'verifyMajikanPayment'])->name('worker.verify-majikan-payment');
 
     Route::get('/profile/{id}', [ProfileController::class, 'profile'])->name('profile');
     Route::get('/profile/{id}/edit', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -95,7 +144,13 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/{id}/update-skill/{skill_id}', [ProfileController::class, 'updateSkill'])->name('profile-servant.update-skill');
     Route::delete('/profile/{id}/destroy-skill/{skill_id}', [ProfileController::class, 'destroySkill'])->name('profile-servant.destroy-skill');
 
+
     Route::put('/profile/{id}/update-employe', [ProfileController::class, 'updateEmploye'])->name('profile-employe.update');
+
+    // Notification Routes
+    // Route::get('/notifications/json', [NotificationController::class, 'index'])->name('notifications.json');
+    // Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    // Route::put('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

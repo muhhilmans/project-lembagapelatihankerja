@@ -53,7 +53,7 @@ class DashboardController extends Controller
         $rejectedComp = 0; // 'rejected' status no longer exists
         $acceptedComp = $complaints->where('status', 'resolved')->count(); // Map resolved to accepted
         
-        $datasApp = $applications->where('status', 'interview')->sortByDesc('updated_at');
+        $datasApp = $applications->whereIn('status', ['interview', 'passed'])->sortByDesc('updated_at');
 
         $chartWorker = $applications->whereIn('status', ['accepted', 'review'])->map(function ($item) {
             $sum = $item->servant->servantDetails->profession->name ?? 'Unknown';
@@ -174,7 +174,7 @@ class DashboardController extends Controller
         $rejectedComp = 0; 
         $acceptedComp = $complaints->where('status', 'resolved')->count();
         
-        $datasApp = $applications->where('status', 'interview')->sortByDesc('updated_at');
+        $datasApp = $applications->whereIn('status', ['interview', 'passed'])->sortByDesc('updated_at');
 
         $data = [
             'pending' => $pendingApp,
@@ -198,7 +198,7 @@ class DashboardController extends Controller
         $accepted = $applications->where('status', 'accepted')->count();
         $rejected = $applications->whereIn('status', ['rejected', 'laidoff'])->count();
 
-        $datasApp = $applications->where('status', 'interview')->sortByDesc('updated_at');
+        $datasApp = $applications->whereIn('status', ['interview', 'passed'])->sortByDesc('updated_at');
 
         $data = [
             'pending' => $pending,

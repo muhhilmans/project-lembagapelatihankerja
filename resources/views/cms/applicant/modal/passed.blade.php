@@ -1,4 +1,4 @@
-<div class="modal fade" id="passedModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="passedModal-{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -7,7 +7,7 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('vacancies.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
+            <form method="POST" action="{{ $data->vacancy_id ? route('vacancies.change', ['vacancy' => $data->vacancy_id, 'user' => $data->servant_id]) : route('applicant-hire.change', $data->id) }}">
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
@@ -25,10 +25,8 @@
                             <option selected disabled>Pilih Pengaturan Gaji...</option>
                             @foreach ($schemas as $item)
                                 <option value="{{ $item->id }}" class="text-wrap">
-                                    Client ({{ $item->adds_client }},
-                                    {{ $item->bpjs_client == 1 ? 'dengan BPJS' : 'Tidak dengan BPJS' }}) | Mitra
-                                    ({{ $item->adds_mitra }},
-                                    {{ $item->bpjs_mitra == 1 ? 'dengan BPJS' : 'Tidak dengan BPJS' }})
+                                    Client ({{ $item->adds_client }}) | Mitra
+                                    ({{ $item->adds_mitra }})
                                 </option>
                             @endforeach
                         </select>

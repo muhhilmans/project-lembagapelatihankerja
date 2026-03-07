@@ -62,9 +62,41 @@
                             @endif
                         </div>
                     </div>
+
+                    {{-- Schedule Publish Section --}}
+                    <div class="card bg-light border mt-3 mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title font-weight-bold"><i class="fas fa-clock"></i> Jadwal Publish</h6>
+                            <div class="form-group mb-2">
+                                <label for="publish_type">Tipe Publish <span class="text-danger">*</span></label>
+                                <select class="form-control" id="publish_type" name="publish_type" required>
+                                    <option value="now" {{ $data->status !== 'scheduled' ? 'selected' : '' }}>Publish Sekarang</option>
+                                    <option value="schedule" {{ $data->status === 'scheduled' ? 'selected' : '' }}>Jadwalkan</option>
+                                </select>
+                            </div>
+                            <div id="schedule-fields" style="{{ $data->status === 'scheduled' ? '' : 'display: none;' }}">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6 mb-0">
+                                        <label for="published_date">Tanggal Publish <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" id="published_date" name="published_date"
+                                            value="{{ $data->published_at ? $data->published_at->format('Y-m-d') : '' }}">
+                                    </div>
+                                    <div class="form-group col-md-6 mb-0">
+                                        <label for="published_time">Jam Publish <span class="text-danger">*</span></label>
+                                        <input type="time" class="form-control" id="published_time" name="published_time"
+                                            value="{{ $data->published_at ? $data->published_at->format('H:i') : '' }}">
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-1 d-block">Blog akan otomatis ter-publish pada waktu yang ditentukan.</small>
+                            </div>
+                            @if ($data->status === 'published' && $data->published_at)
+                                <small class="text-success mt-1 d-block"><i class="fas fa-check-circle"></i> Dipublish pada {{ $data->published_at->format('d F Y, H:i') }}</small>
+                            @endif
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+                    <a href="{{ route('blogs.index') }}" class="btn btn-secondary">Batal</a>
                     <button class="btn btn-primary" type="submit">Simpan</button>
                 </div>
             </form>
@@ -153,6 +185,27 @@
             }
 
             updatePreview('image', 'imagePreviewContainer');
+
+            // Toggle schedule fields
+            function toggleScheduleFields() {
+                if ($('#publish_type').val() === 'schedule') {
+                    $('#schedule-fields').slideDown(200);
+                    $('#published_date').attr('required', true);
+                    $('#published_time').attr('required', true);
+                } else {
+                    $('#schedule-fields').slideUp(200);
+                    $('#published_date').removeAttr('required');
+                    $('#published_time').removeAttr('required');
+                }
+            }
+
+            // Set initial state
+            if ($('#publish_type').val() === 'schedule') {
+                $('#published_date').attr('required', true);
+                $('#published_time').attr('required', true);
+            }
+
+            $('#publish_type').on('change', toggleScheduleFields);
         });
     </script>
 @endpush

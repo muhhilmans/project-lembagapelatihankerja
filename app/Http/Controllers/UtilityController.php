@@ -14,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
+use App\Models\Urgency;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
 
@@ -197,8 +198,11 @@ class UtilityController extends Controller
         }
         
         $schemas = Salary::all();
+        $urgencies = Urgency::where('is_active', true)->get();
+        $schemeOptions = \App\Models\Scheme::where('is_active', true)->get();
+        $garansiOptions = \App\Models\Garansi::where('is_active', true)->get();
         
-        return view('cms.applicant.index', compact('hireData', 'indieData', 'type', 'schemas'));
+        return view('cms.applicant.index', compact('hireData', 'indieData', 'type', 'schemas', 'urgencies', 'schemeOptions', 'garansiOptions'));
     }
 
     public function allApplicant()
@@ -211,27 +215,32 @@ class UtilityController extends Controller
             $datas = Application::all();
         }
 
-        return view('cms.applicant.all', compact('datas'));
+        $urgencies = Urgency::where('is_active', true)->get();
+        $garansiOptions = \App\Models\Garansi::where('is_active', true)->get();
+
+        return view('cms.applicant.all', compact('datas', 'urgencies', 'garansiOptions'));
     }
 
     public function hireApplicant()
     {
+        $urgencies = Urgency::where('is_active', true)->get();
         if (auth()->user()->roles->first()->name == 'majikan') {
             $datas = Application::where('employe_id', auth()->user()->id)
                 ->whereNotNull('employe_id')
                 ->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])
                 ->get();
-            return view('cms.applicant.hire', compact('datas'));
+            return view('cms.applicant.hire', compact('datas', 'urgencies', 'garansiOptions'));
         } else {
             $datas = Application::whereNotNull('employe_id')->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])->get();
 
             $schemas = Salary::all();
-            return view('cms.applicant.hire', compact(['datas', 'schemas']));
+            return view('cms.applicant.hire', compact('datas', 'schemas', 'urgencies', 'garansiOptions'));
         }
     }
 
     public function indieApplicant()
     {
+        $urgencies = Urgency::where('is_active', true)->get();
         if (auth()->user()->roles->first()->name == 'majikan') {
             $datas = Application::whereHas('vacancy.user', function ($query) {
                 $query->where('id', auth()->user()->id);
@@ -240,18 +249,19 @@ class UtilityController extends Controller
                 ->whereNotNull('vacancy_id')
                 ->get();
 
-            return view('cms.applicant.independent', compact('datas'));
+            return view('cms.applicant.independent', compact('datas', 'urgencies', 'garansiOptions'));
         } else {
             $datas = Application::whereNotNull('vacancy_id')->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])->get();
 
             $schemas = Salary::all();
 
-            return view('cms.applicant.independent', compact(['datas', 'schemas']));
+            return view('cms.applicant.independent', compact('datas', 'schemas', 'urgencies', 'garansiOptions'));
         }
     }
 
     public function hireApplication()
     {
+        $urgencies = Urgency::where('is_active', true)->get();
         if (auth()->user()->roles->first()->name == 'pembantu') {
             $datas = Application::where('servant_id', auth()->user()->id)
                 ->whereNotNull('employe_id')
@@ -260,11 +270,12 @@ class UtilityController extends Controller
             $datas = Application::whereNotNull('employe_id')->get();
         }
 
-        return view('cms.application.hire', compact('datas'));
+        return view('cms.application.hire', compact('datas', 'urgencies'));
     }
 
     public function indieApplication()
     {
+        $urgencies = Urgency::where('is_active', true)->get();
         if (auth()->user()->roles->first()->name == 'pembantu') {
             $datas = Application::where('servant_id', auth()->user()->id)
                 ->whereNotNull('vacancy_id')
@@ -273,7 +284,7 @@ class UtilityController extends Controller
             $datas = Application::whereNotNull('vacancy_id')->get();
         }
 
-        return view('cms.application.independent', compact('datas'));
+        return view('cms.application.independent', compact('datas', 'urgencies'));
     }
 
     public function applicationIndex(Request $request)
@@ -302,7 +313,9 @@ class UtilityController extends Controller
             $indieData = $indieQuery->get();
         }
         
-        return view('cms.application.index', compact('hireData', 'indieData', 'type'));
+
+        $urgencies = Urgency::where('is_active', true)->get();
+        return view('cms.application.index', compact('hireData', 'indieData', 'type', 'urgencies'));
     }
 
     public function storeRecom(Request $request, string $id)

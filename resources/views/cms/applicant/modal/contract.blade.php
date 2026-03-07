@@ -1,4 +1,4 @@
-<div class="modal fade" id="contractModal-{{ $d->id }}" tabindex="-1" role="dialog"
+<div class="modal fade" id="contractModal-{{ $data->id }}" tabindex="-1" role="dialog"
     aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -9,32 +9,32 @@
                 </button>
             </div>
             <form method="POST"
-                action="{{ route('applicant-indie.upload', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}"
+                action="{{ $data->vacancy_id ? route('applicant-indie.upload', ['vacancy' => $data->vacancy_id, 'user' => $data->servant_id]) : route('applicant-hire.upload', $data->id) }}"
                 enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
                     <div class="form-group">
-                        <label for="work_start_date">Tanggal Mulai Bekerja <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="work_start_date" name="work_start_date" required>
+                        <label for="work_start_date-{{ $data->id }}">Tanggal Mulai Bekerja <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="work_start_date-{{ $data->id }}" name="work_start_date" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="file_contract_{{ $d->id }}">Berkas Kontrak <span class="text-danger">*</span></label>
+                        <label for="file_contract_{{ $data->id }}">Berkas Kontrak <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text"
-                                    id="file_contract_label_{{ $d->id }}">Upload</span>
+                                    id="file_contract_label_{{ $data->id }}">Upload</span>
                             </div>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="file_contract_{{ $d->id }}"
-                                    name="file_contract" aria-describedby="file_contract_label_{{ $d->id }}"
+                                <input type="file" class="custom-file-input" id="file_contract_{{ $data->id }}"
+                                    name="file_contract" aria-describedby="file_contract_label_{{ $data->id }}"
                                     accept="image/*, application/pdf" required>
-                                <label class="custom-file-label" for="file_contract_{{ $d->id }}">Choose
+                                <label class="custom-file-label" for="file_contract_{{ $data->id }}">Choose
                                     file</label>
                             </div>
                         </div>
-                        <div id="previewFile_{{ $d->id }}" class="mt-2"></div>
+                        <div id="previewFile_{{ $data->id }}" class="mt-2"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -49,19 +49,21 @@
 @push('custom-script')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const closingDateInput = document.getElementById('work_start_date');
-            const today = new Date();
+            const closingDateInput = document.getElementById('work_start_date-{{ $data->id }}');
+            if (closingDateInput) {
+                const today = new Date();
 
-            // Konversi ke timezone Indonesia (UTC+7)
-            const utcOffset = 7 * 60 * 60 * 1000;
-            const indonesiaTime = new Date(today.getTime() + (today.getTimezoneOffset() * 60 * 1000) + utcOffset);
+                // Konversi ke timezone Indonesia (UTC+7)
+                const utcOffset = 7 * 60 * 60 * 1000;
+                const indonesiaTime = new Date(today.getTime() + (today.getTimezoneOffset() * 60 * 1000) + utcOffset);
 
-            const year = indonesiaTime.getFullYear();
-            const month = String(indonesiaTime.getMonth() + 1).padStart(2, '0');
-            const date = String(indonesiaTime.getDate()).padStart(2, '0');
-            const formattedDate = `${year}-${month}-${date}`;
+                const year = indonesiaTime.getFullYear();
+                const month = String(indonesiaTime.getMonth() + 1).padStart(2, '0');
+                const date = String(indonesiaTime.getDate()).padStart(2, '0');
+                const formattedDate = `${year}-${month}-${date}`;
 
-            closingDateInput.setAttribute('min', formattedDate);
+                closingDateInput.setAttribute('min', formattedDate);
+            }
         });
         
         document.querySelectorAll('[id^="file_contract_"]').forEach(input => {

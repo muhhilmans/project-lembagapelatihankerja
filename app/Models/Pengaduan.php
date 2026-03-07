@@ -22,6 +22,8 @@ class Pengaduan extends Model
         'status',
         'applied_sanction_id',
         'resolved_at',
+        'resolution_notes',
+        'resolved_by',
     ];
 
     protected $casts = [
@@ -46,5 +48,10 @@ class Pengaduan extends Model
     public function application()
     {
         return $this->belongsTo(Application::class, 'contract_id');
+    }
+
+    public function resolvedBy()
+    {
+        return $this->belongsTo(User::class, 'resolved_by');
     }
 }

@@ -142,14 +142,10 @@
 
                                     @if ($d->status == 'accepted')
                                         @php
-                                            $hasComplaintWithSameServant = $d->complaint->contains(function (
-                                                $complaint,
-                                            ) use ($d) {
-                                                return $complaint->servant_id == $d->servant_id;
-                                            });
+                                            $alreadyComplained = $d->pengaduan->where('reporter_id', auth()->user()->id)->isNotEmpty();
                                         @endphp
 
-                                        @if (!$hasComplaintWithSameServant)
+                                        @if (!$alreadyComplained)
                                             <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                                                 data-target="#complaintModal-{{ $d->id }}">
                                                 <i class="fas fa-bullhorn"></i>
@@ -175,11 +171,3 @@
         @endif
     </div>
 @endsection
-
-@push('custom-style')
-    <link rel="stylesheet" href="{{ asset('assets/vendor/summernote/summernote-bs4.min.css') }}">
-@endpush
-
-@push('custom-script')
-    <script src="{{ asset('assets/vendor/summernote/summernote-bs4.min.js') }}"></script>
-@endpush

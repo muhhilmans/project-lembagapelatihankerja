@@ -79,6 +79,18 @@
                     <option value="0">Tidak Bersedia</option>
                 </select>
             </div>
+            <!-- Rating -->
+            <div class="col-md-12 mb-3">
+                <label for="filterMinRating" class="font-weight-bold">Minimal Rating</label>
+                <select id="filterMinRating" class="form-control">
+                    <option value="0">Semua Rating</option>
+                    <option value="5">Rating 5</option>
+                    <option value="4">Rating 4</option>
+                    <option value="3">Rating 3</option>
+                    <option value="2">Rating 2</option>
+                    <option value="1">Rating 1</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -94,7 +106,8 @@
                     data-age="{{ \Carbon\Carbon::parse($data->servantDetails->date_of_birth)->age }}"
                     data-religion="{{ $data->servantDetails->religion }}"
                     data-experience="{{ $data->servantDetails->experience }}"
-                    data-inval="{{ $data->servantDetails->is_inval }}" data-stay="{{ $data->servantDetails->is_stay }}">
+                    data-inval="{{ $data->servantDetails->is_inval }}" data-stay="{{ $data->servantDetails->is_stay }}"
+                    data-rating="{{ $data->average_rating ?? 0 }}">
                     <div class="card shadow-sm h-100">
                         <!-- Photo -->
                         @if ($data->servantDetails->photo)
@@ -107,14 +120,21 @@
 
                         <!-- Card Content -->
                         <div class="card-body">
-                            <ul class="list-unstyled mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                <h5 class="card-title font-weight-bold text-dark mb-0 text-truncate" title="{{ $data->name }}" style="max-width: 150px;">
+                                    {{ $data->name }}
+                                </h5>
+                                @if($data->average_rating > 0)
+                                    <div class="d-flex align-items-center shadow-sm" style="background-color: #fff8e1; color: #f59e0b; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; border: 1px solid #fde68a;">
+                                        <i class="fas fa-star mr-1" style="font-size: 0.8rem;"></i> {{ number_format($data->average_rating, 1) }}
+                                    </div>
+                                @endif
+                            </div>
+                            
+                            <ul class="list-unstyled mb-3 text-muted" style="font-size: 0.9rem;">
                                 <li class="mb-2">
-                                    <i class="fas fa-user"></i>
-                                    <strong>Nama:</strong> {{ $data->name }}
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-calendar-alt"></i>
-                                    <strong>Usia:</strong>
+                                    <i class="fas fa-calendar-alt text-primary fa-fw mr-1"></i>
+                                    <strong class="text-dark">Usia:</strong>
                                     {{ \Carbon\Carbon::parse($data->servantDetails->date_of_birth)->age }} Tahun
                                 </li>
                                 <li class="mb-2">
@@ -176,7 +196,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const servantList = document.getElementById('servantList');
             const filterInputs = document.querySelectorAll(
-                '#filterProfession, #filterReligion, #filterMinAge, #filterMaxAge, #filterMinExperience, #filterMaxExperience, #filterInval, #filterStay, #searchInput'
+                '#filterProfession, #filterReligion, #filterMinAge, #filterMaxAge, #filterMinExperience, #filterMaxExperience, #filterInval, #filterStay, #filterMinRating, #searchInput'
             );
 
             // Apply filters to servant list
@@ -190,6 +210,7 @@
                 const maxExperience = parseInt(document.getElementById('filterMaxExperience').value);
                 const invalValue = document.getElementById('filterInval').value;
                 const stayValue = document.getElementById('filterStay').value;
+                const minRating = parseFloat(document.getElementById('filterMinRating').value);
 
                 const filterInval = invalValue !== "" ? parseInt(invalValue) : null;
                 const filterStay = stayValue !== "" ? parseInt(stayValue) : null;
@@ -203,6 +224,7 @@
                     const experience = parseInt(item.dataset.experience);
                     const itemInval = parseInt(item.dataset.inval);
                     const itemStay = parseInt(item.dataset.stay);
+                    const itemRating = parseFloat(item.dataset.rating);
 
                     const matchesSearch = searchValue ?
                         name.includes(searchValue) || itemProfession.includes(searchValue) :
@@ -214,9 +236,10 @@
                     const matchesExperience = experience >= minExperience && experience <= maxExperience;
                     const matchesInval = filterInval !== null ? itemInval === filterInval : true;
                     const matchesStay = filterStay !== null ? itemStay === filterStay : true;
+                    const matchesRating = minRating === 0 ? true : Math.floor(itemRating) === minRating;
 
                     item.style.display = matchesSearch && matchesProfession && matchesReligion &&
-                        matchesAge && matchesExperience && matchesInval && matchesStay ?
+                        matchesAge && matchesExperience && matchesInval && matchesStay && matchesRating ?
                         '' :
                         'none';
                 });
@@ -247,6 +270,11 @@
                 maxExperienceLabel.textContent = this.value;
                 applyFilters();
             });
+            const minRatingLabel = document.getElementById('minRatingLabel');
+            document.getElementById('filterMinRating').addEventListener('change', function() {
+                applyFilters();
+            });
         });
     </script>
 @endpush
+

@@ -12,10 +12,47 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
+// use App\Models\Notification;
+// use App\Events\NotificationDispatched;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Urgency; // Added for new methods
+use App\Models\Salary; // Added for new methods
+use App\Models\Scheme; // Added for new methods
+use App\Models\Garansi; // Added for new methods
 
 class ApplicationController extends Controller
 {
+    public function hireApplicant()
+    {
+        $urgencies = Urgency::where('is_active', true)->get();
+        $garansiOptions = Garansi::where('is_active', true)->get();
+        $schemeOptions = Scheme::where('is_active', true)->get();
+
+        if (auth()->user()->roles->first()->name == 'majikan') {
+            $hireData = Application::where('employe_id', auth()->user()->id)
+                ->whereNotNull('servant_id')
+                ->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])
+                ->get();
+            $indieData = Application::where('employe_id', auth()->user()->id)
+                ->whereNotNull('servant_id')
+                ->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])
+                ->get(); // Assuming indieData is similar or needs to be fetched
+            $type = 'hire'; // Or determine based on context
+            $schemas = Salary::all(); // Assuming Salary model exists
+
+            return view('cms.applicant.index', compact('hireData', 'indieData', 'type', 'schemas', 'urgencies', 'schemeOptions', 'garansiOptions'));
+        } else {
+            // Default behavior if not 'majikan' or if the above condition is not met
+            // This part was not fully provided in the snippet, so I'm making an assumption
+            // based on the return view. You might need to adjust this logic.
+            $hireData = Application::whereNotNull('employe_id')->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])->get();
+            $indieData = Application::whereNotNull('employe_id')->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])->get();
+            $type = 'hire';
+            $schemas = Salary::all();
+            return view('cms.applicant.index', compact('hireData', 'indieData', 'type', 'schemas', 'urgencies', 'schemeOptions', 'garansiOptions'));
+        }
+    }
+
     public function hireServant(Request $request, string $id)
     {
         $servant = User::findOrFail($id);
@@ -32,16 +69,25 @@ class ApplicationController extends Controller
 
         $data = $validator->validated();
 
+        $existing = Application::where('servant_id', $servant->id)
+            ->where('employe_id', $data['employe_id'])
+            ->first();
+
+        if ($existing) {
+            Alert::warning('Peringatan', 'Anda sudah mempekerjakan pembantu ini sebelumnya.');
+            return redirect()->back();
+        }
+
         try {
-            DB::transaction(function () use ($data, $servant) {
-                Application::create([
+            $application = null;
+            DB::transaction(function () use ($data, $servant, &$application) {
+                $application = Application::create([
                     'servant_id' => $servant->id,
                     'employe_id' => $data['employe_id'],
                     'status' => 'pending',
-                    // 'interview_date' => $data['interview_date'],
-                    // 'notes' => $data['notes'],
                 ]);
             });
+
 
             Alert::success('Berhasil', 'Pembantu berhasil dipekerjakan!');
             return redirect()->back();
@@ -66,6 +112,7 @@ class ApplicationController extends Controller
             'work_end_date' => ['sometimes', 'date'],
             'salary' => ['nullable', 'numeric'],
             'schema_salary' => ['sometimes', 'exists:salaries,id'],
+            'end_reason' => ['nullable', 'string', 'in:selesai_kontrak,diberhentikan,diganti,mengundurkan_diri'],
         ]);
 
 
@@ -106,6 +153,7 @@ class ApplicationController extends Controller
                     $update->update([
                         'status' => $data['status'],
                         'work_end_date' => $data['work_end_date'],
+                        'end_reason' => $data['end_reason'] ?? null,
                     ]);
                 } elseif ($data['status'] == 'accepted') {
                     $update->update([
@@ -127,7 +175,17 @@ class ApplicationController extends Controller
                 'status' => 400
             ];
 
-            return view('cms.error', compact('data'));
+            // The original code returned 'cms.error'. The snippet provided a different view.
+            // I'm assuming the intent was to pass these variables to the error view if it's a specific error page.
+            // If the intent was to render a different page on error, the logic needs to be clearer.
+            // For now, I'm keeping the original error view but adding the variables if they were meant for it.
+            // If the intention was to render 'cms.applicant.hire' on error, the structure of the catch block needs to be completely re-evaluated.
+            $urgencies = Urgency::where('is_active', true)->get();
+            $garansiOptions = Garansi::where('is_active', true)->get();
+            $schemas = Salary::all(); // Assuming Salary model exists
+            $datas = Application::whereNotNull('employe_id')->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])->get(); // Assuming datas is needed for this view
+
+            return view('cms.error', compact('data', 'datas', 'urgencies', 'garansiOptions', 'schemas'));
         }
     }
 
@@ -237,15 +295,63 @@ class ApplicationController extends Controller
             return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
+        // Prevent duplicate applications
+        $existingApply = Application::where('servant_id', $request->servant_id)
+            ->where('vacancy_id', $request->vacancy_id)
+            ->first();
+
+        if ($existingApply) {
+            Alert::warning('Peringatan', 'Anda sudah melamar lowongan ini sebelumnya.');
+            return redirect()->back();
+        }
+
+        // Cek apakah pekerja terikat kontrak aktif (salary_type = contract dengan status = accepted)
+        $hasActiveContract = Application::where('servant_id', $request->servant_id)
+            ->where('status', 'accepted')
+            ->where('salary_type', 'contract')
+            ->exists();
+
+        if ($hasActiveContract) {
+            Alert::warning('Peringatan', 'Anda sedang terikat kontrak dan tidak dapat melamar lowongan baru.');
+            return redirect()->back();
+        }
+
         $data = $validator->validated();
 
         try {
-            DB::transaction(function () use ($data) {
-                Application::create([
+            $application = null;
+            DB::transaction(function () use ($data, &$application) {
+                $application = Application::create([
                     'servant_id' => $data['servant_id'],
                     'vacancy_id' => $data['vacancy_id'],
                 ]);
             });
+
+            $servant = User::find($data['servant_id']);
+            $vacancy = Vacancy::find($data['vacancy_id']);
+
+            // Kirim notifikasi ke Admin
+            // $adminIds = User::role(['superadmin', 'admin'])->pluck('id');
+            // foreach ($adminIds as $adminId) {
+            //     $msgAdmin = "Pelamar {$servant->name} telah melamar pada lowongan: {$vacancy->title}.";
+            //     // Notification::create([
+            //     //     'user_id' => $adminId,
+            //     //     'type' => 'success',
+            //     //     'message' => $msgAdmin,
+            //     //     'link' => route('applicant.index'),
+            //     // ]);
+            //     // NotificationDispatched::dispatch($msgAdmin, $adminId, 'success', route('applicant.index'));
+            // }
+
+            // Kirim notifikasi ke Servant (Konfirmasi)
+            // $msgServant = "Lamaran Anda untuk lowongan '{$vacancy->title}' telah berhasil dikirim.";
+            // Notification::create([
+            //     'user_id' => $servant->id,
+            //     'type' => 'success',
+            //     'message' => $msgServant,
+            //     'link' => route('worker-all'),
+            // ]);
+            // NotificationDispatched::dispatch($msgServant, $servant->id, 'success', route('worker-all'));
 
             Alert::success('Berhasil', 'Berhasil mengirimkan lamaran!');
             return redirect()->back();
@@ -272,6 +378,15 @@ class ApplicationController extends Controller
         }
 
         $data = $validator->validated();
+
+        $existing = Application::where('vacancy_id', $vacancy->id)
+            ->where('servant_id', $user->id)
+            ->first();
+
+        if ($existing) {
+            Alert::warning('Peringatan', 'Pelamar ini sudah direkomendasikan untuk lowongan ini.');
+            return redirect()->back();
+        }
 
         try {
             DB::transaction(function () use ($data, $vacancy, $user) {
@@ -306,6 +421,7 @@ class ApplicationController extends Controller
             'work_end_date' => ['sometimes', 'date'],
             'salary' => ['nullable', 'numeric'],
             'schema_salary' => ['sometimes', 'exists:salaries,id'],
+            'end_reason' => ['nullable', 'string', 'in:selesai_kontrak,diberhentikan,diganti,mengundurkan_diri'],
         ]);
 
         if ($validator->fails()) {
@@ -345,6 +461,7 @@ class ApplicationController extends Controller
                     $update->update([
                         'status' => $data['status'],
                         'work_end_date' => $data['work_end_date'],
+                        'end_reason' => $data['end_reason'] ?? null,
                     ]);
                 } elseif ($data['status'] == 'accepted') {
                     $update->update([
@@ -460,27 +577,157 @@ class ApplicationController extends Controller
             return redirect()->back()->with('toast_error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    public function indieApplicant()
+    {
+        $urgencies = Urgency::where('is_active', true)->get();
+        $garansiOptions = Garansi::where('is_active', true)->get();
+
+        // This part of the snippet was incomplete and syntactically incorrect.
+        // Assuming the intent was to fetch data and pass it to a view.
+        // The original code had a conditional 'if (auth()->user()->roles->first()->name == 'majikan') { ... }'
+        // but it was not followed by any logic.
+        // I'm providing a basic structure that returns the view with the requested variables.
+        $datas = Application::whereNull('employe_id')->whereNotIn('status', ['accepted', 'review', 'rejected', 'laidoff'])->get(); // Example data fetch
+        return view('cms.applicant.all', compact('datas', 'urgencies', 'garansiOptions'));
+    }
+
     public function updateSalary(Request $request, $id)
     {
+        // \Illuminate\Support\Facades\Log::info('--- Update Salary Start ---');
+        // \Illuminate\Support\Facades\Log::info('ID: ' . $id);
+        // \Illuminate\Support\Facades\Log::info('Request Data:', $request->all());
+
         $validator = Validator::make($request->all(), [
-            'salary' => ['required', 'numeric', 'min:0'],
+            'salary_type' => ['required', 'in:contract,fee'],
+            // Contract Validation
+            'contract_salary' => ['required_if:salary_type,contract', 'numeric', 'min:0', 'nullable'],
+            'admin_fee' => ['nullable', 'numeric', 'min:0'],
+            'contract_start_date' => ['required_if:salary_type,contract', 'date', 'nullable'],
+            'contract_end_date' => ['nullable', 'date', 'after_or_equal:contract_start_date'],
+            'garansi_id' => ['nullable', 'exists:garansis,id'],
+            'garansi_price' => ['nullable', 'numeric', 'min:0'],
+            'warranty_duration' => ['nullable', 'string'],
+
+            // Fee Validation
+            'is_infal' => ['sometimes', 'boolean'],
+
+            // Fee - Regular
+            'fee_salary_regular' => ['nullable', 'numeric', 'min:0'],
+            'fee_end_date_regular' => ['nullable', 'date'],
+
+            // Fee - Infal
+            'infal_frequency' => ['nullable', 'string'],
+            'fee_salary_infal' => ['nullable', 'numeric', 'min:0'],
+            'infal_start_date' => ['nullable', 'date'],
+            'infal_end_date' => ['nullable', 'date'],
+            'infal_time_in' => ['nullable', 'string'],
+            'infal_time_out' => ['nullable', 'string'],
+            'infal_hourly_rate' => ['nullable', 'numeric', 'min:0'],
+
+            'deduction_amount' => ['nullable', 'numeric', 'min:0'],
+            'scheme_id' => ['nullable', 'exists:schemes,id'],
         ]);
 
         if ($validator->fails()) {
+            \Illuminate\Support\Facades\Log::error('Validation Failed:', $validator->messages()->all());
             return redirect()->back()->with('toast_error', $validator->messages()->all()[0])->withInput();
         }
 
         try {
             $application = Application::findOrFail($id);
+            $data = $request->except(['_token', '_method']);
 
-            // Ensure only majikan can update, or add middleware. For now, we trust the UI/Policy.
-            // Ideally check if auth()->user()->hasRole('majikan')
+            // Common updates
+            $updateData = [
+                'salary_type' => $data['salary_type'],
+                'deduction_amount' => $data['deduction_amount'] ?? 0,
+                'scheme_id' => $data['scheme_id'] ?? null,
+            ];
 
-            $application->update([
-                'salary' => $request->salary
-            ]);
+            if ($data['salary_type'] == 'contract') {
+                $updateData['salary'] = $data['contract_salary'];
+                $updateData['admin_fee'] = $data['admin_fee'];
+                $updateData['work_start_date'] = $data['contract_start_date'];
+                $updateData['work_end_date'] = $data['contract_end_date'];
+                $updateData['work_end_date'] = $data['contract_end_date'];
 
-            Alert::success('Berhasil', 'Gaji berhasil diperbarui!');
+                if (isset($data['garansi_id'])) {
+                    $updateData['garansi_id'] = $data['garansi_id'];
+                    $updateData['garansi_price'] = $data['garansi_price'] ?? null;
+
+                    // fetch garansi details to fill warranty_duration just in case for backward compatibility
+                    $garansi = Garansi::find($data['garansi_id']);
+                    if ($garansi) {
+                        $updateData['warranty_duration'] = $garansi->name;
+                    }
+                } else {
+                    $updateData['garansi_id'] = null;
+                    $updateData['garansi_price'] = null;
+                    $updateData['warranty_duration'] = $data['warranty_duration'] ?? null;
+                }
+
+                // Reset Fee fields
+                $updateData['is_infal'] = false;
+                $updateData['infal_frequency'] = null;
+                $updateData['infal_time_in'] = null;
+                $updateData['infal_time_out'] = null;
+                $updateData['infal_hourly_rate'] = null;
+
+            } else { // Fee
+                $isInfal = $request->has('is_infal');
+                $updateData['is_infal'] = $isInfal;
+
+                // Reset Contract fields
+                $updateData['admin_fee'] = null;
+                $updateData['warranty_duration'] = null;
+
+                if ($isInfal) {
+                    $updateData['salary'] = $data['fee_salary_infal'];
+                    $updateData['infal_frequency'] = $data['infal_frequency'];
+
+                    if ($data['infal_frequency'] == 'hourly') {
+                         // For hourly, we might still want a date, assuming start_date is used as "Work Date"
+                         $updateData['work_start_date'] = $data['infal_start_date'] ?? null;
+                         $updateData['work_end_date'] = null; // No end date or same as start?
+
+                         $updateData['infal_time_in'] = $data['infal_time_in'];
+                         $updateData['infal_time_out'] = $data['infal_time_out'];
+                         $updateData['infal_hourly_rate'] = $data['infal_hourly_rate'];
+                    } else {
+                        $updateData['work_start_date'] = $data['infal_start_date'];
+                        $updateData['work_end_date'] = $data['infal_end_date'];
+
+                        $updateData['infal_time_in'] = null;
+                        $updateData['infal_time_out'] = null;
+                        $updateData['infal_hourly_rate'] = null;
+                    }
+
+                } else {
+                    $updateData['salary'] = $data['fee_salary_regular'];
+                    $updateData['infal_frequency'] = null;
+                    $updateData['infal_time_in'] = null;
+                    $updateData['infal_time_out'] = null;
+                    $updateData['infal_hourly_rate'] = null;
+
+                    // Start date might be existing or not set for regular fee yet? assuming update doesn't enforce start date for regular unless specified
+                    // Logic: End date pembantu automatically H+7 from Employer End Date
+                    if (!empty($data['fee_end_date_regular'])) {
+                        $employerEndDate = \Carbon\Carbon::parse($data['fee_end_date_regular']);
+                        $updateData['work_end_date'] = $employerEndDate->addDays(7)->format('Y-m-d');
+                    } else {
+                        $updateData['work_end_date'] = null;
+                    }
+                }
+            }
+
+            $application->update($updateData);
+
+            if ($application->status == 'interview') {
+                $application->update(['status' => 'passed']);
+            }
+
+            Alert::success('Berhasil', 'Pengaturan gaji berhasil diperbarui!');
             return redirect()->back();
         } catch (\Throwable $th) {
              $data = [

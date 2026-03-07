@@ -17,12 +17,7 @@
                             <small id="adds_client" class="form-text text-muted">Ex. 7,5% = 0.075</small>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="bpjs_client">BPJS Client <span class="text-danger">*</span></label>
-                            <select class="form-control" id="bpjs_client" name="bpjs_client" required>
-                                <option selected disabled>Pilih BPJS Client...</option>
-                                <option value="1">Ya</option>
-                                <option value="0">Tidak</option>
-                            </select>
+                            <input type="hidden" name="bpjs_client" value="0">
                         </div>
                     </div>
                     <div class="form-row">
@@ -32,12 +27,7 @@
                             <small id="adds_mitra" class="form-text text-muted">Ex. 2,5% = 0.025</small>
                         </div>
                         <div class="form-group col-md-6">
-                            <label for="bpjs_mitra">BPJS Mitra <span class="text-danger">*</span></label>
-                            <select class="form-control" id="bpjs_mitra" name="bpjs_mitra" required>
-                                <option selected disabled>Pilih BPJS Mitra...</option>
-                                <option value="1">Ya</option>
-                                <option value="0">Tidak</option>
-                            </select>
+                            <input type="hidden" name="bpjs_mitra" value="0">
                         </div>
                     </div>
                 </div>

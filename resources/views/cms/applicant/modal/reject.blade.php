@@ -1,4 +1,4 @@
-<div class="modal fade" id="rejectModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="rejectModal-{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -7,15 +7,15 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('vacancies.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
+            <form method="POST" action="{{ $data->vacancy_id ? route('vacancies.change', ['vacancy' => $data->vacancy_id, 'user' => $data->servant_id]) : route('applicant-hire.change', $data->id) }}">
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
                     <input type="text" name="status" value="rejected" hidden>
 
                     <div class="form-group">
-                        <label for="notes">Catatan</label>
-                        <textarea id="reject-notes-editor" name="notes" class="form-control"></textarea>
+                        <label for="notes">Catatan <span class="text-danger">*</span></label>
+                        <textarea id="reject-notes-editor-{{ $data->id }}" name="notes" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -30,8 +30,8 @@
 @push('custom-script')
     <script>
         $(document).ready(function() {
-            $('#rejectModal-{{ $d->id }}').on('shown.bs.modal', function () {
-                $('#reject-notes-editor').summernote({
+            $('#rejectModal-{{ $data->id }}').on('shown.bs.modal', function () {
+                $('#reject-notes-editor-{{ $data->id }}').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
                     height: 150,
@@ -42,8 +42,8 @@
                 });
             });
 
-            $('#rejectModal-{{ $d->id }}').on('hidden.bs.modal', function () {
-                $('#reject-notes-editor').summernote('destroy');
+            $('#rejectModal-{{ $data->id }}').on('hidden.bs.modal', function () {
+                $('#reject-notes-editor-{{ $data->id }}').summernote('destroy');
             });
         });
     </script>

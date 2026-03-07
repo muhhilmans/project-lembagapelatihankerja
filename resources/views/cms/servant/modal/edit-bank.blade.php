@@ -1,9 +1,9 @@
 <div class="modal fade" id="editBankModal-{{ $data->id }}" tabindex="-1" role="dialog"
     aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Edit Akun Rekening</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Edit Data Keuangan</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -13,96 +13,71 @@
                 @method('PUT')
                 <div class="modal-body text-left">
                     <div class="row">
-                        <div class="col-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="1" id="is_bank"
-                                    name="is_bank"
-                                    {{ old('is_bank', $data->servant->servantDetails->is_bank ?? 0) == 1 ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_bank">
-                                    Memiliki Rekening
-                                </label>
+                        <!-- Kolom Rekening Bank -->
+                        <div class="col-md-6 border-right">
+                            <h6 class="font-weight-bold text-primary mb-3"><i class="fas fa-university mr-2"></i>Data Rekening Bank</h6>
+                            
+                            <div class="custom-control custom-switch mb-3">
+                                <input type="checkbox" class="custom-control-input" id="is_bank_{{ $data->id }}" name="is_bank" value="1"
+                                    {{ old('is_bank', $data->servant->servantDetails->is_bank ?? 0) == 1 ? 'checked' : '' }}
+                                    onchange="document.getElementById('bank-details-{{ $data->id }}').classList.toggle('d-none', !this.checked)">
+                                <label class="custom-control-label" for="is_bank_{{ $data->id }}">Memiliki Rekening Bank</label>
                             </div>
 
-                            <div id="bank-details"
-                                class="{{ old('is_bank', $data->servant->servantDetails->is_bank) == 1 ? '' : 'd-none' }}">
+                            <div id="bank-details-{{ $data->id }}" class="{{ old('is_bank', $data->servant->servantDetails->is_bank ?? 0) == 1 ? '' : 'd-none' }}">
                                 <div class="form-group">
-                                    <label for="bank_name">Nama Bank <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="bank_name" name="bank_name"
+                                    <label for="bank_name_{{ $data->id }}">Nama Bank <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="bank_name_{{ $data->id }}" name="bank_name"
                                         value="{{ old('bank_name', $data->servant->servantDetails->bank_name) }}"
-                                        placeholder="Isi dengan nama bank...">
+                                        placeholder="Contoh: BCA, Mandiri, BRI...">
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="account_number">Nomor Rekening <span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="account_number" name="account_number"
+                                    <label for="account_number_{{ $data->id }}">Nomor Rekening <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="account_number_{{ $data->id }}" name="account_number"
                                         value="{{ old('account_number', $data->servant->servantDetails->account_number) }}"
-                                        placeholder="Isi dengan nomor rekening...">
+                                        placeholder="Masukkan nomor rekening...">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-6">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="1" id="is_bpjs"
-                                    name="is_bpjs"
-                                    {{ old('is_bpjs', $data->servant->servantDetails->is_bpjs ?? 0) == 1 ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_bpjs">
-                                    Memiliki BPJS
-                                </label>
+                        <!-- Kolom BPJS -->
+                        <div class="col-md-6">
+                            <h6 class="font-weight-bold text-success mb-3"><i class="fas fa-notes-medical mr-2"></i>Data BPJS</h6>
+                            
+                            <div class="custom-control custom-switch mb-3">
+                                <input type="checkbox" class="custom-control-input" id="is_bpjs_{{ $data->id }}" name="is_bpjs" value="1"
+                                    {{ old('is_bpjs', $data->servant->servantDetails->is_bpjs ?? 0) == 1 ? 'checked' : '' }}
+                                    onchange="document.getElementById('bpjs-details-{{ $data->id }}').classList.toggle('d-none', !this.checked)">
+                                <label class="custom-control-label" for="is_bpjs_{{ $data->id }}">Memiliki BPJS</label>
                             </div>
 
-                            <div id="bpjs-details"
-                                class="{{ old('is_bpjs', $data->servant->servantDetails->is_bpjs) == 1 ? '' : 'd-none' }}">
+                            <div id="bpjs-details-{{ $data->id }}" class="{{ old('is_bpjs', $data->servant->servantDetails->is_bpjs ?? 0) == 1 ? '' : 'd-none' }}">
                                 <div class="form-group">
-                                    <label for="type_bpjs">Jenis BPJS <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="type_bpjs" name="type_bpjs"
-                                        value="{{ old('type_bpjs', $data->servant->servantDetails->type_bpjs) }}"
-                                        placeholder="Isi dengan jenis BPJS...">
+                                    <label for="type_bpjs_{{ $data->id }}">Jenis BPJS <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="type_bpjs_{{ $data->id }}" name="type_bpjs">
+                                        <option value="" disabled selected>Pilih Jenis BPJS</option>
+                                        <option value="Kesehatan" {{ old('type_bpjs', $data->servant->servantDetails->type_bpjs) == 'Kesehatan' ? 'selected' : '' }}>Kesehatan</option>
+                                        <option value="Ketenagakerjaan" {{ old('type_bpjs', $data->servant->servantDetails->type_bpjs) == 'Ketenagakerjaan' ? 'selected' : '' }}>Ketenagakerjaan</option>
+                                    </select>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="number_bpjs">Nomor BPJS <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="number_bpjs" name="number_bpjs"
+                                    <label for="number_bpjs_{{ $data->id }}">Nomor BPJS <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="number_bpjs_{{ $data->id }}" name="number_bpjs"
                                         value="{{ old('number_bpjs', $data->servant->servantDetails->number_bpjs) }}"
-                                        placeholder="Isi dengan nomor BPJS...">
+                                        placeholder="Masukkan nomor kartu BPJS...">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="modal-footer">
+                <div class="modal-footer bg-light">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-warning" type="submit">Simpan</button>
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-save mr-1"></i> Simpan Perubahan</button>
                 </div>
             </form>
         </div>
     </div>
-</div>
 
-@push('custom-script')
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const isBankCheckbox = document.getElementById('is_bank');
-            const bankDetails = document.getElementById('bank-details');
-            isBankCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    bankDetails.classList.remove('d-none');
-                } else {
-                    bankDetails.classList.add('d-none');
-                }
-            });
-
-            const isBpjsCheckbox = document.getElementById('is_bpjs');
-            const bpjsDetails = document.getElementById('bpjs-details');
-            isBpjsCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    bpjsDetails.classList.remove('d-none');
-                } else {
-                    bpjsDetails.classList.add('d-none');
-                }
-            });
-        });
-    </script>
-@endpush

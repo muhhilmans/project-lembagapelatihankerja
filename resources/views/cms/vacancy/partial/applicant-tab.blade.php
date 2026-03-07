@@ -152,7 +152,7 @@
                                         data-target="#scheduleModal-{{ $d->id }}">
                                         <i class="fas fa-check"></i>
                                     </a>
-                                    @include('cms.vacancy.modal.status.schedule', [
+                                    @include('cms.applicant.modal.schedule', [
                                         'data' => $d,
                                     ])
                                 @endif
@@ -162,7 +162,7 @@
                                         data-target="#passedModal-{{ $d->id }}">
                                         <i class="fas fa-check"></i>
                                     </a>
-                                    @include('cms.vacancy.modal.status.passed', [
+                                    @include('cms.applicant.modal.passed', [
                                         'data' => $d,
                                     ])
                                 @endif
@@ -173,7 +173,7 @@
                                             data-target="#interviewModal-{{ $d->id }}">
                                             <i class="fas fa-calendar-day"></i>
                                         </a>
-                                        @include('cms.vacancy.modal.status.interview', [
+                                        @include('cms.applicant.modal.interview', [
                                             'data' => $d,
                                         ])
                                     @endif
@@ -183,7 +183,7 @@
                                             <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                                                 data-target="#chooseModal-{{ $d->id }}"><i
                                                     class="fas fa-check"></i></a>
-                                            @include('cms.vacancy.modal.status.choose', [
+                                            @include('cms.applicant.modal.choose', [
                                                 'data' => $d,
                                             ])
 
@@ -191,7 +191,7 @@
                                                 data-target="#rejectModal-{{ $d->id }}">
                                                 <i class="fas fa-times"></i>
                                             </a>
-                                            @include('cms.vacancy.modal.status.reject', [
+                                            @include('cms.applicant.modal.reject', [
                                                 'data' => $d,
                                             ])
                                         </td>
@@ -202,7 +202,7 @@
                                             <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                                                 data-target="#verifyModal-{{ $d->id }}"><i
                                                     class="fas fa-check-double"></i></a>
-                                            @include('cms.vacancy.modal.status.verify', [
+                                            @include('cms.applicant.modal.verify', [
                                                 'data' => $d,
                                             ])
 
@@ -210,7 +210,7 @@
                                                 data-target="#rejectModal-{{ $d->id }}">
                                                 <i class="fas fa-times"></i>
                                             </a>
-                                            @include('cms.vacancy.modal.status.reject', [
+                                            @include('cms.applicant.modal.reject', [
                                                 'data' => $d,
                                             ])
                                         </td>
@@ -221,7 +221,7 @@
                                             <a href="#" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                                                 data-target="#agreeModal-{{ $d->id }}"><i
                                                     class="fas fa-check-double"></i></a>
-                                            @include('cms.vacancy.modal.status.agree', [
+                                            @include('cms.applicant.modal.agree', [
                                                 'data' => $d,
                                             ])
 
@@ -229,7 +229,7 @@
                                                 data-target="#rejectModal-{{ $d->id }}">
                                                 <i class="fas fa-times"></i>
                                             </a>
-                                            @include('cms.vacancy.modal.status.reject', [
+                                            @include('cms.applicant.modal.reject', [
                                                 'data' => $d,
                                             ])
                                         </td>
@@ -259,7 +259,7 @@
                                         <a href="#" class="btn btn-sm btn-secondary mr-1" data-toggle="modal"
                                             data-target="#draftModal-{{ $d->id }}"><i
                                                 class="fas fa-file-alt"></i></a>
-                                        @include('cms.vacancy.modal.status.draft', [
+                                        @include('cms.applicant.modal.draft', [
                                             'data' => $d,
                                         ])
                                     @endif
@@ -270,21 +270,17 @@
                                         data-target="#contractModal-{{ $d->id }}">
                                         <i class="fas fa-file-contract"></i>
                                     </a>
-                                    @include('cms.vacancy.modal.status.contract', [
+                                    @include('cms.applicant.modal.contract', [
                                         'data' => $d,
                                     ])
                                 @endif
 
                                 @if ($d->status == 'accepted')
                                     @php
-                                        $hasComplaintWithSameServant = $d->complaint->contains(function (
-                                            $complaint,
-                                        ) use ($d) {
-                                            return $complaint->servant_id == $d->servant_id;
-                                        });
+                                        $alreadyComplained = $d->pengaduan->where('reporter_id', auth()->user()->id)->isNotEmpty();
                                     @endphp
 
-                                    @if (!$hasComplaintWithSameServant)
+                                    @if (!$alreadyComplained)
                                         <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                                             data-target="#complaintModal-{{ $d->id }}">
                                             <i class="fas fa-bullhorn"></i>
@@ -292,8 +288,6 @@
                                         @include('cms.applicant.modal.complaint', ['data' => $d])
                                     @endif
 
-                                    <a href="{{ route('contract.download', $d->id) }}"
-                                        class="btn btn-sm btn-success mr-1"><i class="fas fa-file-download"></i></a>
                                 @endif
 
                                 @if ($d->status == 'pending' || $d->status == 'interview')
@@ -301,7 +295,7 @@
                                         data-target="#rejectModal-{{ $d->id }}">
                                         <i class="fas fa-times"></i>
                                     </a>
-                                    @include('cms.vacancy.modal.status.reject', [
+                                    @include('cms.applicant.modal.reject', [
                                         'data' => $d,
                                     ])
                                 @endif

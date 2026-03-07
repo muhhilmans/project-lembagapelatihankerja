@@ -23,6 +23,7 @@
                             <th>No</th>
                             <th>Judul</th>
                             <th>Kategori</th>
+                            <th>Status</th>
                             <th>Foto</th>
                             <th>Aksi</th>
                         </tr>
@@ -34,6 +35,20 @@
                                 <td>{{ $data->title }}</td>
                                 <td class="text-center">{{ $data->category ?? 'N/A' }}</td>
                                 <td class="text-center">
+                                    @if ($data->status === 'published')
+                                        <span class="badge badge-success px-2 py-1">Published</span>
+                                    @elseif ($data->status === 'scheduled')
+                                        <span class="badge badge-warning px-2 py-1" title="Dijadwalkan: {{ $data->published_at ? $data->published_at->format('d M Y, H:i') : '-' }}">
+                                            <i class="fas fa-clock"></i> Scheduled
+                                        </span>
+                                        @if ($data->published_at)
+                                            <br><small class="text-muted">{{ $data->published_at->format('d M Y, H:i') }}</small>
+                                        @endif
+                                    @else
+                                        <span class="badge badge-secondary px-2 py-1">Draft</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
                                     <img src="{{ route('getImage', ['path' => 'blogs', 'imageName' => $data->image]) }}" alt="Foto" class="img-fluid zoomable-image" style="max-height: 100px;">
                                 </td>
                                 <td class="text-center">
@@ -41,11 +56,6 @@
                                         <i class="fas fa-fw fa-eye"></i>
                                     </a>
                                     @include('cms.blog.modal.show', ['blog' => $data])
-
-                                    {{-- <a class="btn btn-sm btn-warning mb-1 mb-lg-0" href="#" data-toggle="modal" data-target="#editModal-{{ $data->id }}">
-                                        <i class="fas fa-fw fa-edit"></i>
-                                    </a>
-                                    @include('cms.blog.modal.edit', ['blog' => $data]) --}}
 
                                     <a class="btn btn-sm btn-warning mb-1 mb-lg-0" href="{{ route('blogs.edit', $data->id) }}">
                                         <i class="fas fa-fw fa-edit"></i>

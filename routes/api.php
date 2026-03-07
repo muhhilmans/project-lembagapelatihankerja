@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\WorkerController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\VacancyController;
-use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\ApplicationController;
 
 /*
@@ -59,7 +58,6 @@ Route::middleware('jwt.auth')->group(function () {
         Route::put('/all-worker/{application}/presence/{salary}', [WorkerController::class, 'updatePresenceWorker']);
         Route::put('/all-worker/{application}/reject', [WorkerController::class, 'rejectWorker']);
         Route::post('/all-worker/{application}/complaint-worker', [WorkerController::class, 'complaintWorker']);
-        Route::get('/complaints', [ComplaintController::class, 'allComplaintWorkers']);
         Route::put('/all-worker/{application}/uploadPayment', [WorkerController::class, 'uploadMajikan']);
 
         // Kelola Lowongan
@@ -90,7 +88,6 @@ Route::middleware('jwt.auth')->group(function () {
         Route::get('/all-work', [WorkerController::class, 'allWork']);
         Route::get('/all-work/{id}', [WorkerController::class, 'showWork']);
         Route::post('/all-work/{application}/complaint-work', [WorkerController::class, 'complaintWork']);
-        Route::get('/complaints-work', [ComplaintController::class, 'allComplaintWork']);
 
         // Kelola Profil
         Route::get('/profile/pembantu/{id}', [ProfileController::class, 'profilePembantu']);

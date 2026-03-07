@@ -21,7 +21,21 @@ class Blog extends Model
         'content',
         'image',
         'tags',
+        'status',
+        'published_at',
     ];
+
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];
+
+    /**
+     * Scope: only published blogs (status = published)
+     */
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published');
+    }
 
     public function user()
     {

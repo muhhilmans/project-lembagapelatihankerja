@@ -1,4 +1,4 @@
-<div class="modal fade" id="scheduleModal-{{ $d->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="scheduleModal-{{ $data->id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -7,7 +7,7 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('vacancies.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
+            <form method="POST" action="{{ $data->vacancy_id ? route('vacancies.change', ['vacancy' => $data->vacancy_id, 'user' => $data->servant_id]) : route('applicant-hire.change', $data->id) }}">
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
@@ -15,12 +15,12 @@
 
                     <div class="form-group">
                         <label for="interview_date">Tanggal Interview <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="interview_date" name="interview_date" required>
+                        <input type="date" class="form-control" id="interview_date-{{ $data->id }}" name="interview_date" required>
                     </div>
 
                     <div class="form-group">
                         <label for="notes">Catatan <span class="text-danger">*Berikan rentang waktu</span></label>
-                        <textarea id="notes-editor" name="notes" class="form-control" required></textarea>
+                        <textarea id="notes-editor-{{ $data->id }}" name="notes" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -35,24 +35,26 @@
 @push('custom-script')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const closingDateInput = document.getElementById('interview_date');
-            const today = new Date();
+            const closingDateInput = document.getElementById('interview_date-{{ $data->id }}');
+            if (closingDateInput) {
+                const today = new Date();
 
-            // Konversi ke timezone Indonesia (UTC+7)
-            const utcOffset = 7 * 60 * 60 * 1000;
-            const indonesiaTime = new Date(today.getTime() + (today.getTimezoneOffset() * 60 * 1000) + utcOffset);
+                // Konversi ke timezone Indonesia (UTC+7)
+                const utcOffset = 7 * 60 * 60 * 1000;
+                const indonesiaTime = new Date(today.getTime() + (today.getTimezoneOffset() * 60 * 1000) + utcOffset);
 
-            const year = indonesiaTime.getFullYear();
-            const month = String(indonesiaTime.getMonth() + 1).padStart(2, '0');
-            const date = String(indonesiaTime.getDate()).padStart(2, '0');
-            const formattedDate = `${year}-${month}-${date}`;
+                const year = indonesiaTime.getFullYear();
+                const month = String(indonesiaTime.getMonth() + 1).padStart(2, '0');
+                const date = String(indonesiaTime.getDate()).padStart(2, '0');
+                const formattedDate = `${year}-${month}-${date}`;
 
-            closingDateInput.setAttribute('min', formattedDate);
+                closingDateInput.setAttribute('min', formattedDate);
+            }
         });
         
         $(document).ready(function() {
-            $('#scheduleModal-{{ $d->id }}').on('shown.bs.modal', function () {
-                $('#notes-editor').summernote({
+            $('#scheduleModal-{{ $data->id }}').on('shown.bs.modal', function () {
+                $('#notes-editor-{{ $data->id }}').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
                     height: 150,
@@ -63,8 +65,8 @@
                 });
             });
 
-            $('#scheduleModal-{{ $d->id }}').on('hidden.bs.modal', function () {
-                $('#notes-editor').summernote('destroy');
+            $('#scheduleModal-{{ $data->id }}').on('hidden.bs.modal', function () {
+                $('#notes-editor-{{ $data->id }}').summernote('destroy');
             });
         });
     </script>

@@ -11,19 +11,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Salary;
 
 class VacancyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $professions = Profession::all();
 
         if (auth()->user()->roles->first()->name == 'majikan') {
             $users = auth()->user();
+            
+            // Auto-Archive Logic: Pre-check active vacancies for fulfilled quotas
+            $activeVacancies = Vacancy::where('user_id', $users->id)->get();
+            foreach ($activeVacancies as $vacancy) {
+                if ($vacancy->isLimitReached()) {
+                    // Soft delete the vacancy if its quota (limit) is met
+                    $vacancy->delete();
+                }
+            }
+
+            // Re-fetch data after potential auto-archiving
             $datas = Vacancy::where('user_id', $users->id)->get();
+            $archives = Vacancy::onlyTrashed()->where('user_id', auth()->id())->get();
         } else {
             $datas = Vacancy::all();
 
@@ -31,10 +41,6 @@ class VacancyController extends Controller
                 $query->where('name', 'majikan');
             })->where('is_active', true)->get();
             $archives = Vacancy::onlyTrashed()->get();
-        }
-
-        if (auth()->user()->roles->first()->name == 'majikan') {
-            $archives = Vacancy::onlyTrashed()->where('user_id', auth()->id())->get();
         }
 
         return view('cms.vacancy.index', compact(['datas', 'users', 'professions', 'archives']));
@@ -101,7 +107,9 @@ class VacancyController extends Controller
         })->get();
         $applications = Application::where('vacancy_id', $id)->where('status', '!=', 'accepted')->get();
 
-        return view('cms.vacancy.partial.detail', compact(['data', 'recoms', 'applications']));
+        $schemas = Salary::all();
+
+        return view('cms.vacancy.partial.detail', compact(['data', 'recoms', 'applications', 'schemas']));
     }
 
     /**

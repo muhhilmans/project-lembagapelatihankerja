@@ -7,14 +7,14 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('vacancies.change', ['vacancy' => $d->vacancy_id, 'user' => $d->servant_id]) }}">
+            <form method="POST" action="{{ $data->vacancy_id ? route('vacancies.change', ['vacancy' => $data->vacancy_id, 'user' => $data->servant_id]) : route('applicant-hire.change', $data->id) }}">
                 @csrf
                 @method('PUT')
                 <div class="modal-body text-left">
                     <input type="text" name="status" value="verify" hidden>
                     <div class="form-group">
                         <label for="notes">Catatan Verifikasi <span class="text-danger">*</span></label>
-                        <textarea id="verify-notes-editor" name="notes" class="form-control" required></textarea>
+                        <textarea id="verify-notes-editor-{{ $data->id }}" name="notes" class="form-control" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -29,8 +29,8 @@
 @push('custom-script')
     <script>
         $(document).ready(function() {
-            $('#verifyModal-{{ $d->id }}').on('shown.bs.modal', function () {
-                $('#verify-notes-editor').summernote({
+            $('#verifyModal-{{ $data->id }}').on('shown.bs.modal', function () {
+                $('#verify-notes-editor-{{ $data->id }}').summernote({
                     placeholder: 'Tulis deskripsi di sini...',
                     tabsize: 2,
                     height: 150,
@@ -41,8 +41,8 @@
                 });
             });
 
-            $('#verifyModal-{{ $d->id }}').on('hidden.bs.modal', function () {
-                $('#verify-notes-editor').summernote('destroy');
+            $('#verifyModal-{{ $data->id }}').on('hidden.bs.modal', function () {
+                $('#verify-notes-editor-{{ $data->id }}').summernote('destroy');
             });
         });
     </script>

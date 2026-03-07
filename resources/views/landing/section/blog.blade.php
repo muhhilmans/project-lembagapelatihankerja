@@ -36,7 +36,7 @@
                                 <li class="d-flex align-items-center gap-1">
                                     <i class="bi bi-calendar4-week base fz-18"></i>
                                     <span class="pra">
-                                        {{ \Carbon\Carbon::parse($blog->created_at)->format('d F Y') }}
+                                    {{ \Carbon\Carbon::parse($blog->published_at ?? $blog->created_at)->format('d F Y') }}
                                     </span>
                                 </li>
                             </ul>

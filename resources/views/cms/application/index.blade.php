@@ -143,20 +143,17 @@
 
                                                 @if ($data->status === 'accepted')
                                                     @php
-                                                        $hasComplaintWithSameServant = $data->complaint->contains(function (
-                                                            $complaint,
-                                                        ) use ($data) {
-                                                            return $complaint->servant_id == $data->servant_id;
-                                                        });
+                                                        $hasComplaint = $data->pengaduan->where('reporter_id', auth()->id())->isNotEmpty();
                                                     @endphp
 
-                                                    @if (!$hasComplaintWithSameServant)
+                                                    @if (!$hasComplaint)
                                                         <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                                                             data-target="#complaintModal-{{ $data->id }}">
                                                             <i class="fas fa-bullhorn"></i>
                                                         </a>
                                                         @include('cms.application.modal.complaint', [
                                                             'data' => $data,
+                                                            'urgencies' => $urgencies
                                                         ])
                                                     @endif
                                                 @endif
@@ -215,8 +212,8 @@
                                 @foreach ($indieData as $data)
                                     <tr>
                                         <td class="text-center">{{ $loop->iteration }}</td>
-                                        <td>{{ $data->vacancy->title }}</td>
-                                        <td>{{ $data->vacancy->user->name }}</td>
+                                        <td>{{ optional($data->vacancy)->title ?? '-' }}</td>
+                                        <td>{{ optional(optional($data->vacancy)->user)->name ?? '-' }}</td>
                                         @hasrole('superadmin|admin')
                                             <td>{{ $data->servant->name }}</td>
                                         @endhasrole
@@ -293,21 +290,18 @@
                                                     @endif
 
                                                     @if ($data->status === 'accepted')
-                                                        @php
-                                                            $hasComplaintWithSameServant = $data->complaint->contains(function (
-                                                                $complaint,
-                                                            ) use ($data) {
-                                                                return $complaint->servant_id == $data->servant_id;
-                                                            });
-                                                        @endphp
+                                                    @php
+                                                        $hasComplaint = $data->pengaduan->where('reporter_id', auth()->id())->isNotEmpty();
+                                                    @endphp
 
-                                                        @if (!$hasComplaintWithSameServant)
+                                                    @if (!$hasComplaint)
                                                             <a href="#" class="btn btn-sm btn-danger mr-1" data-toggle="modal"
                                                                 data-target="#complaintModal-{{ $data->id }}">
                                                                 <i class="fas fa-bullhorn"></i>
                                                             </a>
                                                             @include('cms.application.modal.complaint', [
                                                                 'data' => $data,
+                                                                'urgencies' => $urgencies
                                                             ])
                                                         @endif
                                                     @endif

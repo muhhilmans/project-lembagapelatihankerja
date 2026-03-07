@@ -176,7 +176,28 @@
                         <i class="fas fa-fw fa-percentage"></i>
                         <span>Voucher</span></a>
                 </li>
+                
+                <!-- Nav Item - Rating & Ulasan -->
+                <li class="nav-item {{ Route::is('reviews.*') ? 'active' : '' }}">
+                    <a class="nav-link {{ Route::is('reviews.*') ? 'active' : '' }}" href="{{ route('reviews.index') }}">
+                        <i class="fas fa-fw fa-star"></i>
+                        <span>Rating & Ulasan</span></a>
+                </li>
             @endhasrole
+
+            <!-- Nav Item - Skema Biaya -->
+            <li class="nav-item {{ Route::is('schemes.*') ? 'active' : '' }}">
+                <a class="nav-link {{ Route::is('schemes.*') ? 'active' : '' }}" href="{{ route('schemes.index') }}">
+                    <i class="fas fa-fw fa-money-bill-wave"></i>
+                    <span>Skema Biaya</span></a>
+            </li>
+
+            <!-- Nav Item - Garansi -->
+            <li class="nav-item {{ Route::is('garansis.*') ? 'active' : '' }}">
+                <a class="nav-link {{ Route::is('garansis.*') ? 'active' : '' }}" href="{{ route('garansis.index') }}">
+                    <i class="fas fa-fw fa-shield-alt"></i>
+                    <span>Garansi</span></a>
+            </li>
 
             <!-- Nav Item - Settings Collapse Menu -->
             <li class="nav-item {{ Route::is('professions.*', 'salaries.*') ? 'active' : '' }}">
