@@ -614,6 +614,7 @@ class ApplicationController extends Controller
 
             // Fee - Regular
             'fee_salary_regular' => ['nullable', 'numeric', 'min:0'],
+            'fee_frequency_regular' => ['nullable', 'string'],
             'fee_end_date_regular' => ['nullable', 'date'],
 
             // Fee - Infal
@@ -705,7 +706,7 @@ class ApplicationController extends Controller
 
                 } else {
                     $updateData['salary'] = $data['fee_salary_regular'];
-                    $updateData['infal_frequency'] = null;
+                    $updateData['infal_frequency'] = $data['fee_frequency_regular'] ?? null;
                     $updateData['infal_time_in'] = null;
                     $updateData['infal_time_out'] = null;
                     $updateData['infal_hourly_rate'] = null;

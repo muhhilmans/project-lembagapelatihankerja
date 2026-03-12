@@ -159,10 +159,19 @@
 
                         {{-- Regular Options --}}
                         <div id="regularOptions-{{ $data->id }}" class="fee-subsection">
-                            <div class="alert alert-info py-2"><i class="fas fa-info-circle mr-1"></i> Mode Reguler (Bayar Bulanan)</div>
+                            <div class="alert alert-info py-2"><i class="fas fa-info-circle mr-1"></i> Mode Reguler</div>
                              <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label>Gaji Bulanan (Rp) <span class="text-danger">*</span></label>
+                                <div class="form-group col-md-4">
+                                    <label>Frekuensi Fee <span class="text-danger">*</span></label>
+                                    <select class="form-control" name="fee_frequency_regular">
+                                        <option value="monthly" {{ $data->salary_type == 'fee' && !$data->is_infal && (empty($data->infal_frequency) || $data->infal_frequency == 'monthly') ? 'selected' : '' }}>Bulanan</option>
+                                        <option value="weekly" {{ $data->salary_type == 'fee' && !$data->is_infal && $data->infal_frequency == 'weekly' ? 'selected' : '' }}>Mingguan</option>
+                                        <option value="daily" {{ $data->salary_type == 'fee' && !$data->is_infal && $data->infal_frequency == 'daily' ? 'selected' : '' }}>Harian</option>
+                                        <option value="hourly" {{ $data->salary_type == 'fee' && !$data->is_infal && $data->infal_frequency == 'hourly' ? 'selected' : '' }}>Per Jam</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Nominal Gaji (Rp) <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">Rp</span>
@@ -172,10 +181,26 @@
                                         <input type="hidden" name="fee_salary_regular" value="{{ $data->salary_type == 'fee' && !$data->is_infal ? $data->salary : '' }}"> 
                                     </div>
                                 </div>
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-4">
                                     <label>Tanggal Pembayaran Majikan</label>
                                     <input type="date" class="form-control" name="fee_end_date_regular" value="{{ $data->work_end_date }}">
                                     <small class="form-text text-muted">End date pembantu otomatis H+7 dari tanggal pembayaran ini.</small>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <h6 class="font-weight-bold mb-3">Pengaturan Tambahan</h6>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Potongan Izin (Rp/hari)</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">Rp</span>
+                                        </div>
+                                        <input type="text" class="form-control rupiah-input deduction-amount-input" data-target="deduction_amount" placeholder="0" inputmode="numeric" value="{{ $data->deduction_amount ? number_format($data->deduction_amount, 0, ',', '.') : '' }}">
+                                        <input type="hidden" name="deduction_amount" class="deduction-amount-hidden" value="{{ $data->deduction_amount }}">
+                                    </div>
+                                    <small class="form-text text-muted">Jika tidak masuk dengan izin.</small>
                                 </div>
                             </div>
                         </div>
@@ -343,6 +368,30 @@
                 }
             }
 
+            var feeSalaryRegularInput = container.querySelector('input[data-target="fee_salary_regular"]');
+            var deductionAmountInput = container.querySelector('.deduction-amount-input');
+            var deductionAmountHidden = container.querySelector('.deduction-amount-hidden');
+
+            function updateDeductionAmount() {
+                if (!feeSalaryRegularInput || !deductionAmountInput || !deductionAmountHidden) return;
+                var valStr = feeSalaryRegularInput.value.replace(/\./g, '').replace(/,/g, '.');
+                if(valStr && !isNaN(valStr) && parseFloat(valStr) > 0) {
+                    var val = parseFloat(valStr);
+                    var deduction = Math.round(val / 30);
+                    var formatted = deduction.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                    deductionAmountInput.value = formatted;
+                    deductionAmountHidden.value = deduction;
+                } else {
+                    deductionAmountInput.value = '';
+                    deductionAmountHidden.value = '';
+                }
+            }
+
+            if(feeSalaryRegularInput) {
+                feeSalaryRegularInput.addEventListener('keyup', updateDeductionAmount);
+                feeSalaryRegularInput.addEventListener('change', updateDeductionAmount);
+            }
+
             if(select) select.addEventListener('change', toggleInfalFrequency);
             if(timeIn) timeIn.addEventListener('change', calculateHourlyTotal);
             if(timeOut) timeOut.addEventListener('change', calculateHourlyTotal);
@@ -393,22 +442,7 @@
     }
 </script>
 
-                        <hr>
-                        <h6 class="font-weight-bold mb-3">Pengaturan Tambahan</h6>
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label>Potongan Izin (Rp/hari)</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp</span>
-                                    </div>
-                                    <input type="text" class="form-control rupiah-input" data-target="deduction_amount" placeholder="0" inputmode="numeric" value="{{ $data->deduction_amount ? number_format($data->deduction_amount, 0, ',', '.') : '' }}">
-                                    <input type="hidden" name="deduction_amount" value="{{ $data->deduction_amount }}">
-                                </div>
-                                <small class="form-text text-muted">Jika tidak masuk dengan izin.</small>
-                            </div>
 
-                        </div>
 
                         {{-- Opsi Fee (Skema Biaya) --}}
                         @if(isset($schemeOptions) && $schemeOptions->count() > 0)

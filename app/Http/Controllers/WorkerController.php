@@ -449,7 +449,7 @@ class WorkerController extends Controller
             $servantName = str_replace(' ', '_', $app->servant->name);
             $date = Carbon::parse($salary->month)->format('M-Y');
             $directory = "payments/{$majikanName}/{$servantName}";
-            $fileName = "proof_majikan_" . $date . "_{$servantName}." . $request->file('proof_majikan')->getClientOriginalExtension();
+            $baseFileName = "proof_majikan_" . $date . "_{$servantName}";
             $storagePath = "public/{$directory}";
 
             if (!Storage::exists($storagePath)) {
@@ -460,7 +460,7 @@ class WorkerController extends Controller
                 Storage::delete("payments/{$salary->payment_majikan_image}");
             }
 
-            $path = $request->file('proof_majikan')->storeAs($storagePath, $fileName);
+            $path = $this->convertAndStoreToWebp($request->file('proof_majikan'), $storagePath, $baseFileName);
 
             DB::transaction(function () use ($salary, $path) {
                 $salary->update([
@@ -511,9 +511,9 @@ public function uploadMajikanContract(Request $request, Application $app)
         $servantName = str_replace(' ', '_', $app->servant->name);
         $date = Carbon::parse($salary->month)->format('M-Y');
         $directory = "payments/{$majikanName}/{$servantName}";
-        $fileName = "proof_majikan_contract_" . $date . "_{$servantName}." . $request->file('proof_majikan')->getClientOriginalExtension();
+        $baseFileName = "proof_majikan_contract_" . $date . "_{$servantName}";
         $storagePath = "public/{$directory}";
-
+        
         if (!Storage::exists($storagePath)) {
             Storage::makeDirectory($storagePath);
         }
@@ -522,7 +522,7 @@ public function uploadMajikanContract(Request $request, Application $app)
             Storage::delete("public/payments/{$salary->payment_majikan_image}");
         }
 
-        $path = $request->file('proof_majikan')->storeAs($storagePath, $fileName);
+        $path = $this->convertAndStoreToWebp($request->file('proof_majikan'), $storagePath, $baseFileName);
 
         $salary->update([
             'payment_majikan_image' => str_replace('public/payments/', '', $path),
@@ -547,14 +547,19 @@ public function uploadMajikanContract(Request $request, Application $app)
 public function uploadMajikanFee(Request $request, Application $app)
 {
     // Tentukan apakah perlu input quantity (hourly/daily/weekly)
-    $needQuantity = $app->is_infal && in_array($app->infal_frequency, ['hourly', 'daily', 'weekly']);
+    $needQuantity = in_array($app->infal_frequency, ['hourly', 'daily', 'weekly']);
 
     $rules = [
         'month' => 'required',
         'proof_majikan' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
     ];
     if ($needQuantity) {
-        $rules['quantity'] = 'required|integer|min:1';
+        $rules['quantity'] = 'required|numeric|min:0.1';
+    }
+    if ($app->salary_type == 'fee') {
+        $rules['absence_days'] = 'nullable|integer|min:0';
+        $rules['absence_reason'] = 'nullable|string|max:255';
+        $rules['extra_deduction'] = 'nullable|integer|min:0';
     }
 
     $validator = Validator::make($request->all(), $rules);
@@ -572,6 +577,16 @@ public function uploadMajikanFee(Request $request, Application $app)
         $tarifSatuan = $app->salary;
         $quantity = $needQuantity ? (int) $data['quantity'] : 1;
         $gajiPokok = $tarifSatuan * $quantity;
+        
+        // Potongan absen/izin untuk Fee Reguler dan Potongan Mandiri (Extra)
+        $absenceDays = 0;
+        $extraDeduction = 0;
+        if ($app->salary_type == 'fee') {
+            $absenceDays = (int) ($data['absence_days'] ?? 0);
+            $extraDeduction = (int) ($data['extra_deduction'] ?? 0);
+            $totalDeduction = ($absenceDays * (int)$app->deduction_amount) + $extraDeduction;
+            $gajiPokok = max(0, $gajiPokok - $totalDeduction);
+        }
 
         $totalSalaryMajikan = $gajiPokok;
         $totalSalaryPembantu = $gajiPokok;
@@ -608,6 +623,9 @@ public function uploadMajikanFee(Request $request, Application $app)
             ['application_id' => $app->id, 'month' => $monthDate],
             [
                 'presence' => 0,
+                'absence' => $absenceDays,
+                'absence_reason' => $data['absence_reason'] ?? null,
+                'extra_deduction' => $extraDeduction,
                 'quantity' => $needQuantity ? $quantity : null,
                 'total_salary' => $gajiPokok,
                 'total_salary_majikan' => ceil($totalSalaryMajikan),
@@ -617,6 +635,9 @@ public function uploadMajikanFee(Request $request, Application $app)
 
         // Update quantity dan totals jika record sudah ada
         $salary->update([
+            'absence' => $absenceDays,
+            'absence_reason' => $data['absence_reason'] ?? null,
+            'extra_deduction' => $extraDeduction,
             'quantity' => $needQuantity ? $quantity : null,
             'total_salary' => $gajiPokok,
             'total_salary_majikan' => ceil($totalSalaryMajikan),
@@ -627,7 +648,7 @@ public function uploadMajikanFee(Request $request, Application $app)
         $servantName = str_replace(' ', '_', $app->servant->name);
         $date = Carbon::parse($salary->month)->format('M-Y');
         $directory = "payments/{$majikanName}/{$servantName}";
-        $fileName = "proof_majikan_fee_" . $date . "_{$servantName}." . $request->file('proof_majikan')->getClientOriginalExtension();
+        $baseFileName = "proof_majikan_fee_" . $date . "_{$servantName}";
         $storagePath = "public/{$directory}";
 
         if (!Storage::exists($storagePath)) {
@@ -638,7 +659,7 @@ public function uploadMajikanFee(Request $request, Application $app)
             Storage::delete("public/payments/{$salary->payment_majikan_image}");
         }
 
-        $path = $request->file('proof_majikan')->storeAs($storagePath, $fileName);
+        $path = $this->convertAndStoreToWebp($request->file('proof_majikan'), $storagePath, $baseFileName);
 
         $salary->update([
             'payment_majikan_image' => str_replace('public/payments/', '', $path),
@@ -722,7 +743,7 @@ public function uploadMajikanFee(Request $request, Application $app)
             $servantName = str_replace(' ', '_', $app->servant->name);
             $date = Carbon::parse($salary->month)->format('M-Y');
             $directory = "payments/{$majikanName}/{$servantName}";
-            $fileName = "proof_admin_" . $date . "_{$servantName}." . $request->file('proof_admin')->getClientOriginalExtension();
+            $baseFileName = "proof_admin_" . $date . "_{$servantName}";
             $storagePath = "public/{$directory}";
 
             if (!Storage::exists($storagePath)) {
@@ -733,7 +754,7 @@ public function uploadMajikanFee(Request $request, Application $app)
                 Storage::delete("payments/{$salary->payment_pembantu_image}");
             }
 
-            $path = $request->file('proof_admin')->storeAs($storagePath, $fileName);
+            $path = $this->convertAndStoreToWebp($request->file('proof_admin'), $storagePath, $baseFileName);
 
             DB::transaction(function () use ($salary, $path) {
                 $salary->update([
@@ -783,7 +804,7 @@ public function uploadAdminContract(Request $request, Application $app)
         $servantName = str_replace(' ', '_', $app->servant->name);
         $date = Carbon::parse($salary->month)->format('M-Y');
         $directory = "payments/{$majikanName}/{$servantName}";
-        $fileName = "proof_admin_contract_" . $date . "_{$servantName}." . $request->file('proof_admin')->getClientOriginalExtension();
+        $baseFileName = "proof_admin_contract_" . $date . "_{$servantName}";
         $storagePath = "public/{$directory}";
 
         if (!Storage::exists($storagePath)) {
@@ -794,7 +815,7 @@ public function uploadAdminContract(Request $request, Application $app)
             Storage::delete("public/payments/{$salary->payment_pembantu_image}");
         }
 
-        $path = $request->file('proof_admin')->storeAs($storagePath, $fileName);
+        $path = $this->convertAndStoreToWebp($request->file('proof_admin'), $storagePath, $baseFileName);
 
         $salary->update([
             'payment_pembantu_image' => str_replace('public/payments/', '', $path),

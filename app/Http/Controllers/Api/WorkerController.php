@@ -611,13 +611,13 @@ class WorkerController extends Controller
             $date = Carbon::parse($salary->month)->format('M-Y');
 
             $directory = "payments/{$majikanName}/{$servantName}";
-            $fileName = "proof_majikan_" . $date . "_{$servantName}." . $request->file('proof_majikan')->getClientOriginalExtension();
+        $baseFileName = "proof_majikan_" . $date . "_{$servantName}";
 
-            if ($salary->payment_majikan_image && Storage::disk('public')->exists("payments/" . $salary->payment_majikan_image)) {
-                Storage::disk('public')->delete("payments/" . $salary->payment_majikan_image);
-            }
+        if ($salary->payment_majikan_image && Storage::disk('public')->exists("payments/" . $salary->payment_majikan_image)) {
+            Storage::disk('public')->delete("payments/" . $salary->payment_majikan_image);
+        }
 
-            $path = $request->file('proof_majikan')->storeAs($directory, $fileName, 'public');
+        $path = $this->convertAndStoreToWebp($request->file('proof_majikan'), $directory, $baseFileName);
 
             DB::transaction(function () use ($salary, $path) {
                 $salary->update([
@@ -1079,5 +1079,45 @@ class WorkerController extends Controller
                 ]
             ], 500);
         }
+    }
+
+    private function convertAndStoreToWebp($file, $directory, $baseFileName)
+    {
+        if (!Storage::disk('public')->exists($directory)) {
+            Storage::disk('public')->makeDirectory($directory);
+        }
+
+        $extension = strtolower($file->getClientOriginalExtension());
+        
+        if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
+            $fileName = $baseFileName . '.webp';
+            $imagePath = $file->getPathname();
+            $image = null;
+            
+            if ($extension == 'png') {
+                $image = @imagecreatefrompng($imagePath);
+                if ($image) {
+                    imagepalettetotruecolor($image);
+                    imagealphablending($image, true);
+                    imagesavealpha($image, true);
+                }
+            } else {
+                $image = @imagecreatefromjpeg($imagePath);
+            }
+
+            if ($image) {
+                $tempPath = sys_get_temp_dir() . '/' . uniqid() . '.webp';
+                imagewebp($image, $tempPath, 80);
+                imagedestroy($image);
+                
+                $path = $directory . '/' . $fileName;
+                Storage::disk('public')->put($path, file_get_contents($tempPath));
+                unlink($tempPath);
+                return $path;
+            }
+        }
+        
+        $fileName = $baseFileName . '.' . $extension;
+        return $file->storeAs($directory, $fileName, 'public');
     }
 }

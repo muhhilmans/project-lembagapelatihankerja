@@ -53,11 +53,24 @@
                                         <small class="text-muted">
                                             / {{ match($data->infal_frequency) { 'hourly' => 'Jam', 'daily' => 'Hari', 'weekly' => 'Minggu', 'monthly' => 'Bulan', default => '-' } }}
                                         </small>
-                                    @elseif($data->salary_type == 'contract')
+                                    @elseif($data->salary_type == 'fee' && !$data->is_infal && $data->infal_frequency)
+                                        <small class="text-muted">
+                                            / {{ match($data->infal_frequency) { 'hourly' => 'Jam', 'daily' => 'Hari', 'weekly' => 'Minggu', 'monthly' => 'Bulan', default => 'Bulan' } }}
+                                        </small>
+                                    @elseif($data->salary_type == 'contract' || ($data->salary_type == 'fee' && empty($data->infal_frequency)))
                                         <small class="text-muted">/ Bulan</small>
                                     @endif
                                 </span>
                             </div>
+                            @if($data->salary_type == 'fee' && !$data->is_infal && $data->deduction_amount > 0)
+                            <div>
+                                <small class="text-muted d-block"><i class="fas fa-minus-circle mr-1"></i> Potongan Izin</small>
+                                <span class="font-weight-bold text-dark">
+                                    Rp. {{ number_format($data->deduction_amount, 0, ',', '.') }}
+                                    <small class="text-muted">/ Hari</small>
+                                </span>
+                            </div>
+                            @endif
                             <div>
                                 <small class="text-muted d-block"><i class="fas fa-tags mr-1"></i> Tipe</small>
                                 <span class="font-weight-bold text-dark">
@@ -66,7 +79,7 @@
                                     @elseif($data->is_infal && $data->infal_frequency)
                                         <span class="badge badge-info px-2 py-1" style="border-radius:12px; font-size: 0.85rem;"><i class="fas fa-clock mr-1"></i> Infal {{ match($data->infal_frequency) { 'hourly' => 'Per Jam', 'daily' => 'Harian', 'weekly' => 'Mingguan', 'monthly' => 'Bulanan', default => '' } }}</span>
                                     @else
-                                        <span class="badge badge-warning px-2 py-1" style="border-radius:12px; font-size: 0.85rem;"><i class="fas fa-hand-holding-usd mr-1"></i> Fee</span>
+                                        <span class="badge badge-warning px-2 py-1" style="border-radius:12px; font-size: 0.85rem;"><i class="fas fa-hand-holding-usd mr-1"></i> Fee {{ $data->infal_frequency ? '('.match($data->infal_frequency) { 'hourly' => 'Per Jam', 'daily' => 'Harian', 'weekly' => 'Mingguan', 'monthly' => 'Bulanan', default => 'Bulanan' }.')' : '' }}</span>
                                     @endif
                                 </span>
                             </div>
@@ -376,7 +389,7 @@
                             $feeFreqLabel = 'Bulanan';
                             $feeSatuanLabel = 'Bulan';
                             $feeNeedQuantity = false; // apakah perlu input jumlah
-                            if ($data->is_infal && $data->infal_frequency) {
+                            if ($data->infal_frequency) {
                                 $feeFreqLabel = match($data->infal_frequency) {
                                     'hourly' => 'Per Jam',
                                     'daily' => 'Harian',
@@ -489,10 +502,11 @@
                                                 // Hitung estimasi kuantitas untuk UI jika belum ada
                                                 $estQuantity = 0;
                                                 if ($feeNeedQuantity) {
+                                                    $daysDiff = (int) $monthStart->copy()->startOfDay()->diffInDays($monthEnd->copy()->startOfDay());
                                                     if ($data->infal_frequency == 'daily') {
-                                                        $estQuantity = $monthStart->diffInDays($monthEnd) + 1;
+                                                        $estQuantity = $daysDiff + 1;
                                                     } elseif ($data->infal_frequency == 'hourly') {
-                                                        $daysWorked = $monthStart->diffInDays($monthEnd) + 1;
+                                                        $daysWorked = $daysDiff + 1;
                                                         if ($data->infal_time_in && $data->infal_time_out) {
                                                             $ti = \Carbon\Carbon::parse($data->infal_time_in);
                                                             $to = \Carbon\Carbon::parse($data->infal_time_out);
@@ -500,13 +514,13 @@
                                                             if ($to->lessThan($ti)) {
                                                                 $to->addDay();
                                                             }
-                                                            $hoursPerDay = $ti->diffInHours($to);
+                                                            $hoursPerDay = (int) $ti->diffInHours($to);
                                                             $estQuantity = $daysWorked * $hoursPerDay;
                                                         } else {
                                                             $estQuantity = $daysWorked * 8; // Default 8 jam/hari
                                                         }
                                                     } elseif ($data->infal_frequency == 'weekly') {
-                                                        $estQuantity = ceil(($monthStart->diffInDays($monthEnd) + 1) / 7);
+                                                        $estQuantity = ceil(($daysDiff + 1) / 7);
                                                     }
                                                 }
 
@@ -514,20 +528,37 @@
                                                 $rowQuantity = $feeSalaryRecord && $feeSalaryRecord->quantity ? $feeSalaryRecord->quantity : null;
                                                 $displayQuantity = $rowQuantity ?: $estQuantity;
 
-                                                if ($feeNeedQuantity && $displayQuantity) {
-                                                    $rowGajiPokok = $feeTarifSatuan * $displayQuantity;
+                                                if ($feeSalaryRecord) {
+                                                    $rowGajiPokok = $feeSalaryRecord->total_salary;
+                                                    $rowTagihanMajikan = $feeSalaryRecord->total_salary_majikan;
+                                                    $rowGajiMitra = $feeSalaryRecord->total_salary_pembantu;
                                                 } else {
-                                                    $rowGajiPokok = $feeTarifSatuan; // default 1 satuan / flat bulanan
+                                                    if ($feeNeedQuantity && $displayQuantity) {
+                                                        $rowGajiPokok = $feeTarifSatuan * $displayQuantity;
+                                                    } else {
+                                                        $rowGajiPokok = $feeTarifSatuan; // default 1 satuan / flat bulanan
+                                                    }
+                                                    $rowTotals = $calcFeeTotals($rowGajiPokok);
+                                                    $rowTagihanMajikan = $rowTotals['tagihan'];
+                                                    $rowGajiMitra = $rowTotals['mitra'];
                                                 }
-                                                $rowTotals = $calcFeeTotals($rowGajiPokok);
-                                                $rowTagihanMajikan = $rowTotals['tagihan'];
-                                                $rowGajiMitra = $rowTotals['mitra'];
+
+                                                $hasAbsence = false;
+                                                $absenceDays = 0;
+                                                $absenceDeduction = 0;
+                                                if ($data->salary_type == 'fee') {
+                                                    if ($feeSalaryRecord && $feeSalaryRecord->absence > 0) {
+                                                        $hasAbsence = true;
+                                                        $absenceDays = $feeSalaryRecord->absence;
+                                                        $absenceDeduction = $absenceDays * $data->deduction_amount;
+                                                    }
+                                                }
                                             @endphp
                                             <tr>
                                                 <td>{{ $i + 1 }}</td>
                                                 <td>
                                                     {{ $feeMonthDate->format('F Y') }}
-                                                    @if($data->is_infal)
+                                                    @if($data->is_infal || $feeNeedQuantity)
                                                         <br><small class="text-muted text-nowrap">({{ $monthStart->format('d M Y') }} - {{ $monthEnd->format('d M Y') }})</small>
                                                     @endif
                                                 </td>
@@ -544,10 +575,22 @@
                                                         @endif
                                                     </td>
                                                 @endif
-                                                <td>Rp. {{ number_format($rowGajiPokok, 0, ',', '.') }}</td>
+                                                <td id="tdGajiPokok_UI_{{ $i }}">
+                                                    Rp. {{ number_format($rowGajiPokok, 0, ',', '.') }}
+                                                    @php
+                                                        $extraDed = $feeSalaryRecord->extra_deduction ?? 0;
+                                                        $totalDed = $absenceDeduction + $extraDed;
+                                                    @endphp
+                                                    @if($hasAbsence || $extraDed > 0)
+                                                        <br>
+                                                        <small class="text-danger" style="font-size: 0.85em; white-space: nowrap;">
+                                                            <i class="fas fa-minus-circle mr-1"></i> Izin {{ $hasAbsence ? $absenceDays . ' Potongan ' : '' }}{{ $hasAbsence && $extraDed > 0 ? '& ' : '' }}{{ $extraDed > 0 ? 'Tambahan' : '' }}<span id="tdGajiReasonSpan_{{ $i }}">@if(!empty($feeSalaryRecord->absence_reason)) ({{ $feeSalaryRecord->absence_reason }})@endif</span> (- Rp. {{ number_format($totalDed, 0, ',', '.') }})
+                                                        </small>
+                                                    @endif
+                                                </td>
                                                 
                                                 @hasrole('superadmin|admin|owner|majikan')
-                                                    <td>Rp. {{ number_format($rowTagihanMajikan, 0, ',', '.') }}</td>
+                                                    <td id="tdTagihanMajikan_UI_{{ $i }}">Rp. {{ number_format($rowTagihanMajikan, 0, ',', '.') }}</td>
                                                     <td class="text-center">
                                                     @if ($feeSalaryRecord && $feeSalaryRecord->payment_majikan_image)
                                                         @php
@@ -610,7 +653,152 @@
                                                     <td class="text-center">
                                                     @hasrole('majikan')
                                                         @if (!$feeSalaryRecord || !$feeSalaryRecord->payment_majikan_image)
-                                                            <a href="#" class="btn btn-sm btn-primary mb-1" data-toggle="modal" data-target="#paymentMajikanFeeModal-{{ $i }}"><i class="fas fa-upload mr-1"></i> Upload Pembayaran</a>
+                                                            @if($data->salary_type == 'fee')
+                                                                <div class="mb-2">
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger mb-1" data-toggle="collapse" data-target="#collapseAbsence-{{ $i }}" aria-expanded="false" aria-controls="collapseAbsence-{{ $i }}">
+                                                                        <i class="fas fa-user-minus mr-1"></i> Potongan
+                                                                    </button>
+                                                                    <div class="collapse mt-2" id="collapseAbsence-{{ $i }}">
+                                                                        <div class="card card-body p-2 border-danger text-left">
+                                                                            <small class="text-danger font-weight-bold mb-1"><i class="fas fa-info-circle mr-1"></i> Potong Gaji</small>
+                                                                            <div class="row align-items-center mb-1">
+                                                                                <div class="col-6 d-none">
+                                                                                    <small class="text-muted d-block mb-1">Izin:</small>
+                                                                                    <div class="d-flex align-items-center">
+                                                                                        <input type="number" class="form-control form-control-sm text-center mr-2" style="width: 80px;" id="quickAbsence_{{ $i }}" placeholder="Potongan" min="0" value="{{ $hasAbsence ? $absenceDays : 0 }}" onchange="syncAbsence_{{ $i }}(this.value)" oninput="syncAbsence_{{ $i }}(this.value)">
+                                                                                        <small>Potongan</small>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12">
+                                                                                    <small class="text-muted d-block mb-1">Potongan Lain (Rp):</small>
+                                                                                    <div class="d-flex align-items-center">
+                                                                                        <span class="mr-1">Rp</span>
+                                                                                        <input type="text" class="form-control form-control-sm" id="quickExtraDeduction_{{ $i }}" placeholder="0" value="{{ number_format($feeSalaryRecord->extra_deduction ?? 0, 0, ',', '.') }}" onkeyup="formatRupiah_{{ $i }}(this)" onchange="syncExtraDeduction_{{ $i }}(this.value)">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="mb-2 mt-2">
+                                                                                <small class="text-muted d-block mb-1">Keterangan Izin / Potongan:</small>
+                                                                                <input type="text" class="form-control form-control-sm" id="quickAbsenceReason_{{ $i }}" placeholder="Cth: Sakit, Pulang kampung, Kasbon" value="{{ (!empty($feeSalaryRecord) && ($hasAbsence || $feeSalaryRecord->extra_deduction > 0)) ? ($feeSalaryRecord->absence_reason ?? '') : '' }}" onchange="syncAbsenceReason_{{ $i }}(this.value)" oninput="syncAbsenceReason_{{ $i }}(this.value)">
+                                                                            </div>
+                                                                            <small class="text-danger font-weight-bold d-none" id="quickAbsenceText_{{ $i }}">
+                                                                                @if($hasAbsence && $absenceDays > 0)
+                                                                                    Total Potongan: Rp. {{ number_format($absenceDays * ($data->deduction_amount ?? 0), 0, ',', '.') }}
+                                                                                @endif
+                                                                            </small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            @endif
+                                                                <a href="#" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#paymentMajikanFeeModal-{{ $i }}"><i class="fas fa-upload mr-1"></i> Upload Pembayaran</a>
+                                                            @if($data->salary_type == 'fee' && !$data->is_infal && $data->deduction_amount > 0)
+                                                                <script>
+                                                                    function syncAbsenceReason_{{ $i }}(val) {
+                                                                        var modalReasonInput = document.getElementById('absence_reason_{{ $i }}');
+                                                                        if(modalReasonInput) {
+                                                                            modalReasonInput.value = val;
+                                                                        }
+                                                                        
+                                                                        var displayReasonText = document.getElementById('tdGajiReasonSpan_{{ $i }}');
+                                                                        if(displayReasonText) {
+                                                                            if(val.trim() !== '') {
+                                                                                displayReasonText.innerHTML = ' (' + val + ')';
+                                                                            } else {
+                                                                                displayReasonText.innerHTML = '';
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    function formatRupiah_{{ $i }}(rupiah){
+                                                                        var number_string = rupiah.value.replace(/[^,\d]/g, '').toString(),
+                                                                        split = number_string.split(','),
+                                                                        sisa = split[0].length % 3,
+                                                                        rupiahValue = split[0].substr(0, sisa),
+                                                                        ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+                                                                        if(ribuan){
+                                                                            var separator = sisa ? '.' : '';
+                                                                            rupiahValue += separator + ribuan.join('.');
+                                                                        }
+
+                                                                        rupiahValue = split[1] != undefined ? rupiahValue + ',' + split[1] : rupiahValue;
+                                                                        rupiah.value = rupiahValue;
+                                                                        syncExtraDeduction_{{ $i }}(rupiahValue);
+                                                                    }
+                                                                    function syncExtraDeduction_{{ $i }}(val) {
+                                                                        var cleanVal = val.toString().replace(/\./g, '');
+                                                                        var modalExtraInput = document.getElementById('extra_deduction_{{ $i }}');
+                                                                        if(modalExtraInput) {
+                                                                            modalExtraInput.value = cleanVal;
+                                                                        }
+                                                                        var absenceInput = document.getElementById('quickAbsence_{{ $i }}');
+                                                                        if(absenceInput) {
+                                                                            syncAbsence_{{ $i }}(absenceInput.value);
+                                                                        }
+                                                                    }
+                                                                    function syncAbsence_{{ $i }}(val) {
+                                                                        var absence = parseInt(val) || 0;
+                                                                        var modalInput = document.getElementById('absence_days_{{ $i }}');
+                                                                        if(modalInput) {
+                                                                            modalInput.value = absence;
+                                                                            if (typeof hitungPotonganFee_{{ $i }} === "function") {
+                                                                                hitungPotonganFee_{{ $i }}();
+                                                                            }
+                                                                        }
+                                                                        
+                                                                        var extraInput = document.getElementById('quickExtraDeduction_{{ $i }}');
+                                                                        var extraDeduction = extraInput ? (parseInt(extraInput.value.replace(/\./g, '')) || 0) : 0;
+                                                                        
+                                                                        var deductionPerDay = {{ $data->deduction_amount ?: 0 }};
+                                                                        var totalDeduction = (absence * deductionPerDay) + extraDeduction;
+                                                                        
+                                                                        var absenceText = document.getElementById('quickAbsenceText_{{ $i }}');
+                                                                        if(absenceText) {
+                                                                            if(absence > 0 || extraDeduction > 0) {
+                                                                                absenceText.innerHTML = 'Total Potongan: Rp. ' + totalDeduction.toLocaleString('id-ID');
+                                                                            } else {
+                                                                                absenceText.innerHTML = '';
+                                                                            }
+                                                                        }
+
+                                                                        var baseSalary = {{ $feeNeedQuantity ? '('.$feeTarifSatuan.' * '.($displayQuantity ?: 0).')' : $feeTarifSatuan }};
+                                                                        var newBaseSalary = Math.max(0, baseSalary - totalDeduction);
+                                                                        var clientFees = 0;
+                                                                        var clientData = @json($data->scheme && is_array($data->scheme->client_data) ? $data->scheme->client_data : []);
+                                                                        for (var j = 0; j < clientData.length; j++) {
+                                                                            var fee = clientData[j];
+                                                                            if (fee.unit === '%') {
+                                                                                clientFees += (newBaseSalary * (parseFloat(fee.value) / 100));
+                                                                            } else {
+                                                                                clientFees += parseFloat(fee.value);
+                                                                            }
+                                                                        }
+                                                                        var newTotalTagihan = Math.ceil(newBaseSalary + clientFees);
+                                                                        
+                                                                        var tdGaji = document.getElementById('tdGajiPokok_UI_{{ $i }}');
+                                                                        if(tdGaji) {
+                                                                            var html = 'Rp. ' + newBaseSalary.toLocaleString('id-ID');
+                                                                            if (absence > 0 || extraDeduction > 0) {
+                                                                                var reasonInput = document.getElementById('quickAbsenceReason_{{ $i }}');
+                                                                                var initReason = '{{ (!empty($feeSalaryRecord) && ($hasAbsence || $feeSalaryRecord->extra_deduction > 0)) ? ($feeSalaryRecord->absence_reason ?? '') : '' }}';
+                                                                                var currentReason = reasonInput ? reasonInput.value : initReason;
+                                                                                var reasonAppend = currentReason.trim() !== '' ? ' (' + currentReason + ')' : '';
+                                                                                
+                                                                                var potText = [];
+                                                                                if(absence > 0) { potText.push(absence + ' Potongan'); }
+                                                                                if(extraDeduction > 0) { potText.push('Tambahan'); }
+                                                                                
+                                                                                html += '<br><small class="text-danger" style="font-size: 0.85em; white-space: nowrap;"><i class="fas fa-minus-circle mr-1"></i> Izin ' + potText.join(' & ') + '<span id="tdGajiReasonSpan_{{ $i }}">' + reasonAppend + '</span> (- Rp. ' + totalDeduction.toLocaleString('id-ID') + ')</small>';
+                                                                            }
+                                                                            tdGaji.innerHTML = html;
+                                                                        }
+                                                                        
+                                                                        var tdTagihan = document.getElementById('tdTagihanMajikan_UI_{{ $i }}');
+                                                                        if(tdTagihan) {
+                                                                            tdTagihan.innerHTML = 'Rp. ' + newTotalTagihan.toLocaleString('id-ID');
+                                                                        }
+                                                                    }
+                                                                </script>
+                                                            @endif
                                                             @include('cms.servant.modal.payment-majikan-fee', ['data' => $data, 'month' => $feeMonthStr, 'index' => $i, 'totalTagihan' => $rowTagihanMajikan, 'tarifSatuan' => $feeTarifSatuan, 'satuanLabel' => $feeSatuanLabel, 'needQuantity' => $feeNeedQuantity, 'defaultQuantity' => $displayQuantity])
                                                         @elseif($feeSalaryRecord && $feeSalaryRecord->payment_majikan_status == 'waiting')
                                                             <span class="badge badge-warning"><i class="fas fa-hourglass-half mr-1"></i> Menunggu Verifikasi</span>

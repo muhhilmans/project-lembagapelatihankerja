@@ -142,9 +142,22 @@
                                         $jenis = '<span class="badge-fee">Fee</span> <br><small class="text-muted">('.$freqLabel.')</small>';
                                         $jenisRaw = 'Fee';
                                     } elseif ($data->salary_type == 'fee') {
-                                        $jenis = '<span class="badge-fee">Fee</span> <br><small class="text-muted">(Bulanan)</small>';
+                                        $freqLabel = match($data->infal_frequency) {
+                                            'hourly' => 'Per Jam',
+                                            'daily' => 'Harian',
+                                            'weekly' => 'Mingguan',
+                                            'monthly' => 'Bulanan',
+                                            default => 'Bulanan'
+                                        };
+                                        $tipeFeeRaw = match($data->infal_frequency) {
+                                            'hourly' => 'Jam',
+                                            'daily' => 'Harian',
+                                            'weekly' => 'Mingguan',
+                                            'monthly' => 'Bulanan',
+                                            default => 'Bulanan'
+                                        };
+                                        $jenis = '<span class="badge-fee">Fee</span> <br><small class="text-muted">('.$freqLabel.')</small>';
                                         $jenisRaw = 'Fee';
-                                        $tipeFeeRaw = 'Bulanan';
                                     }
 
                                     $start = \Carbon\Carbon::parse($data->work_start_date);
@@ -373,7 +386,16 @@
                                             @if($data->salary_type == 'contract')
                                                 (Tipe Kontrak)
                                             @elseif($data->salary_type == 'fee')
-                                                (Tipe Fee)
+                                                @php
+                                                    $freqLabel = match($data->infal_frequency) {
+                                                        'hourly' => 'Per Jam',
+                                                        'daily' => 'Harian',
+                                                        'weekly' => 'Mingguan',
+                                                        'monthly' => 'Bulanan',
+                                                        default => 'Bulanan'
+                                                    };
+                                                @endphp
+                                                (Tipe Fee - {{ $freqLabel }})
                                             @else
                                                 (Belum Diatur)
                                             @endif
