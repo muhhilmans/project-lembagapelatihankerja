@@ -73,4 +73,9 @@ Route::group(['middleware' => ['role:superadmin']], function () {
     Route::get('tracking/locations', [TrackingController::class, 'getLocations'])->name('tracking.locations');
 
     Route::get('reviews', [ReviewAdminController::class, 'index'])->name('reviews.index');
+
+    // Rekonsiliasi Keuangan
+    Route::get('/recon', [\App\Http\Controllers\ReconController::class, 'index'])->name('recon.index');
+    Route::get('/recon/export-excel', [\App\Http\Controllers\ReconController::class, 'exportExcel'])->name('recon.export-excel');
+    Route::get('/recon/export-pdf', [\App\Http\Controllers\ReconController::class, 'exportPdf'])->name('recon.export-pdf');
 });

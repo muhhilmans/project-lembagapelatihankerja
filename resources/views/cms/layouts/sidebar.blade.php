@@ -141,11 +141,25 @@
         @endhasrole
 
         @hasrole('superadmin|admin|owner|majikan|pembantu')
-            <!-- Nav Item - Pekerja -->
-            <li class="nav-item {{ Route::is('worker-all') ? 'active' : '' }}">
-                <a class="nav-link {{ Route::is('worker-all') ? 'active' : '' }}" href="{{ route('worker-all') }}">
+            <!-- Nav Item - Pekerja Collapse Menu -->
+            <li class="nav-item {{ Route::is('worker-all', 'worker.show', 'recon.*') ? 'active' : '' }}">
+                <a class="nav-link {{ Route::is('worker-all', 'worker.show', 'recon.*') ? '' : 'collapsed' }}" href="#"
+                    data-toggle="collapse" data-target="#collapsePekerja"
+                    aria-expanded="{{ Route::is('worker-all', 'worker.show', 'recon.*') ? 'true' : 'false' }}" aria-controls="collapsePekerja">
                     <i class="fas fa-fw fa-id-badge"></i>
-                    <span>Pekerja</span></a>
+                    <span>Pekerja</span>
+                </a>
+                <div id="collapsePekerja" class="collapse {{ Route::is('worker-all', 'worker.show', 'recon.*') ? 'show' : '' }}"
+                    aria-labelledby="headingPekerja" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item {{ Route::is('worker-all', 'worker.show') ? 'active' : '' }}"
+                            href="{{ route('worker-all') }}">Daftar Pekerja</a>
+                        @hasrole('superadmin')
+                            <a class="collapse-item {{ Route::is('recon.*') ? 'active' : '' }}"
+                                href="{{ route('recon.index') }}">Rekonsiliasi</a>
+                        @endhasrole
+                    </div>
+                </div>
             </li>
         @endhasrole
     @endif
