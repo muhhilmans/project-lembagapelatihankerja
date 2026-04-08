@@ -87,163 +87,15 @@ class ApplicationController extends Controller
                 ],
                 'hires' => [
                     'data' => $hires->map(function ($hire) {
-                        return [
-                            'id' => $hire->id,
-                            'servant_id' => $hire->servant_id,
-                            'employe_id' => $hire->employe_id,
-                            'status' => $hire->status,
-                            'interview_date' => $hire->interview_date,
-                            'link_interview' => $hire->link_interview,
-                            'notes_interview' => $hire->notes_interview,
-                            'notes_verify' => $hire->notes_verify,
-                            'notes_accepted' => $hire->notes_accepted,
-                            'notes_rejected' => $hire->notes_rejected,
-                            'salary' => $hire->salary,
-                            'file_contract' => $hire->file_contract,
-                            'work_start_date' => $hire->work_start_date,
-                            'work_end_date' => $hire->work_end_date,
-                            'servant_detail' => [
-                                'id' => $hire->servant->id,
-                                'name' => $hire->servant->name,
-                                'username' => $hire->servant->username,
-                                'email' => $hire->servant->email,
-                                'gender'           => $hire->servant->servantDetails->gender ?? 'not_filled',
-                                'place_of_birth'   => $hire->servant->servantDetails->place_of_birth ?? '-',
-                                'date_of_birth'    => $hire->servant->servantDetails->date_of_birth,
-                                'religion'         => $hire->servant->servantDetails->religion ?? '-',
-                                'marital_status'   => $hire->servant->servantDetails->marital_status ?? 'not_filled',
-                                'children'         => $hire->servant->servantDetails->children ?? 0,
-                                'last_education'   => $hire->servant->servantDetails->last_education ?? 'not_filled',
-                                'phone'            => $hire->servant->servantDetails->phone ?? '-',
-                                'emergency_number' => $hire->servant->servantDetails->emergency_number ?? '-',
-                                'address'          => $hire->servant->servantDetails->address ?? '-',
-                                'rt'               => $hire->servant->servantDetails->rt,
-                                'rw'               => $hire->servant->servantDetails->rw,
-                                'village'          => $hire->servant->servantDetails->village,
-                                'district'         => $hire->servant->servantDetails->district,
-                                'regency'          => $hire->servant->servantDetails->regency,
-                                'province'         => $hire->servant->servantDetails->province,
-                                'is_bank'          => $hire->servant->servantDetails->is_bank ?? 0,
-                                'bank_name'        => $hire->servant->servantDetails->bank_name ?? '-',
-                                'account_number'   => $hire->servant->servantDetails->account_number ?? '-',
-                                'is_bpjs'          => $hire->servant->servantDetails->is_bpjs ?? 0,
-                                'type_bpjs'        => $hire->servant->servantDetails->type_bpjs ?? 'Ketenagakerjaan',
-                                'number_bpjs'      => $hire->servant->servantDetails->number_bpjs ?? '-',
-                                'photo'            => $hire->servant->servantDetails->photo,
-                                'identity_card'    => $hire->servant->servantDetails->identity_card,
-                                'family_card'      => $hire->servant->servantDetails->family_card,
-                                'working_status'   => $hire->servant->servantDetails->working_status ?? 0,
-                                'experience'       => $hire->servant->servantDetails->experience ?? '-',
-                                'description'      => $hire->servant->servantDetails->description ?? '-',
-                                'is_inval'         => $hire->servant->servantDetails->is_inval ?? 0,
-                                'is_stay'          => $hire->servant->servantDetails->is_stay ?? 0,
-                                'profession'       => $hire->servant->servantDetails->profession->name ?? null,
-                                'skills' => $hire->servant->servantSkills->map(function ($skill) {
-                                    return [
-                                        'id' => $skill->id,
-                                        'user_id' => $skill->user_id,
-                                        'skill' => $skill->skill,
-                                        'keahlian' => $skill->level
-                                    ];
-                                }),
-                            ],
-                        ];
+                        return $this->formatApplicationData($hire, 'employer_detail', $hire->employe);
                     }),
-                    'pagination' => [
-                        'current_page' => $hires->currentPage(),
-                        'per_page' => $hires->perPage(),
-                        'total' => $hires->total(),
-                        'last_page' => $hires->lastPage(),
-                        'current_page_url' => $indies->url($indies->currentPage()),
-                        'next_page_url' => $hires->nextPageUrl(),
-                        'prev_page_url' => $hires->previousPageUrl(),
-                    ],
+                    'pagination' => $this->formatPagination($hires),
                 ],
                 'indies' => [
                     'data' => $indies->map(function ($indie) {
-                        return [
-                            'id' => $indie->id,
-                            'servant_id' => $indie->servant_id,
-                            'vacancy_id' => $indie->vacancy_id,
-                            'status' => $indie->status,
-                            'interview_date' => $indie->interview_date,
-                            'link_interview' => $indie->link_interview,
-                            'notes_interview' => $indie->notes_interview,
-                            'notes_verify' => $indie->notes_verify,
-                            'notes_accepted' => $indie->notes_accepted,
-                            'notes_rejected' => $indie->notes_rejected,
-                            'salary' => $indie->salary,
-                            'file_contract' => $indie->file_contract,
-                            'work_start_date' => $indie->work_start_date,
-                            'work_end_date' => $indie->work_end_date,
-                            'servant_detail' => [
-                                'id' => $indie->servant->id,
-                                'name' => $indie->servant->name,
-                                'username' => $indie->servant->username,
-                                'email' => $indie->servant->email,
-                                'gender'           => $indie->servant->servantDetails->gender ?? 'not_filled',
-                                'place_of_birth'   => $indie->servant->servantDetails->place_of_birth ?? '-',
-                                'date_of_birth'    => $indie->servant->servantDetails->date_of_birth,
-                                'religion'         => $indie->servant->servantDetails->religion ?? '-',
-                                'marital_status'   => $indie->servant->servantDetails->marital_status ?? 'not_filled',
-                                'children'         => $indie->servant->servantDetails->children ?? 0,
-                                'last_education'   => $indie->servant->servantDetails->last_education ?? 'not_filled',
-                                'phone'            => $indie->servant->servantDetails->phone ?? '-',
-                                'emergency_number' => $indie->servant->servantDetails->emergency_number ?? '-',
-                                'address'          => $indie->servant->servantDetails->address ?? '-',
-                                'rt'               => $indie->servant->servantDetails->rt,
-                                'rw'               => $indie->servant->servantDetails->rw,
-                                'village'          => $indie->servant->servantDetails->village,
-                                'district'         => $indie->servant->servantDetails->district,
-                                'regency'          => $indie->servant->servantDetails->regency,
-                                'province'         => $indie->servant->servantDetails->province,
-                                'is_bank'          => $indie->servant->servantDetails->is_bank ?? 0,
-                                'bank_name'        => $indie->servant->servantDetails->bank_name ?? '-',
-                                'account_number'   => $indie->servant->servantDetails->account_number ?? '-',
-                                'is_bpjs'          => $indie->servant->servantDetails->is_bpjs ?? 0,
-                                'type_bpjs'        => $indie->servant->servantDetails->type_bpjs ?? 'Ketenagakerjaan',
-                                'number_bpjs'      => $indie->servant->servantDetails->number_bpjs ?? '-',
-                                'photo'            => $indie->servant->servantDetails->photo,
-                                'identity_card'    => $indie->servant->servantDetails->identity_card,
-                                'family_card'      => $indie->servant->servantDetails->family_card,
-                                'working_status'   => $indie->servant->servantDetails->working_status ?? 0,
-                                'experience'       => $indie->servant->servantDetails->experience ?? '-',
-                                'description'      => $indie->servant->servantDetails->description ?? '-',
-                                'is_inval'         => $indie->servant->servantDetails->is_inval ?? 0,
-                                'is_stay'          => $indie->servant->servantDetails->is_stay ?? 0,
-                                'profession'       => $indie->servant->servantDetails->profession->name ?? null,
-                                'skills' => $indie->servant->servantSkills->map(function ($skill) {
-                                    return [
-                                        'id' => $skill->id,
-                                        'user_id' => $skill->user_id,
-                                        'skill' => $skill->skill,
-                                        'keahlian' => $skill->level
-                                    ];
-                                }),
-                            ],
-                            'vacancy_detail' => [
-                                'id' => $indie->vacancy->id,
-                                'client' => $indie->vacancy->user->name,
-                                'title' => $indie->vacancy->title,
-                                'profession' => $indie->vacancy->profession->name,
-                                'description' => $indie->vacancy->description,
-                                'requirements' => $indie->vacancy->requirements,
-                                'benefits' => $indie->vacancy->benefits,
-                                'closing_date' => $indie->vacancy->closing_date,
-                                'limit' => $indie->vacancy->limit,
-                                'status' => $indie->vacancy->status,
-                            ],
-                        ];
+                        return $this->formatApplicationData($indie, 'vacancy_detail', $indie->vacancy);
                     }),
-                    'pagination' => [
-                        'current_page' => $indies->currentPage(),
-                        'per_page' => $indies->perPage(),
-                        'total' => $indies->total(),
-                        'last_page' => $indies->lastPage(),
-                        'current_page_url' => $indies->url($indies->currentPage()),
-                        'next_page_url' => $indies->nextPageUrl(),
-                        'prev_page_url' => $indies->previousPageUrl(),
-                    ],
+                    'pagination' => $this->formatPagination($indies),
                 ],
             ];
 
@@ -258,9 +110,7 @@ class ApplicationController extends Controller
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat mengambil data.',
                 'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
+                    'message' => $th->getMessage()
                 ]
             ], 500);
         }
@@ -283,6 +133,7 @@ class ApplicationController extends Controller
         $vacancyId = $request->vacancy_id;
         $servantId = auth()->id();
 
+        // 1. Validasi: Cek apakah sudah melamar di lowongan ini
         $existingApplication = Application::where('servant_id', $servantId)
             ->where('vacancy_id', $vacancyId)
             ->first();
@@ -300,6 +151,18 @@ class ApplicationController extends Controller
             ], 409);
         }
 
+        // 2. Validasi: Cek apakah masih terikat kontrak aktif
+        $hasActiveContract = Application::where('servant_id', $servantId)
+            ->where('status', 'accepted')
+            ->exists();
+
+        if ($hasActiveContract) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Anda sedang terikat kontrak aktif dan tidak dapat melamar lowongan baru.',
+            ], 403);
+        }
+
         try {
             DB::beginTransaction();
 
@@ -309,7 +172,6 @@ class ApplicationController extends Controller
             ]);
 
             DB::commit();
-
 
             return response()->json([
                 'success' => 'success',
@@ -327,11 +189,6 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat mengirimkan lamaran.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
             ], 500);
         }
     }
@@ -354,6 +211,7 @@ class ApplicationController extends Controller
         $data = $validator->validated();
         $servant = $recomServant->servant;
 
+        // Cek duplikasi persetujuan rekomendasi
         $existingApplication = Application::where('vacancy_id', $vacancy->id)
             ->where('servant_id', $servant->id)
             ->first();
@@ -362,6 +220,18 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Pelamar sudah disetujui pada lowongan ini.',
+            ], 409);
+        }
+
+        // Cek apakah pekerja terikat kontrak aktif (Perbaikan BUG $servantId -> $servant->id)
+        $hasActiveContract = Application::where('servant_id', $servant->id)
+            ->where('status', 'accepted')
+            ->exists();
+
+        if ($hasActiveContract) {
+            return response()->json([
+                'success' => 'failed',
+                'message' => 'Pekerja sedang terikat kontrak dan tidak dapat diproses untuk lowongan baru.',
             ], 409);
         }
 
@@ -378,16 +248,7 @@ class ApplicationController extends Controller
 
             DB::commit();
 
-            // try {
-            //     $majikanName = auth()->user()->name;
-            //     NotificationDispatched::dispatch(
-            //         "Selamat! Anda diundang interview oleh {$majikanName} melalui rekomendasi.",
-            //         $servant->id,
-            //         'success'
-            //     );
-            // } catch (\Exception $e) {
-            //     Log::error("Gagal kirim notif applyRecom: " . $e->getMessage());
-            // }
+            // SCRIPT NOTIFIKASI DIHAPUS SESUAI INSTRUKSI
 
             return response()->json([
                 'success' => 'success',
@@ -395,17 +256,6 @@ class ApplicationController extends Controller
                 'data' => [
                     'id' => $application->id,
                     'vacancy_id' => $application->vacancy_id,
-                    'servant' => [
-                        'id' => $servant->id,
-                        'name' => $servant->name,
-                        'email' => $servant->email,
-                        'detail' => collect($servant->servantDetails)->except([
-                            'id',
-                            'servant_id',
-                            'created_at',
-                            'updated_at'
-                        ]),
-                    ],
                     'status' => $application->status,
                     'notes_interview' => $application->notes_interview,
                     'interview_date' => $application->interview_date,
@@ -417,11 +267,6 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat menyetujui rekomendasi.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
             ], 500);
         }
     }
@@ -479,7 +324,6 @@ class ApplicationController extends Controller
 
             DB::commit();
 
-
             return response()->json([
                 'status'  => 'success',
                 'message' => 'Data status berhasil dirubah!',
@@ -491,11 +335,6 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat mengubah status.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
             ], 500);
         }
     }
@@ -534,169 +373,15 @@ class ApplicationController extends Controller
                 ],
                 'hires' => [
                     'data' => $hires->map(function ($hire) {
-                        return [
-                            'id' => $hire->id,
-                            'servant_id' => $hire->servant_id,
-                            'employe_id' => $hire->employe_id,
-                            'status' => $hire->status,
-                            'interview_date' => $hire->interview_date,
-                            'link_interview' => $hire->link_interview,
-                            'notes_interview' => $hire->notes_interview,
-                            'notes_verify' => $hire->notes_verify,
-                            'notes_accepted' => $hire->notes_accepted,
-                            'notes_rejected' => $hire->notes_rejected,
-                            'salary' => $hire->salary,
-                            'file_contract' => $hire->file_contract,
-                            'work_start_date' => $hire->work_start_date,
-                            'work_end_date' => $hire->work_end_date,
-                            'servant_detail' => [
-                                'id' => $hire->servant->id,
-                                'name' => $hire->servant->name,
-                                'username' => $hire->servant->username,
-                                'email' => $hire->servant->email,
-                                'gender'           => $hire->servant->servantDetails->gender ?? 'not_filled',
-                                'place_of_birth'   => $hire->servant->servantDetails->place_of_birth ?? '-',
-                                'date_of_birth'    => $hire->servant->servantDetails->date_of_birth,
-                                'religion'         => $hire->servant->servantDetails->religion ?? '-',
-                                'marital_status'   => $hire->servant->servantDetails->marital_status ?? 'not_filled',
-                                'children'         => $hire->servant->servantDetails->children ?? 0,
-                                'last_education'   => $hire->servant->servantDetails->last_education ?? 'not_filled',
-                                'phone'            => $hire->servant->servantDetails->phone ?? '-',
-                                'emergency_number' => $hire->servant->servantDetails->emergency_number ?? '-',
-                                'address'          => $hire->servant->servantDetails->address ?? '-',
-                                'rt'               => $hire->servant->servantDetails->rt,
-                                'rw'               => $hire->servant->servantDetails->rw,
-                                'village'          => $hire->servant->servantDetails->village,
-                                'district'         => $hire->servant->servantDetails->district,
-                                'regency'          => $hire->servant->servantDetails->regency,
-                                'province'         => $hire->servant->servantDetails->province,
-                                'is_bank'          => $hire->servant->servantDetails->is_bank ?? 0,
-                                'bank_name'        => $hire->servant->servantDetails->bank_name ?? '-',
-                                'account_number'   => $hire->servant->servantDetails->account_number ?? '-',
-                                'is_bpjs'          => $hire->servant->servantDetails->is_bpjs ?? 0,
-                                'type_bpjs'        => $hire->servant->servantDetails->type_bpjs ?? 'Ketenagakerjaan',
-                                'number_bpjs'      => $hire->servant->servantDetails->number_bpjs ?? '-',
-                                'photo'            => $hire->servant->servantDetails->photo,
-                                'identity_card'    => $hire->servant->servantDetails->identity_card,
-                                'family_card'      => $hire->servant->servantDetails->family_card,
-                                'working_status'   => $hire->servant->servantDetails->working_status ?? 0,
-                                'experience'       => $hire->servant->servantDetails->experience ?? '-',
-                                'description'      => $hire->servant->servantDetails->description ?? '-',
-                                'is_inval'         => $hire->servant->servantDetails->is_inval ?? 0,
-                                'is_stay'          => $hire->servant->servantDetails->is_stay ?? 0,
-                                'profession'       => $hire->servant->servantDetails->profession->name ?? null,
-                                'skills' => $hire->servant->servantSkills->map(function ($skill) {
-                                    return [
-                                        'id' => $skill->id,
-                                        'user_id' => $skill->user_id,
-                                        'skill' => $skill->skill,
-                                        'keahlian' => $skill->level
-                                    ];
-                                }),
-                            ],
-                            'employer_detail' => [
-                                'id' => $hire->employe->id,
-                                'name' => $hire->employe->name,
-                                'address' => $hire->employe->employeDetails->address,
-                                'phone' => $hire->employe->employeDetails->phone,
-                            ],
-                        ];
+                        return $this->formatApplicationData($hire, 'employer_detail', $hire->employe);
                     }),
-                    'pagination' => [
-                        'current_page' => $hires->currentPage(),
-                        'per_page' => $hires->perPage(),
-                        'total' => $hires->total(),
-                        'last_page' => $hires->lastPage(),
-                        'current_page_url' => $indies->url($indies->currentPage()),
-                        'next_page_url' => $hires->nextPageUrl(),
-                        'prev_page_url' => $hires->previousPageUrl(),
-                    ],
+                    'pagination' => $this->formatPagination($hires),
                 ],
                 'indies' => [
                     'data' => $indies->map(function ($indie) {
-                        return [
-                            'id' => $indie->id,
-                            'servant_id' => $indie->servant_id,
-                            'vacancy_id' => $indie->vacancy_id,
-                            'status' => $indie->status,
-                            'interview_date' => $indie->interview_date,
-                            'link_interview' => $indie->link_interview,
-                            'notes_interview' => $indie->notes_interview,
-                            'notes_verify' => $indie->notes_verify,
-                            'notes_accepted' => $indie->notes_accepted,
-                            'notes_rejected' => $indie->notes_rejected,
-                            'salary' => $indie->salary,
-                            'file_contract' => $indie->file_contract,
-                            'work_start_date' => $indie->work_start_date,
-                            'work_end_date' => $indie->work_end_date,
-                            'servant_detail' => [
-                                'id' => $indie->servant->id,
-                                'name' => $indie->servant->name,
-                                'username' => $indie->servant->username,
-                                'email' => $indie->servant->email,
-                                'gender'           => $indie->servant->servantDetails->gender ?? 'not_filled',
-                                'place_of_birth'   => $indie->servant->servantDetails->place_of_birth ?? '-',
-                                'date_of_birth'    => $indie->servant->servantDetails->date_of_birth,
-                                'religion'         => $indie->servant->servantDetails->religion ?? '-',
-                                'marital_status'   => $indie->servant->servantDetails->marital_status ?? 'not_filled',
-                                'children'         => $indie->servant->servantDetails->children ?? 0,
-                                'last_education'   => $indie->servant->servantDetails->last_education ?? 'not_filled',
-                                'phone'            => $indie->servant->servantDetails->phone ?? '-',
-                                'emergency_number' => $indie->servant->servantDetails->emergency_number ?? '-',
-                                'address'          => $indie->servant->servantDetails->address ?? '-',
-                                'rt'               => $indie->servant->servantDetails->rt,
-                                'rw'               => $indie->servant->servantDetails->rw,
-                                'village'          => $indie->servant->servantDetails->village,
-                                'district'         => $indie->servant->servantDetails->district,
-                                'regency'          => $indie->servant->servantDetails->regency,
-                                'province'         => $indie->servant->servantDetails->province,
-                                'is_bank'          => $indie->servant->servantDetails->is_bank ?? 0,
-                                'bank_name'        => $indie->servant->servantDetails->bank_name ?? '-',
-                                'account_number'   => $indie->servant->servantDetails->account_number ?? '-',
-                                'is_bpjs'          => $indie->servant->servantDetails->is_bpjs ?? 0,
-                                'type_bpjs'        => $indie->servant->servantDetails->type_bpjs ?? 'Ketenagakerjaan',
-                                'number_bpjs'      => $indie->servant->servantDetails->number_bpjs ?? '-',
-                                'photo'            => $indie->servant->servantDetails->photo,
-                                'identity_card'    => $indie->servant->servantDetails->identity_card,
-                                'family_card'      => $indie->servant->servantDetails->family_card,
-                                'working_status'   => $indie->servant->servantDetails->working_status ?? 0,
-                                'experience'       => $indie->servant->servantDetails->experience ?? '-',
-                                'description'      => $indie->servant->servantDetails->description ?? '-',
-                                'is_inval'         => $indie->servant->servantDetails->is_inval ?? 0,
-                                'is_stay'          => $indie->servant->servantDetails->is_stay ?? 0,
-                                'profession'       => $indie->servant->servantDetails->profession->name ?? null,
-                                'skills' => $indie->servant->servantSkills->map(function ($skill) {
-                                    return [
-                                        'id' => $skill->id,
-                                        'user_id' => $skill->user_id,
-                                        'skill' => $skill->skill,
-                                        'keahlian' => $skill->level
-                                    ];
-                                }),
-                            ],
-                            'vacancy_detail' => [
-                                'id' => $indie->vacancy->id,
-                                'client' => $indie->vacancy->user->name,
-                                'title' => $indie->vacancy->title,
-                                'profession' => $indie->vacancy->profession->name,
-                                'description' => $indie->vacancy->description,
-                                'requirements' => $indie->vacancy->requirements,
-                                'benefits' => $indie->vacancy->benefits,
-                                'closing_date' => $indie->vacancy->closing_date,
-                                'limit' => $indie->vacancy->limit,
-                                'status' => $indie->vacancy->status,
-                            ],
-                        ];
+                        return $this->formatApplicationData($indie, 'vacancy_detail', $indie->vacancy);
                     }),
-                    'pagination' => [
-                        'current_page' => $indies->currentPage(),
-                        'per_page' => $indies->perPage(),
-                        'total' => $indies->total(),
-                        'last_page' => $indies->lastPage(),
-                        'current_page_url' => $indies->url($indies->currentPage()),
-                        'next_page_url' => $indies->nextPageUrl(),
-                        'prev_page_url' => $indies->previousPageUrl(),
-                    ],
+                    'pagination' => $this->formatPagination($indies),
                 ],
             ];
 
@@ -710,11 +395,6 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat mengambil data.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
             ], 500);
         }
     }
@@ -751,51 +431,10 @@ class ApplicationController extends Controller
 
         try {
             DB::beginTransaction();
-
-            $updateData = ['status' => $data['status']];
-
-            $application->fill($updateData);
-
-            if (!$application->save()) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'Perubahan status gagal disimpan. Silakan coba lagi.'
-                ], 502);
-            }
-
+            $application->update(['status' => $data['status']]);
             DB::commit();
 
-            try {
-                // Tentukan target ID Majikan
-                $targetId = null;
-                if ($application->vacancy) {
-                    $targetId = $application->vacancy->user_id;
-                } elseif ($application->employe_id) {
-                    $targetId = $application->employe_id;
-                }
-
-                if ($targetId) {
-                    $pembantuName = auth()->user()->name;
-                    $msg = "";
-                    $type = 'info';
-
-                    // Asumsi: 'verify' atau 'choose' berarti setuju/lanjut
-                    if (in_array($data['status'], ['verify', 'choose'])) {
-                        $msg = "Mitra {$pembantuName} MENERIMA/MENYETUJUI penawaran Anda.";
-                        $type = 'success';
-                    } elseif ($data['status'] === 'rejected') {
-                        $msg = "Mitra {$pembantuName} MENOLAK penawaran Anda.";
-                        $type = 'warning';
-                    }
-
-                    if ($msg) {
-                        NotificationDispatched::dispatch($msg, $targetId, $type);
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::error("Gagal kirim notif chooseStatus: " . $e->getMessage());
-            }
+            // SCRIPT NOTIFIKASI DIHAPUS SESUAI INSTRUKSI
 
             return response()->json([
                 'status'  => 'success',
@@ -808,12 +447,71 @@ class ApplicationController extends Controller
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat mengubah status.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
             ], 500);
         }
+    }
+
+    // Helper method untuk meminimalisir kode berulang (DRY)
+    private function formatApplicationData($app, $relationKey, $relationData)
+    {
+        $data = [
+            'id' => $app->id,
+            'servant_id' => $app->servant_id,
+            'vacancy_id' => $app->vacancy_id,
+            'employe_id' => $app->employe_id,
+            'status' => $app->status,
+            'salary_type' => $app->salary_type,
+            'salary' => $app->salary,
+            'is_infal' => $app->is_infal,
+            'infal_frequency' => $app->infal_frequency,
+            'admin_fee' => $app->admin_fee,
+            'warranty_duration' => $app->warranty_duration,
+            'end_reason' => $app->end_reason,
+            'scheme_id' => $app->sheme_id, // Note: periksa apakah typo DB sheme_id atau scheme_id
+            'garansi_id' => $app->garansi_id,
+            'garansi_price' => $app->garansi_price,
+            'infal_time_in' => $app->infal_time_in,
+            'infal_time_out' => $app->infal_time_out,
+            'infal_hourly_rate' => $app->infal_hourly_rate,
+            'file_contract' => $app->file_contract,
+            'work_start_date' => $app->work_start_date,
+            'work_end_date' => $app->work_end_date,
+            'servant_detail' => [
+                'id' => $app->servant->id,
+                'name' => $app->servant->name,
+                'email' => $app->servant->email,
+            ],
+        ];
+
+        if ($relationKey === 'employer_detail' && $relationData) {
+            $data['employer_detail'] = [
+                'id' => $relationData->id,
+                'name' => $relationData->name,
+                'address' => $relationData->employeDetails->address ?? '-',
+                'phone' => $relationData->employeDetails->phone ?? '-',
+            ];
+        } elseif ($relationKey === 'vacancy_detail' && $relationData) {
+             $data['vacancy_detail'] = [
+                'id' => $relationData->id,
+                'client' => $relationData->user->name ?? '-',
+                'title' => $relationData->title,
+                'status' => $relationData->status,
+            ];
+        }
+
+        return $data;
+    }
+
+    private function formatPagination($paginator)
+    {
+        return [
+            'current_page' => $paginator->currentPage(),
+            'per_page' => $paginator->perPage(),
+            'total' => $paginator->total(),
+            'last_page' => $paginator->lastPage(),
+            'current_page_url' => $paginator->url($paginator->currentPage()),
+            'next_page_url' => $paginator->nextPageUrl(),
+            'prev_page_url' => $paginator->previousPageUrl(),
+        ];
     }
 }

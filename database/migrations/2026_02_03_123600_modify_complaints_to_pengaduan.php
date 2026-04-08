@@ -19,14 +19,14 @@ return new class extends Migration
 
         // 2. Modify structure - Drop Items
         Schema::table('pengaduan', function (Blueprint $table) {
-             // We can't easily check for FK existence in Blueprint, but we can catch the error if we use raw statements, 
-             // OR we just assume the name. 
+             // We can't easily check for FK existence in Blueprint, but we can catch the error if we use raw statements,
+             // OR we just assume the name.
              // To be safe against "Key does not exist" errors, we can check information_schema or just try/catch the Schema operation?
              // But simpler is to rely on consistent state. The error previously was due to wrong name guessing.
              // We will try to drop the known old foreign keys.
              // However, to avoid "Error: Can't drop because it doesn't exist" (idempotency), we should check.
         });
-        
+
         // Helper to drop FK if exists
         $dropFkIfExists = function($table, $fkName) {
             $exists = DB::select("SELECT * FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = ? AND CONSTRAINT_NAME = ?", [$table, $fkName]);
@@ -40,7 +40,7 @@ return new class extends Migration
         $dropFkIfExists('pengaduan', 'complaints_application_id_foreign');
         $dropFkIfExists('pengaduan', 'complaints_servant_id_foreign');
         $dropFkIfExists('pengaduan', 'complaints_employe_id_foreign');
-        
+
         // Also try 'pengaduan_' prefixed ones just in case
         $dropFkIfExists('pengaduan', 'pengaduan_application_id_foreign');
         $dropFkIfExists('pengaduan', 'pengaduan_servant_id_foreign');
@@ -67,10 +67,10 @@ return new class extends Migration
                 $table->foreignUuid('complaint_type_id')->nullable()->constrained('urgencies')->onDelete('set null');
             }
             if (!Schema::hasColumn('pengaduan', 'urgency_level')) {
-                $table->enum('urgency_level', ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])->nullable(); 
+                $table->enum('urgency_level', ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])->nullable();
             }
             if (!Schema::hasColumn('pengaduan', 'reporter_id')) {
-                $table->foreignUuid('reporter_id')->constrained('users')->onDelete('cascade')->comment('pengaju');
+                $table->foreignUuid('reporter_id')->nullable()->constrained('users')->onDelete('cascade')->comment('pengaju');
             }
             if (!Schema::hasColumn('pengaduan', 'reported_user_id')) {
                 $table->foreignUuid('reported_user_id')->nullable()->constrained('users')->onDelete('cascade')->comment('terlapor');
@@ -82,7 +82,7 @@ return new class extends Migration
                 $table->enum('status', ['open', 'investigating', 'resolved'])->default('open');
             }
             if (!Schema::hasColumn('pengaduan', 'applied_sanction_id')) {
-               $table->uuid('applied_sanction_id')->nullable(); 
+               $table->uuid('applied_sanction_id')->nullable();
             }
             if (!Schema::hasColumn('pengaduan', 'resolved_at')) {
                 $table->timestamp('resolved_at')->nullable();
@@ -102,7 +102,7 @@ return new class extends Migration
            // $table->dropForeign(['complaint_type_id']); // This might fail if constraint name differs :P
            // Strict rollback is hard here without same checks.
         });
-        
+
          if (Schema::hasTable('pengaduan') && !Schema::hasTable('complaints')) {
             Schema::rename('pengaduan', 'complaints');
         }

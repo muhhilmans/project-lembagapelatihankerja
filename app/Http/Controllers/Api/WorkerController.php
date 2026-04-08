@@ -34,143 +34,66 @@ class WorkerController extends Controller
             $user = auth()->user();
             $search = $request->input('search');
 
-            $workers = Application::with(['servant', 'employe', 'vacancy'])
+            $baseQuery = Application::with(['servant', 'employe', 'vacancy'])
                 ->where(function ($query) use ($user) {
                     $query->where('employe_id', $user->id)
                         ->orWhereHas('vacancy', function ($q) use ($user) {
                             $q->where('user_id', $user->id);
                         });
                 })
-                ->where('status', 'accepted')
                 ->when($search, function ($q) use ($search) {
-                    $q->whereHas('servant', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%")
+                    $q->whereHas('servant', function ($s) use ($search) {
+                        $s->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
                     });
-                })
-                ->paginate(10);
+                });
 
+            // Pemisahan Kueri: Active dan History
+            $activeWorkers = (clone $baseQuery)->where('status', 'accepted')->paginate(10, ['*'], 'active_page');
+            $historyWorkers = (clone $baseQuery)->whereIn('status', ['laidoff', 'rejected'])->paginate(10, ['*'], 'history_page');
 
-            if ($workers->isEmpty()) {
-                return response()->json([
-                    'success' => 'success',
-                    'message' => 'Data semua pekerja.',
-                    'data' =>  [
-                        'user' => [
-                                'id' => $user->id,
-                                'name' => $user->name,
-                                'username' => $user->username,
-                                'email' => $user->email,
-                                'role' => $user->roles->first()->name,
-                                'access_token' => $user->access_token,
-                            ],
-                        'worker' => 'Belum ada pekerja.'
-                        ]
-                ], 200);
-            }
-
-            $datas = [
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'username' => $user->username,
-                    'email' => $user->email,
-                    'role' => $user->roles->first()->name,
-                    'access_token' => $user->access_token,
-                ],
-                'worker' => [
-                    'data' => $workers->map(function ($query) {
-                        return [
-                            'id' => $query->id,
-                            'servant_id' => $query->servant_id,
-                            'vacancy_id' => $query->vacancy_id,
-                            'employe_id' => $query->employe_id,
-                            'status' => $query->status,
-                            'interview_date' => $query->interview_date,
-                            'link_interview' => $query->link_interview,
-                            'notes_interview' => $query->notes_interview,
-                            'notes_verify' => $query->notes_verify,
-                            'notes_accepted' => $query->notes_accepted,
-                            'notes_rejected' => $query->notes_rejected,
-                            'salary' => $query->salary,
-                            'file_contract' => $query->file_contract,
-                            'work_start_date' => $query->work_start_date,
-                            'work_end_date' => $query->work_end_date,
-                            'servant_detail' => [
-                                'id' => $query->servant->id,
-                                'name' => $query->servant->name,
-                                'username' => $query->servant->username,
-                                'email' => $query->servant->email,
-                                'gender'           => $query->servant->servantDetails->gender ?? 'not_filled',
-                                'place_of_birth'   => $query->servant->servantDetails->place_of_birth ?? '-',
-                                'date_of_birth'    => $query->servant->servantDetails->date_of_birth,
-                                'religion'         => $query->servant->servantDetails->religion ?? '-',
-                                'marital_status'   => $query->servant->servantDetails->marital_status ?? 'not_filled',
-                                'children'         => $query->servant->servantDetails->children ?? 0,
-                                'last_education'   => $query->servant->servantDetails->last_education ?? 'not_filled',
-                                'phone'            => $query->servant->servantDetails->phone ?? '-',
-                                'emergency_number' => $query->servant->servantDetails->emergency_number ?? '-',
-                                'address'          => $query->servant->servantDetails->address ?? '-',
-                                'rt'               => $query->servant->servantDetails->rt,
-                                'rw'               => $query->servant->servantDetails->rw,
-                                'village'          => $query->servant->servantDetails->village,
-                                'district'         => $query->servant->servantDetails->district,
-                                'regency'          => $query->servant->servantDetails->regency,
-                                'province'         => $query->servant->servantDetails->province,
-                                'is_bank'          => $query->servant->servantDetails->is_bank ?? 0,
-                                'bank_name'        => $query->servant->servantDetails->bank_name ?? '-',
-                                'account_number'   => $query->servant->servantDetails->account_number ?? '-',
-                                'is_bpjs'          => $query->servant->servantDetails->is_bpjs ?? 0,
-                                'type_bpjs'        => $query->servant->servantDetails->type_bpjs ?? 'Ketenagakerjaan',
-                                'number_bpjs'      => $query->servant->servantDetails->number_bpjs ?? '-',
-                                'photo'            => $query->servant->servantDetails->photo,
-                                'identity_card'    => $query->servant->servantDetails->identity_card,
-                                'family_card'      => $query->servant->servantDetails->family_card,
-                                'working_status'   => $query->servant->servantDetails->working_status ?? 0,
-                                'experience'       => $query->servant->servantDetails->experience ?? '-',
-                                'description'      => $query->servant->servantDetails->description ?? '-',
-                                'is_inval'         => $query->servant->servantDetails->is_inval ?? 0,
-                                'is_stay'          => $query->servant->servantDetails->is_stay ?? 0,
-                                'profession'       => $query->servant->servantDetails->profession->name ?? null,
-                                'skills' => $query->servant->servantSkills->map(function ($skill) {
-                                    return [
-                                        'id' => $skill->id,
-                                        'user_id' => $skill->user_id,
-                                        'skill' => $skill->skill,
-                                        'keahlian' => $skill->level
-                                    ];
-                                }),
-                            ],
-                        ];
-                    }),
-                    'pagination' => [
-                        'current_page' => $workers->currentPage(),
-                        'per_page' => $workers->perPage(),
-                        'total' => $workers->total(),
-                        'last_page' => $workers->lastPage(),
-                        'current_page_url' => $workers->url($workers->currentPage()),
-                        'next_page_url' => $workers->nextPageUrl(),
-                        'prev_page_url' => $workers->previousPageUrl(),
-                    ],
-                ],
-            ];
+            $formatData = function($query) {
+                return [
+                    'id' => $query->id,
+                    'servant_id' => $query->servant_id,
+                    'status' => $query->status,
+                    'salary_type' => $query->salary_type,
+                    'work_start_date' => $query->work_start_date,
+                    'work_end_date' => $query->work_end_date,
+                    'end_reason' => $query->end_reason,
+                    'servant_name' => $query->servant->name ?? '-',
+                ];
+            };
 
             return response()->json([
                 'success' => 'success',
-                'message' => 'Data semua pekerja.',
-                'data' => $datas
-            ], 200);
-        } catch (\Throwable $th) {
-            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Terjadi kesalahan saat mengambil data.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
+                'message' => 'Data pekerja berhasil dimuat.',
+                'data' => [
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'role' => $user->roles->first()->name,
+                    ],
+                    'datas' => [
+                        'data' => $activeWorkers->map($formatData),
+                        'pagination' => [
+                            'current_page' => $activeWorkers->currentPage(),
+                            'total' => $activeWorkers->total(),
+                        ]
+                    ],
+                    'historyDatas' => [
+                        'data' => $historyWorkers->map($formatData),
+                        'pagination' => [
+                            'current_page' => $historyWorkers->currentPage(),
+                            'total' => $historyWorkers->total(),
+                        ]
+                    ]
                 ]
-            ], 500);
+            ], 200);
+
+        } catch (\Throwable $th) {
+            Log::error("Error allWorker: {$th->getMessage()}");
+            return $this->errorResponse('Terjadi kesalahan saat mengambil data.', [], 500);
         }
     }
 
@@ -587,58 +510,157 @@ class WorkerController extends Controller
      * @param Application $application
      * @return \Illuminate\Http\JsonResponse
      */
-    public function uploadMajikan(Request $request, Application $application)
+    public function uploadMajikanContract(Request $request, Application $application)
     {
         $validator = Validator::make($request->all(), [
             'proof_majikan' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'worker_salary_id' => 'required|exists:worker_salaries,id'
         ]);
 
+        if ($validator->fails()) return $this->errorResponse($validator->messages()->all()[0]);
+        if ($application->salary_type !== 'contract') return $this->errorResponse('Tipe gaji bukan kontrak bulanan.');
+
+        return $this->processUploadMajikan($request, $application, 'Contract');
+    }
+
+    public function uploadMajikanFee(Request $request, Application $application)
+    {
+        // 1. Penambahan Validation Rules Baru [cite: 85]
+        // Jika skema fee, input absence_days, absence_reason, dan extra_deduction diizinkan dan dicek [cite: 86]
+        $validator = Validator::make($request->all(), [
+            'proof_majikan'    => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'worker_salary_id' => 'nullable|exists:worker_salaries,id',
+            'month'            => 'required|date_format:Y-m',
+            'quantity'         => 'required|integer|min:1',
+            'absence_days'     => 'nullable|integer|min:0',
+            'absence_reason'   => 'nullable|string|max:255',
+            'extra_deduction'  => 'nullable|integer|min:0',
+        ]);
+
         if ($validator->fails()) {
-            return $this->errorResponse($validator->messages()->all()[0]);
+            return $this->validationErrorResponse($validator);
         }
 
-        $data = $validator->validated();
+        if ($application->salary_type !== 'fee') {
+            return $this->errorResponse('Tipe gaji bukan fee/infal.');
+        }
 
         try {
-            $salary = WorkerSalary::find($request->worker_salary_id);
-            if(!$salary) {
-                return $this->errorResponse('salary tidak ditemukan');
+            DB::beginTransaction();
+
+            $data = $validator->validated();
+            $absenceDays = $data['absence_days'] ?? 0;
+            $extraDeduction = $data['extra_deduction'] ?? 0;
+            $quantity = $data['quantity']; // Mendeteksi harian/mingguan [cite: 89]
+            $monthDate = Carbon::createFromFormat('Y-m', $data['month'])->startOfMonth()->format('Y-m-d');
+
+            // 2. Perbaikan Formula Kalkulasi Dasar [cite: 87]
+            // Perhitungan Gaji Pokok Awal dilakukan terpisah [cite: 90]
+            $tarifSatuan = $application->salary;
+            $gajiPokok = $tarifSatuan * $quantity;
+
+            // 3. Implementasi Rumus Potongan Baru [cite: 91]
+            // Mengalikan absen dengan tarif potongan, ditambah jumlah kasbon [cite: 94]
+            $deductionAmount = $application->deduction_amount ?? $tarifSatuan; // Fallback jika deduction_amount kosong
+            $totalDeduction = ($absenceDays * (int)$deductionAmount) + $extraDeduction; // [cite: 93]
+
+            // 4. Bugfix Pencegahan Minus [cite: 95]
+            // Jika potongan lebih besar dari gaji, pekerja dicatat mendapat gaji 0 [cite: 97]
+            $gajiPokokBersih = max(0, $gajiPokok - $totalDeduction); // Menggunakan fungsi max(0, ...) [cite: 95]
+
+            // 5. Sinkronisasi dengan Skema Klien/Mitra (Admin Fee) [cite: 98]
+            // Persentase dihitung dari gaji bersih pembantu, bukan kotor [cite: 100]
+            // (Asumsi mengambil data skema dari relasi yang ada)
+            $schemaSalary = clone $application->schemaSalary;
+            $addsClient = $schemaSalary ? $schemaSalary->adds_client : 0;
+            $addsMitra  = $schemaSalary ? $schemaSalary->adds_mitra : 0;
+
+            $totalSalaryMajikan  = $gajiPokokBersih + ($gajiPokokBersih * $addsClient);
+            $totalSalaryPembantu = $gajiPokokBersih - ($gajiPokokBersih * $addsMitra);
+
+            // 6. Operasi Database Transaction [cite: 101]
+            // Menyimpan status menggunakan firstOrCreate dan update dari Eloquent [cite: 102]
+            $salary = WorkerSalary::firstOrCreate(
+                [
+                    'id' => $data['worker_salary_id'] ?? null,
+                    'application_id' => $application->id,
+                    'month' => $monthDate,
+                ],
+                [
+                    'presence' => max(0, $quantity - $absenceDays),
+                    'absence' => $absenceDays, // Kolom digabung dan disimpan [cite: 103]
+                    'absence_reason' => $data['absence_reason'] ?? null,
+                    'extra_deduction' => $extraDeduction,
+                    'total_salary' => $gajiPokokBersih,
+                    'total_salary_majikan' => $totalSalaryMajikan,
+                    'total_salary_pembantu' => $totalSalaryPembantu,
+                ]
+            );
+
+            // Eksekusi Update jika data bulan ini ternyata sudah ada
+            if (!$salary->wasRecentlyCreated) {
+                 $salary->update([
+                    'presence' => max(0, $quantity - $absenceDays),
+                    'absence' => $absenceDays,
+                    'absence_reason' => $data['absence_reason'] ?? null,
+                    'extra_deduction' => $extraDeduction,
+                    'total_salary' => $gajiPokokBersih,
+                    'total_salary_majikan' => $totalSalaryMajikan,
+                    'total_salary_pembantu' => $totalSalaryPembantu,
+                 ]);
             }
+
+            // 7. Upload Bukti Gambar (Tetap Dipertahankan)
+            $majikanName = str_replace(' ', '_', ($application->vacancy ? $application->vacancy->user->name : $application->employe->name));
+            $servantName = str_replace(' ', '_', $application->servant->name);
+            $date = Carbon::parse($salary->month)->format('M-Y');
+            $directory = "payments/{$majikanName}/{$servantName}";
+            $baseFileName = "proof_majikan_Fee_" . $date . "_{$servantName}";
+
+            if ($salary->payment_majikan_image && Storage::disk('public')->exists("payments/" . $salary->payment_majikan_image)) {
+                Storage::disk('public')->delete("payments/" . $salary->payment_majikan_image);
+            }
+
+            $path = $this->convertAndStoreToWebp($request->file('proof_majikan'), $directory, $baseFileName);
+
+            $salary->update(['payment_majikan_image' => $path]);
+
+            DB::commit();
+
+            return $this->successResponse($salary, "Berhasil memproses perhitungan potongan dan upload bukti pembayaran Fee.");
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Error uploadMajikanFee: {$th->getMessage()}");
+            return $this->errorResponse('Kesalahan sistem saat memproses gaji fee', $th->getMessage());
+        }
+    }
+
+    // Fungsi Helper Internal untuk Proses Upload Gaji agar tidak mengulang kode
+    private function processUploadMajikan($request, $application, $type)
+    {
+        try {
+            $salary = WorkerSalary::find($request->worker_salary_id);
+            if(!$salary) return $this->errorResponse('Data gaji tidak ditemukan');
 
             $majikanName = str_replace(' ', '_', ($application->vacancy ? $application->vacancy->user->name : $application->employe->name));
             $servantName = str_replace(' ', '_', $application->servant->name);
             $date = Carbon::parse($salary->month)->format('M-Y');
-
             $directory = "payments/{$majikanName}/{$servantName}";
-        $baseFileName = "proof_majikan_" . $date . "_{$servantName}";
+            $baseFileName = "proof_majikan_{$type}_" . $date . "_{$servantName}";
 
-        if ($salary->payment_majikan_image && Storage::disk('public')->exists("payments/" . $salary->payment_majikan_image)) {
-            Storage::disk('public')->delete("payments/" . $salary->payment_majikan_image);
-        }
+            if ($salary->payment_majikan_image && Storage::disk('public')->exists("payments/" . $salary->payment_majikan_image)) {
+                Storage::disk('public')->delete("payments/" . $salary->payment_majikan_image);
+            }
 
-        $path = $this->convertAndStoreToWebp($request->file('proof_majikan'), $directory, $baseFileName);
+            $path = $this->convertAndStoreToWebp($request->file('proof_majikan'), $directory, $baseFileName);
 
             DB::transaction(function () use ($salary, $path) {
-                $salary->update([
-                    'payment_majikan_image' => $path,
-                ]);
+                $salary->update(['payment_majikan_image' => $path]);
             });
 
-            // try {
-            //     $bulan = Carbon::parse($salary->month)->translatedFormat('F Y');
-            //     NotificationDispatched::dispatch(
-            //         "Majikan telah mengunggah bukti pembayaran gaji bulan {$bulan}.",
-            //         $application->servant_id,
-            //         'success'
-            //     );
-            // } catch (\Exception $e) {
-            //     Log::error("Gagal kirim notif uploadMajikan: " . $e->getMessage());
-            // }
-
-            return $this->successResponse($salary, 'Berhasil mengupload bukti pembayaran');
+            return $this->successResponse($salary, "Berhasil mengupload bukti pembayaran $type");
         } catch (\Throwable $th) {
-            return $this->errorResponse('kesalahan sistem', $th->getMessage());
+            return $this->errorResponse('Kesalahan sistem', $th->getMessage());
         }
     }
 
@@ -726,6 +748,7 @@ class WorkerController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'message' => ['required'],
+            'urgency_level' => ['required', 'in:LOW,MEDIUM,HIGH,CRITICAL'], // Wajib ada
         ]);
 
         if ($validator->fails()) {
@@ -759,8 +782,9 @@ class WorkerController extends Controller
             $store = Pengaduan::create([
                 'contract_id' => $application->id,
                 'reporter_id' => $user->id,
-                'reported_user_id' => $application->servant_id,
+                'reported_user_id' => $application->servant_id, // (Atau $employerId untuk complaintWork)
                 'description' => $data['message'],
+                'urgency_level' => $data['urgency_level'], // Masukkan datanya ke DB
                 'status' => 'open',
             ]);
 
@@ -1009,6 +1033,7 @@ class WorkerController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'message' => ['required'],
+            'urgency_level' => ['required', 'in:LOW,MEDIUM,HIGH,CRITICAL'], // Wajib ada
         ]);
 
         if ($validator->fails()) {
@@ -1044,8 +1069,9 @@ class WorkerController extends Controller
             $store = Pengaduan::create([
                 'contract_id' => $application->id,
                 'reporter_id' => $user->id,
-                'reported_user_id' => $employerId,
+                'reported_user_id' => $application->servant_id, // (Atau $employerId untuk complaintWork)
                 'description' => $data['message'],
+                'urgency_level' => $data['urgency_level'], // Masukkan datanya ke DB
                 'status' => 'open',
             ]);
 
@@ -1088,12 +1114,12 @@ class WorkerController extends Controller
         }
 
         $extension = strtolower($file->getClientOriginalExtension());
-        
+
         if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
             $fileName = $baseFileName . '.webp';
             $imagePath = $file->getPathname();
             $image = null;
-            
+
             if ($extension == 'png') {
                 $image = @imagecreatefrompng($imagePath);
                 if ($image) {
@@ -1109,15 +1135,112 @@ class WorkerController extends Controller
                 $tempPath = sys_get_temp_dir() . '/' . uniqid() . '.webp';
                 imagewebp($image, $tempPath, 80);
                 imagedestroy($image);
-                
+
                 $path = $directory . '/' . $fileName;
                 Storage::disk('public')->put($path, file_get_contents($tempPath));
                 unlink($tempPath);
                 return $path;
             }
         }
-        
+
         $fileName = $baseFileName . '.' . $extension;
         return $file->storeAs($directory, $fileName, 'public');
     }
+
+    public function endContract(Request $request, Application $application)
+    {
+        $validator = Validator::make($request->all(), [
+            'end_reason' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) return $this->validationErrorResponse($validator);
+
+        try {
+            DB::beginTransaction();
+            $application->update([
+                'status' => 'laidoff',
+                'work_end_date' => Carbon::now()->format('Y-m-d'),
+                'end_reason' => $request->end_reason
+            ]);
+            DB::commit();
+
+            return $this->successResponse($application, 'Kontrak kerja berhasil diakhiri.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Error endContract: {$th->getMessage()}");
+            return $this->errorResponse('Gagal mengakhiri kontrak.', [], 500);
+        }
+    }
+
+    public function extendContract(Request $request, Application $application)
+    {
+        $validator = Validator::make($request->all(), [
+            'new_work_end_date' => 'required|date|after:today',
+        ]);
+
+        if ($validator->fails()) return $this->validationErrorResponse($validator);
+
+        try {
+            DB::beginTransaction();
+            $application->update([
+                'work_end_date' => $request->new_work_end_date
+            ]);
+            DB::commit();
+
+            return $this->successResponse($application, 'Durasi kontrak berhasil diperpanjang.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Error extendContract: {$th->getMessage()}");
+            return $this->errorResponse('Gagal memperpanjang kontrak.', [], 500);
+        }
+    }
+
+    public function swapServant(Request $request, Application $application)
+    {
+        $validator = Validator::make($request->all(), [
+            'new_servant_id' => 'required|exists:users,id',
+            'swap_reason' => 'required|string',
+        ]);
+
+        if ($validator->fails()) return $this->validationErrorResponse($validator);
+
+        // Validasi garansi masih aktif
+        $warrantyEndsAt = Carbon::parse($application->work_start_date)->addMonths($application->warranty_duration);
+        if (Carbon::now()->greaterThan($warrantyEndsAt)) {
+            return $this->errorResponse('Masa garansi penukaran pembantu sudah habis.', [], 403);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // 1. Akhiri kontrak pembantu lama
+            $application->update([
+                'status' => 'laidoff',
+                'work_end_date' => Carbon::now()->format('Y-m-d'),
+                'end_reason' => 'Ditukar (Swap): ' . $request->swap_reason
+            ]);
+
+            // 2. Buat kontrak baru untuk pembantu pengganti dengan sisa waktu/garansi
+            $newApp = Application::create([
+                'servant_id' => $request->new_servant_id,
+                'employe_id' => $application->employe_id,
+                'vacancy_id' => $application->vacancy_id,
+                'status' => 'accepted',
+                'salary_type' => $application->salary_type,
+                'salary' => $application->salary,
+                'warranty_duration' => $application->warranty_duration, // Mewarisi durasi garansi awal
+                'work_start_date' => Carbon::now()->format('Y-m-d'),
+                'work_end_date' => $application->work_end_date, // Mewarisi target selesai
+            ]);
+
+            DB::commit();
+            return $this->successResponse($newApp, 'Pembantu berhasil ditukar menggunakan Garansi.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Error swapServant: {$th->getMessage()}");
+            return $this->errorResponse('Gagal melakukan penukaran.', [], 500);
+        }
+    }
 }
+
+

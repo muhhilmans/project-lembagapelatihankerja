@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\WorkerController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\VacancyController;
+use App\Http\Controllers\Api\TrackingController;
 use App\Http\Controllers\Api\ApplicationController;
 
 /*
@@ -21,10 +22,6 @@ use App\Http\Controllers\Api\ApplicationController;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/register-employe', [AuthController::class, 'storeEmployeRegister']);
@@ -37,8 +34,9 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::post('/pushLaLongtitude', [AuthController::class, 'pushLaLongtitude']);
 
-    // Route
-    // Client
+    // ==========================================
+    // ROLE: CLIENT / MAJIKAN
+    // ==========================================
     Route::middleware('role_api:majikan')->group(function () {
         // Cari Mitra
         Route::get('/seek-mitra', [PartnerController::class, 'allPartner']);
@@ -58,7 +56,15 @@ Route::middleware('jwt.auth')->group(function () {
         Route::put('/all-worker/{application}/presence/{salary}', [WorkerController::class, 'updatePresenceWorker']);
         Route::put('/all-worker/{application}/reject', [WorkerController::class, 'rejectWorker']);
         Route::post('/all-worker/{application}/complaint-worker', [WorkerController::class, 'complaintWorker']);
-        Route::put('/all-worker/{application}/uploadPayment', [WorkerController::class, 'uploadMajikan']);
+
+        // Pembaruan Sistem Pembayaran Gaji (Contract vs Fee)
+        Route::post('/all-worker/{application}/uploadPayment-contract', [WorkerController::class, 'uploadMajikanContract']);
+        Route::post('/all-worker/{application}/uploadPayment-fee', [WorkerController::class, 'uploadMajikanFee']);
+
+        // Pembaruan Operasional Kontrak Kerja
+        Route::post('/all-worker/{application}/end-contract', [WorkerController::class, 'endContract']);
+        Route::post('/all-worker/{application}/extend-contract', [WorkerController::class, 'extendContract']);
+        Route::post('/all-worker/{application}/swap-servant', [WorkerController::class, 'swapServant']);
 
         // Kelola Lowongan
         Route::apiResource('vacancy', VacancyController::class);
@@ -67,11 +73,12 @@ Route::middleware('jwt.auth')->group(function () {
         // Kelola Profil
         Route::get('/profile/majikan/{id}', [ProfileController::class, 'profileMajikan']);
         Route::post('/profile/majikan/{id}/edit', [ProfileController::class, 'updateMajikan']);
-
-
     });
 
-    // Mitra
+
+    // ==========================================
+    // ROLE: MITRA / PEMBANTU
+    // ==========================================
     Route::middleware('role_api:pembantu')->group(function () {
         // Cari Lowongan
         Route::get('/seek-vacancy', [VacancyController::class, 'seekVacancy']);
@@ -99,9 +106,17 @@ Route::middleware('jwt.auth')->group(function () {
         Route::put('/profile/pembantu/{id}/change-stay', [ProfileController::class, 'changeStay']);
     });
 
-    // ALL
+
+    // ==========================================
+    // AKSES GLOBAL (ALL LOGGED IN USERS)
+    // ==========================================
     Route::get('/schedule-interview', [ApplicationController::class, 'scheduleInterview']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    //review
+
+    // Fitur Live Tracking Maps
+    Route::get('/tracking/locations', [TrackingController::class, 'getLocations']);
+
+    // Ulasan / Review
     Route::post('/reviews/{application}', [ReviewController::class, 'store']);
+
 });

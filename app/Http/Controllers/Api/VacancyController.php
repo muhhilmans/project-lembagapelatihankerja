@@ -22,6 +22,15 @@ class VacancyController extends Controller
         $search = $request->input('search');
         $user = auth()->user();
 
+        $activeVacancies = Vacancy::where('user_id', $user->id)->where('status', true)->get();
+        foreach ($activeVacancies as $vac) {
+            $acceptedCount = Application::where('vacancy_id', $vac->id)->where('status', 'accepted')->count();
+            if ($acceptedCount >= $vac->limit) {
+                // Memicu Soft Delete agar lowongan masuk ke Archive otomatis
+                $vac->delete();
+            }
+        }
+
         $query = Vacancy::with(['professions:id,name', 'user:id,name'])
             ->where('user_id', $user->id);
 
@@ -153,7 +162,7 @@ class VacancyController extends Controller
                 ]);
 
                 $vacancy->professions()->sync($data['profession_ids']);
-                
+
                 $vacancy->load('professions');
 
                 return $this->successResponse($this->formatVacancy($vacancy), 'Lowongan berhasil ditambahkan', 201);
