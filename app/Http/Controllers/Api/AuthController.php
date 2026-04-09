@@ -34,6 +34,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // 1. Validasi Input
         $validator = Validator::make($request->all(), [
             'account' => 'required|string',
             'password' => 'required|string',
@@ -43,45 +44,55 @@ class AuthController extends Controller
             return $this->validationErrorResponse($validator);
         }
 
+        // 2. Tentukan field login (email atau username)
         $fieldType = filter_var($request->account, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
         $credentials = [
             $fieldType => $request->account,
             'password' => $request->password,
         ];
 
+        // 3. Cari User
         $user = User::where($fieldType, $request->account)->first();
 
         if (!$user) {
             return $this->errorResponse('Akun tidak terdaftar.', [], 401);
         }
 
+        // 4. PENANGANAN TOKEN LAMA (Agar tidak konflik)
         if (!empty($user->access_token)) {
             try {
+                // Kita coba beritahu library JWT tentang token lama ini
                 auth('api')->setToken($user->access_token);
 
-                auth('api')->invalidate(true);
-
+                // Cek apakah token masih bisa digunakan (belum expired)
+                if (auth('api')->check()) {
+                    // Jika masih hidup, kita matikan (blacklist) demi keamanan
+                    auth('api')->invalidate(true);
+                }
             } catch (\PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException $e) {
-               //
-            } catch (\PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException $e) {
-                //
-            } catch (\Throwable $e) {
-                //
+                // Jika sudah expired, biarkan saja, tidak perlu di-invalidate karena sudah mati sendiri
+            } catch (\Exception $e) {
+                // Tangkap error lainnya agar proses login tidak berhenti di sini
+                Log::info("Token lama gagal di-invalidate: " . $e->getMessage());
             } finally {
+                // Pastikan state auth bersih sebelum attempt login baru
                 auth('api')->unsetToken();
             }
         }
 
+        // 5. Attempt Login & Set TTL (Contoh: 43200 menit = 30 hari)
         if (!$token = auth('api')->setTTL(43200)->attempt($credentials)) {
             return $this->errorResponse('Kombinasi akun dan password salah.', [], 401);
         }
 
-
+        // 6. Cek Verifikasi Email
         if ($user->email_verified_at == null) {
-            auth('api')->logout();
+            // Jika belum verifikasi, logout token yang baru saja dibuat
+            auth('api')->setToken($token)->logout();
             return $this->errorResponse('Email belum diverifikasi!', ['email' => $user->email], 401);
         }
 
+        // 7. Simpan token baru ke database & kembalikan response
         $user->forceFill(['access_token' => $token])->save();
 
         return $this->responseWithToken($token, $user);
