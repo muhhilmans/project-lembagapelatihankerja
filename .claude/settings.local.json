@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Projects\\\\project-lembagapelatihankerja\\\\app\\\\Http\\\\Controllers\" -Recurse | Where-Object { $_.Name -match \"[Cc]omplaint|[Pp]engaduan\" } | Select-Object FullName)"
+    ]
+  }
+}

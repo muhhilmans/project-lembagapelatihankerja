@@ -1,15 +1,17 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\Api\WorkerController;
+use App\Http\Controllers\Api\ComplaintController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\VacancyController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TrackingController;
-use App\Http\Controllers\Api\ApplicationController;
+use App\Http\Controllers\Api\VacancyController;
+use App\Http\Controllers\Api\WorkerController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -106,6 +108,13 @@ Route::middleware('jwt.auth')->group(function () {
         Route::put('/profile/pembantu/{id}/change-stay', [ProfileController::class, 'changeStay']);
     });
 
+    // ==========================================
+    // ROLE: ADMIN / SUPER ADMIN (Management)
+    // ==========================================
+    Route::middleware('role_api:admin,superadmin')->group(function () {
+        Route::put('/complaints/{id}/status', [ComplaintController::class, 'changeStatus']);
+        Route::post('/complaints/{id}/resolve', [ComplaintController::class, 'resolve']);
+    });
 
     // ==========================================
     // AKSES GLOBAL (ALL LOGGED IN USERS)
@@ -113,10 +122,21 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/schedule-interview', [ApplicationController::class, 'scheduleInterview']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Pengaduan / Complaint
+    Route::get('/complaint-types', [ComplaintController::class, 'complaintTypes']);
+    Route::get('/complaints', [ComplaintController::class, 'index']);
+    Route::post('/complaints', [ComplaintController::class, 'store']);
+    Route::get('/complaints/{id}', [ComplaintController::class, 'show']);
+
     // Fitur Live Tracking Maps
     Route::get('/tracking/locations', [TrackingController::class, 'getLocations']);
 
     // Ulasan / Review
     Route::post('/reviews/{application}', [ReviewController::class, 'store']);
+
+    //notifikasi
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 
 });
