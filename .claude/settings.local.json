@@ -1,7 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Get-ChildItem -Path \"c:\\\\Projects\\\\project-lembagapelatihankerja\\\\app\\\\Http\\\\Controllers\" -Recurse | Where-Object { $_.Name -match \"[Cc]omplaint|[Pp]engaduan\" } | Select-Object FullName)"
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Projects\\\\project-lembagapelatihankerja\\\\app\\\\Http\\\\Controllers\" -Recurse | Where-Object { $_.Name -match \"[Cc]omplaint|[Pp]engaduan\" } | Select-Object FullName)",
+      "Bash(php artisan *)",
+      "Bash(Get-Item \"C:\\\\Users\\\\Sulthan\\\\.claude\\\\projects\\\\c--Projects-project-lembagapelatihankerja\\\\c11a3663-527d-44e1-8b81-88bab4af7c64.jsonl\")",
+      "Bash(Select-Object Length)",
+      "Bash(grep -o '\"postman_collection\"' \"C:/Users/Sulthan/.claude/projects/c--Projects-project-lembagapelatihankerja/c11a3663-527d-44e1-8b81-88bab4af7c64.jsonl\" | head -5)",
+      "Read(//c/Users/Sulthan/.claude/projects/c--Projects-project-lembagapelatihankerja/**)",
+      "Bash(python3 -c ' *)",
+      "Bash(php -r ' *)",
+      "Bash(php \"C:/Projects/project-lembagapelatihankerja/fix_postman.php\")",
+      "Bash(grep -v \"^\\\\s*//\")"
     ]
   }
 }

@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
 use App\Models\Voucher;
-use App\Models\Pengaduan; // Updated
+use App\Models\Garansi;
+use App\Models\Pengaduan;
 use App\Models\Application;
 use App\Traits\ApiResponse;
 use App\Models\WorkerSalary;
@@ -503,6 +504,148 @@ class WorkerController extends Controller
         }
     }
 
+    public function setSalary(Request $request, Application $application)
+    {
+        // Pastikan application milik majikan yang login
+        $user = auth()->user();
+        $isOwner = (string) $application->employe_id === (string) $user->id
+            || (string) ($application->vacancy?->user_id) === (string) $user->id;
+
+        if (!$isOwner) {
+            return $this->errorResponse('Anda tidak memiliki akses ke kontrak ini.', [], 403);
+        }
+
+        if (in_array($application->status, ['accepted', 'rejected', 'laidoff'])) {
+            return $this->errorResponse("Status kontrak sudah '{$application->status}' dan tidak dapat diubah.", [], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'salary_type'          => ['required', 'in:contract,fee'],
+            // Contract
+            'contract_salary'      => ['required_if:salary_type,contract', 'nullable', 'numeric', 'min:0'],
+            'admin_fee'            => ['nullable', 'numeric', 'min:0'],
+            'contract_start_date'  => ['required_if:salary_type,contract', 'nullable', 'date'],
+            'contract_end_date'    => ['nullable', 'date', 'after_or_equal:contract_start_date'],
+            'garansi_id'           => ['nullable', 'exists:garansis,id'],
+            'garansi_price'        => ['nullable', 'numeric', 'min:0'],
+            'warranty_duration'    => ['nullable', 'string'],
+            // Fee
+            'is_infal'             => ['sometimes', 'boolean'],
+            'fee_salary_regular'   => ['nullable', 'numeric', 'min:0'],
+            'fee_frequency_regular'=> ['nullable', 'string'],
+            'fee_end_date_regular' => ['nullable', 'date'],
+            'infal_frequency'      => ['nullable', 'string'],
+            'fee_salary_infal'     => ['nullable', 'numeric', 'min:0'],
+            'infal_start_date'     => ['nullable', 'date'],
+            'infal_end_date'       => ['nullable', 'date'],
+            'infal_time_in'        => ['nullable', 'string'],
+            'infal_time_out'       => ['nullable', 'string'],
+            'infal_hourly_rate'    => ['nullable', 'numeric', 'min:0'],
+            // Common
+            'deduction_amount'     => ['nullable', 'numeric', 'min:0'],
+            'scheme_id'            => ['nullable', 'exists:schemes,id'],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $data = $validator->validated();
+
+            $updateData = [
+                'salary_type'      => $data['salary_type'],
+                'deduction_amount' => $data['deduction_amount'] ?? 0,
+                'scheme_id'        => $data['scheme_id'] ?? null,
+            ];
+
+            if ($data['salary_type'] === 'contract') {
+                $updateData['salary']           = $data['contract_salary'];
+                $updateData['admin_fee']        = $data['admin_fee'] ?? null;
+                $updateData['work_start_date']  = $data['contract_start_date'];
+                $updateData['work_end_date']    = $data['contract_end_date'] ?? null;
+
+                if (!empty($data['garansi_id'])) {
+                    $garansi = Garansi::find($data['garansi_id']);
+                    $updateData['garansi_id']        = $data['garansi_id'];
+                    $updateData['garansi_price']     = $data['garansi_price'] ?? null;
+                    $updateData['warranty_duration'] = $garansi?->name ?? $data['warranty_duration'] ?? null;
+                } else {
+                    $updateData['garansi_id']        = null;
+                    $updateData['garansi_price']     = null;
+                    $updateData['warranty_duration'] = $data['warranty_duration'] ?? null;
+                }
+
+                // Reset field fee
+                $updateData['is_infal']         = false;
+                $updateData['infal_frequency']  = null;
+                $updateData['infal_time_in']    = null;
+                $updateData['infal_time_out']   = null;
+                $updateData['infal_hourly_rate'] = null;
+
+            } else { // fee
+                $isInfal = (bool) ($data['is_infal'] ?? false);
+                $updateData['is_infal'] = $isInfal;
+
+                // Reset field contract
+                $updateData['admin_fee']         = null;
+                $updateData['warranty_duration'] = null;
+
+                if ($isInfal) {
+                    $updateData['salary']          = $data['fee_salary_infal'] ?? null;
+                    $updateData['infal_frequency'] = $data['infal_frequency'] ?? null;
+
+                    if (($data['infal_frequency'] ?? '') === 'hourly') {
+                        $updateData['work_start_date']   = $data['infal_start_date'] ?? null;
+                        $updateData['work_end_date']     = null;
+                        $updateData['infal_time_in']     = $data['infal_time_in'] ?? null;
+                        $updateData['infal_time_out']    = $data['infal_time_out'] ?? null;
+                        $updateData['infal_hourly_rate'] = $data['infal_hourly_rate'] ?? null;
+                    } else {
+                        $updateData['work_start_date']   = $data['infal_start_date'] ?? null;
+                        $updateData['work_end_date']     = $data['infal_end_date'] ?? null;
+                        $updateData['infal_time_in']     = null;
+                        $updateData['infal_time_out']    = null;
+                        $updateData['infal_hourly_rate'] = null;
+                    }
+                } else {
+                    $updateData['salary']          = $data['fee_salary_regular'] ?? null;
+                    $updateData['infal_frequency'] = $data['fee_frequency_regular'] ?? null;
+                    $updateData['infal_time_in']   = null;
+                    $updateData['infal_time_out']  = null;
+                    $updateData['infal_hourly_rate'] = null;
+
+                    // End date pembantu H+7 dari end date majikan
+                    if (!empty($data['fee_end_date_regular'])) {
+                        $updateData['work_end_date'] = Carbon::parse($data['fee_end_date_regular'])->addDays(7)->format('Y-m-d');
+                    } else {
+                        $updateData['work_end_date'] = null;
+                    }
+                }
+            }
+
+            $application->update($updateData);
+
+            // Sama seperti web: jika status masih interview, otomatis naik ke passed
+            if ($application->status === 'interview') {
+                $application->update(['status' => 'passed']);
+            }
+
+            DB::commit();
+
+            return $this->successResponse(
+                $application->fresh(['servant:id,name', 'vacancy:id,title', 'scheme']),
+                'Pengaturan gaji berhasil disimpan.'
+            );
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Error setSalary: {$th->getMessage()}");
+            return $this->errorResponse('Terjadi kesalahan saat menyimpan pengaturan gaji.', [], 500);
+        }
+    }
+
     /**
      * Mengunggah bukti pembayaran majikan.
      *
@@ -525,58 +668,72 @@ class WorkerController extends Controller
 
     public function uploadMajikanFee(Request $request, Application $application)
     {
-        // 1. Penambahan Validation Rules Baru [cite: 85]
-        // Jika skema fee, input absence_days, absence_reason, dan extra_deduction diizinkan dan dicek [cite: 86]
-        $validator = Validator::make($request->all(), [
+        if ($application->salary_type !== 'fee') {
+            return $this->errorResponse('Tipe gaji bukan fee/infal.');
+        }
+
+        // quantity hanya wajib jika frekuensi infal adalah hourly/daily/weekly
+        $needQuantity = in_array($application->infal_frequency, ['hourly', 'daily', 'weekly']);
+
+        $rules = [
             'proof_majikan'    => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'worker_salary_id' => 'nullable|exists:worker_salaries,id',
             'month'            => 'required|date_format:Y-m',
-            'quantity'         => 'required|integer|min:1',
             'absence_days'     => 'nullable|integer|min:0',
             'absence_reason'   => 'nullable|string|max:255',
             'extra_deduction'  => 'nullable|integer|min:0',
-        ]);
+        ];
+        if ($needQuantity) {
+            $rules['quantity'] = 'required|numeric|min:0.1';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return $this->validationErrorResponse($validator);
         }
 
-        if ($application->salary_type !== 'fee') {
-            return $this->errorResponse('Tipe gaji bukan fee/infal.');
-        }
-
         try {
             DB::beginTransaction();
 
-            $data = $validator->validated();
-            $absenceDays = $data['absence_days'] ?? 0;
-            $extraDeduction = $data['extra_deduction'] ?? 0;
-            $quantity = $data['quantity']; // Mendeteksi harian/mingguan [cite: 89]
-            $monthDate = Carbon::createFromFormat('Y-m', $data['month'])->startOfMonth()->format('Y-m-d');
+            $data           = $validator->validated();
+            $absenceDays    = (int) ($data['absence_days'] ?? 0);
+            $extraDeduction = (int) ($data['extra_deduction'] ?? 0);
+            $quantity       = $needQuantity ? (float) $data['quantity'] : 1;
+            $monthDate      = Carbon::createFromFormat('Y-m', $data['month'])->startOfMonth()->format('Y-m-d');
 
-            // 2. Perbaikan Formula Kalkulasi Dasar [cite: 87]
-            // Perhitungan Gaji Pokok Awal dilakukan terpisah [cite: 90]
             $tarifSatuan = $application->salary;
-            $gajiPokok = $tarifSatuan * $quantity;
+            $gajiPokok   = $tarifSatuan * $quantity;
 
-            // 3. Implementasi Rumus Potongan Baru [cite: 91]
-            // Mengalikan absen dengan tarif potongan, ditambah jumlah kasbon [cite: 94]
-            $deductionAmount = $application->deduction_amount ?? $tarifSatuan; // Fallback jika deduction_amount kosong
-            $totalDeduction = ($absenceDays * (int)$deductionAmount) + $extraDeduction; // [cite: 93]
+            $deductionAmount = $application->deduction_amount ?? $tarifSatuan;
+            $totalDeduction  = ($absenceDays * (int) $deductionAmount) + $extraDeduction;
+            $gajiPokokBersih = max(0, $gajiPokok - $totalDeduction);
 
-            // 4. Bugfix Pencegahan Minus [cite: 95]
-            // Jika potongan lebih besar dari gaji, pekerja dicatat mendapat gaji 0 [cite: 97]
-            $gajiPokokBersih = max(0, $gajiPokok - $totalDeduction); // Menggunakan fungsi max(0, ...) [cite: 95]
+            // Hitung admin fee dari scheme->client_data dan mitra_data (array per item)
+            $totalSalaryMajikan  = $gajiPokokBersih;
+            $totalSalaryPembantu = $gajiPokokBersih;
 
-            // 5. Sinkronisasi dengan Skema Klien/Mitra (Admin Fee) [cite: 98]
-            // Persentase dihitung dari gaji bersih pembantu, bukan kotor [cite: 100]
-            // (Asumsi mengambil data skema dari relasi yang ada)
-            $schemaSalary = clone $application->schemaSalary;
-            $addsClient = $schemaSalary ? $schemaSalary->adds_client : 0;
-            $addsMitra  = $schemaSalary ? $schemaSalary->adds_mitra : 0;
+            if ($application->scheme) {
+                $clientFees = 0;
+                if (is_array($application->scheme->client_data)) {
+                    foreach ($application->scheme->client_data as $fee) {
+                        $clientFees += isset($fee['unit']) && $fee['unit'] === '%'
+                            ? ($gajiPokokBersih * ($fee['value'] / 100))
+                            : ($fee['value'] ?? 0);
+                    }
+                }
+                $totalSalaryMajikan = $gajiPokokBersih + $clientFees;
 
-            $totalSalaryMajikan  = $gajiPokokBersih + ($gajiPokokBersih * $addsClient);
-            $totalSalaryPembantu = $gajiPokokBersih - ($gajiPokokBersih * $addsMitra);
+                $mitraDeductions = 0;
+                if (is_array($application->scheme->mitra_data)) {
+                    foreach ($application->scheme->mitra_data as $deduction) {
+                        $mitraDeductions += isset($deduction['unit']) && $deduction['unit'] === '%'
+                            ? ($gajiPokokBersih * ($deduction['value'] / 100))
+                            : ($deduction['value'] ?? 0);
+                    }
+                }
+                $totalSalaryPembantu = $gajiPokokBersih - $mitraDeductions;
+            }
 
             // 6. Operasi Database Transaction [cite: 101]
             // Menyimpan status menggunakan firstOrCreate dan update dari Eloquent [cite: 102]
@@ -831,66 +988,67 @@ class WorkerController extends Controller
         $user = auth()->user();
         $search = $request->input('search');
 
-        $workers = Application::with(['servant', 'employe', 'vacancy'])
-            ->where('servant_id', $user->id)
-            ->where('status', 'accepted')
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->whereHas('employe', function ($q2) use ($search) {
-                        $q2->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('vacancy.user', function ($q2) use ($search) {
-                        $q2->where('name', 'like', "%{$search}%");
+        try {
+            $baseQuery = Application::with(['servant', 'employe', 'vacancy'])
+                ->where('servant_id', $user->id)
+                ->when($search, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->whereHas('employe', fn($q2) => $q2->where('name', 'like', "%{$search}%"))
+                          ->orWhereHas('vacancy.user', fn($q2) => $q2->where('name', 'like', "%{$search}%"));
                     });
                 });
-            })
-            ->paginate(10);
 
-        try {
-            if ($workers->isEmpty()) {
-                return response()->json([
-                    'success' => 'success',
-                    'message' => 'Data semua pekerjaan.',
-                    'data' => 'Belum ada pekerjaan.'
-                ], 200);
-            }
+            $activeWorkers  = (clone $baseQuery)->where('status', 'accepted')->paginate(10, ['*'], 'active_page');
+            $historyWorkers = (clone $baseQuery)->whereIn('status', ['laidoff', 'rejected'])->paginate(10, ['*'], 'history_page');
+
+            $formatWork = function ($query) {
+                return [
+                    'id'              => $query->id,
+                    'client'          => $query->employe ? $query->employe->name : ($query->vacancy->user->name ?? '-'),
+                    'status'          => $query->status,
+                    'salary_type'     => $query->salary_type,
+                    'salary'          => $query->salary,
+                    'interview_date'  => $query->interview_date,
+                    'link_interview'  => $query->link_interview,
+                    'notes_interview' => $query->notes_interview,
+                    'notes_verify'    => $query->notes_verify,
+                    'notes_accepted'  => $query->notes_accepted,
+                    'notes_rejected'  => $query->notes_rejected,
+                    'end_reason'      => $query->end_reason,
+                    'file_contract'   => $query->file_contract,
+                    'work_start_date' => $query->work_start_date,
+                    'work_end_date'   => $query->work_end_date,
+                ];
+            };
 
             $datas = [
                 'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
+                    'id'       => $user->id,
+                    'name'     => $user->name,
                     'username' => $user->username,
-                    'email' => $user->email,
-                    'role' => $user->roles->first()->name,
-                    'access_token' => $user->access_token,
+                    'email'    => $user->email,
+                    'role'     => $user->roles->first()->name,
                 ],
-                'worker' => [
-                    'data' => $workers->map(function ($query) {
-                        return [
-                            'id' => $query->id,
-                            'servant_id' => $query->servant_id,
-                            'client' => $query->employe ? $query->employe->name : $query->vacancy->user->name,
-                            'status' => $query->status,
-                            'interview_date' => $query->interview_date,
-                            'link_interview' => $query->link_interview,
-                            'notes_interview' => $query->notes_interview,
-                            'notes_verify' => $query->notes_verify,
-                            'notes_accepted' => $query->notes_accepted,
-                            'notes_rejected' => $query->notes_rejected,
-                            'salary' => $query->salary,
-                            'file_contract' => $query->file_contract,
-                            'work_start_date' => $query->work_start_date,
-                            'work_end_date' => $query->work_end_date,
-                        ];
-                    }),
+                'datas' => [
+                    'data'       => $activeWorkers->map($formatWork),
                     'pagination' => [
-                        'current_page' => $workers->currentPage(),
-                        'per_page' => $workers->perPage(),
-                        'total' => $workers->total(),
-                        'last_page' => $workers->lastPage(),
-                        'current_page_url' => $workers->url($workers->currentPage()),
-                        'next_page_url' => $workers->nextPageUrl(),
-                        'prev_page_url' => $workers->previousPageUrl(),
+                        'current_page' => $activeWorkers->currentPage(),
+                        'per_page'     => $activeWorkers->perPage(),
+                        'total'        => $activeWorkers->total(),
+                        'last_page'    => $activeWorkers->lastPage(),
+                        'next_page_url' => $activeWorkers->nextPageUrl(),
+                        'prev_page_url' => $activeWorkers->previousPageUrl(),
+                    ],
+                ],
+                'historyDatas' => [
+                    'data'       => $historyWorkers->map($formatWork),
+                    'pagination' => [
+                        'current_page' => $historyWorkers->currentPage(),
+                        'per_page'     => $historyWorkers->perPage(),
+                        'total'        => $historyWorkers->total(),
+                        'last_page'    => $historyWorkers->lastPage(),
+                        'next_page_url' => $historyWorkers->nextPageUrl(),
+                        'prev_page_url' => $historyWorkers->previousPageUrl(),
                     ],
                 ],
             ];
@@ -898,18 +1056,13 @@ class WorkerController extends Controller
             return response()->json([
                 'success' => 'success',
                 'message' => 'Data semua pekerjaan.',
-                'data' => $datas
+                'data'    => $datas,
             ], 200);
         } catch (\Throwable $th) {
             Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
             return response()->json([
                 'success' => 'failed',
                 'message' => 'Terjadi kesalahan saat mengambil data.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
             ], 500);
         }
     }
@@ -1067,12 +1220,12 @@ class WorkerController extends Controller
             $employerId = $application->employe_id ?? ($application->vacancy ? $application->vacancy->user_id : null);
 
             $store = Pengaduan::create([
-                'contract_id' => $application->id,
-                'reporter_id' => $user->id,
-                'reported_user_id' => $application->servant_id, // (Atau $employerId untuk complaintWork)
-                'description' => $data['message'],
-                'urgency_level' => $data['urgency_level'], // Masukkan datanya ke DB
-                'status' => 'open',
+                'contract_id'      => $application->id,
+                'reporter_id'      => $user->id,
+                'reported_user_id' => $employerId,
+                'description'      => $data['message'],
+                'urgency_level'    => $data['urgency_level'],
+                'status'           => 'open',
             ]);
 
             if (!$store) {

@@ -59,6 +59,9 @@ Route::middleware('jwt.auth')->group(function () {
         Route::put('/all-worker/{application}/reject', [WorkerController::class, 'rejectWorker']);
         Route::post('/all-worker/{application}/complaint-worker', [WorkerController::class, 'complaintWorker']);
 
+        // Pengaturan Gaji & Kontrak (set salary type, amounts, dates)
+        Route::post('/all-worker/{application}/set-salary', [WorkerController::class, 'setSalary']);
+
         // Pembaruan Sistem Pembayaran Gaji (Contract vs Fee)
         Route::post('/all-worker/{application}/uploadPayment-contract', [WorkerController::class, 'uploadMajikanContract']);
         Route::post('/all-worker/{application}/uploadPayment-fee', [WorkerController::class, 'uploadMajikanFee']);

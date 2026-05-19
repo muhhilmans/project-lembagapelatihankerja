@@ -65,6 +65,33 @@ Format mengacu pada [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+### Audit & Perbaikan Bug: Ketidaksesuaian Web vs API — 2026-05-12
+
+Hasil audit menyeluruh perbandingan alur sistem web dan API ditemukan 4 bug kritis yang langsung diperbaiki.
+
+#### Diperbaiki
+
+- **`app/Http/Controllers/Api/ApplicationController.php` baris 470** — Typo `$app->sheme_id` diubah ke `$app->scheme_id`. Kolom DB aslinya adalah `scheme_id` (bukan `sheme_id`). Bug ini menyebabkan field `scheme_id` selalu mengembalikan `null` di semua response API.
+
+- **`app/Http/Controllers/Api/WorkerController.php` — `complaintWork()`** — Bug logika: `reported_user_id` di-set ke `$application->servant_id` padahal method ini dipakai oleh **pembantu** yang melapor **majikan**. Diperbaiki menjadi `$employerId` (yaitu `employe_id` atau `vacancy->user_id`). Bug ini menyebabkan pengaduan pembantu selalu menunjuk ke diri sendiri (servant) bukan ke majikan.
+
+- **`app/Http/Controllers/Api/WorkerController.php` — `uploadMajikanFee()`** — Validasi `quantity` yang selalu `required` diganti menjadi conditional: hanya wajib diisi jika `infal_frequency` adalah `hourly`, `daily`, atau `weekly`. Sebelumnya API selalu reject upload jika tidak ada `quantity`, padahal pada skema fee reguler (non-infal) field ini tidak diperlukan — sesuai logika web.
+
+- **`app/Http/Controllers/Api/WorkerController.php` — `uploadMajikanFee()`** — Formula kalkulasi admin fee diganti dari `schemaSalary->adds_client` / `adds_mitra` (model `Salary`, simple persentase) menjadi `scheme->client_data` / `mitra_data` (model `Scheme`, array per-item yang mendukung nilai flat maupun persentase `%`). Formula lama menyebabkan hasil kalkulasi total gaji majikan dan pembantu berbeda dengan yang tampil di web.
+
+#### Ketidaksesuaian yang Dicatat (Tidak Diperbaiki Sesi Ini)
+
+Temuan di bawah memerlukan diskusi lebih lanjut karena melibatkan perubahan alur besar:
+
+| # | Deskripsi | File | Keterangan |
+|---|-----------|------|------------|
+| 1 | `changeStatus()` API hanya support 3 status (`schedule`, `passed`, `rejected`), web support lebih banyak (`interview`, `verify`, `contract`, `accepted`, dll) | `Api/ApplicationController.php:274` | Perlu tambah handler per-status |
+| 2 | Tidak ada `updateSalary()` di API — update skema gaji (contract/fee/infal) hanya bisa dari web | `Api/ApplicationController.php` | Perlu implementasi baru |
+| 3 | Web `store()` complaint menerima field `message`, API menerima `description` — keduanya disimpan ke kolom `description` di DB | `ComplaintController.php:114` vs `Api/ComplaintController.php:96` | Perlu standardisasi nama field |
+| 4 | Web tidak ada minimum panjang deskripsi complaint, API minimal 20 karakter | `ComplaintController.php:114` | Pertimbangkan menambah validasi di web |
+
+---
+
 ## Riwayat Sebelumnya
 
 ### [184ff4f] — feat: Enhance login process with input validation, user checks, and token management

@@ -256,16 +256,19 @@ class VacancyController extends Controller
         }
     }
 
-    public function seekVacancy()
+    public function seekVacancy(Request $request)
     {
-        $vacancies = Vacancy::with(['user:id,name', 'professions:id,name'])
-            ->where('status', true)
-            ->paginate(5);
+        $professionId = $request->input('profession_id');
 
-        if ($vacancies->isEmpty()) {
-            return $this->successResponse([], 'Tidak ada lowongan!');
+        $query = Vacancy::with(['user:id,name', 'professions:id,name'])
+            ->where('status', true)
+            ->latest();
+
+        if ($professionId) {
+            $query->whereHas('professions', fn($q) => $q->where('professions.id', $professionId));
         }
 
+        $vacancies = $query->paginate(5);
         $professions = Profession::select('id', 'name')->get();
 
         $datas = [

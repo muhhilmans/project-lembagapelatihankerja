@@ -274,11 +274,15 @@ class ApplicationController extends Controller
     public function changeStatus(Request $request, Application $application)
     {
         $validator = Validator::make($request->all(), [
-            'status'          => ['required', 'string'],
+            'status'          => ['required', 'in:schedule,interview,passed,verify,rejected'],
             'notes_interview' => ['nullable', 'string'],
             'notes_rejected'  => ['nullable', 'string'],
+            'notes_verify'    => ['nullable', 'string'],
             'interview_date'  => ['nullable', 'date'],
+            'link_interview'  => ['nullable', 'url'],
             'salary'          => ['nullable', 'numeric'],
+        ], [
+            'status.in' => 'Status tidak valid. Gunakan: schedule, interview, passed, verify, atau rejected.',
         ]);
 
         if ($validator->fails()) {
@@ -306,8 +310,13 @@ class ApplicationController extends Controller
             if ($data['status'] === 'schedule') {
                 $updateData['notes_interview'] = $data['notes_interview'] ?? null;
                 $updateData['interview_date']  = $data['interview_date'] ?? null;
+            } elseif ($data['status'] === 'interview') {
+                $updateData['link_interview']  = $data['link_interview'] ?? null;
+                $updateData['notes_interview'] = $data['notes_interview'] ?? null;
             } elseif ($data['status'] === 'passed') {
                 $updateData['salary'] = $data['salary'] ?? null;
+            } elseif ($data['status'] === 'verify') {
+                $updateData['notes_verify'] = $data['notes_verify'] ?? null;
             } elseif ($data['status'] === 'rejected') {
                 $updateData['notes_rejected'] = $data['notes_rejected'] ?? null;
             }
@@ -467,7 +476,7 @@ class ApplicationController extends Controller
             'admin_fee' => $app->admin_fee,
             'warranty_duration' => $app->warranty_duration,
             'end_reason' => $app->end_reason,
-            'scheme_id' => $app->sheme_id, // Note: periksa apakah typo DB sheme_id atau scheme_id
+            'scheme_id' => $app->scheme_id,
             'garansi_id' => $app->garansi_id,
             'garansi_price' => $app->garansi_price,
             'infal_time_in' => $app->infal_time_in,
