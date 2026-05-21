@@ -153,19 +153,21 @@ class ApplicationController extends Controller
             ], 409);
         }
 
-        // 2. Validasi: Cek apakah masih terikat kontrak non-infal (contract atau fee reguler)
-        // Infal boleh melamar di banyak tempat secara bersamaan
-        $hasActiveContract = Application::where('servant_id', $servantId)
+        $hasActiveDedicatedJob = Application::where('servant_id', $servantId)
             ->where('status', 'accepted')
-            ->where(function ($q) {
-                $q->where('is_infal', false)->orWhereNull('is_infal');
+            ->where(function ($query) {
+                $query->where('salary_type', 'contract')
+                      ->orWhere(function ($q) {
+                          $q->where('salary_type', 'fee')
+                            ->where('is_infal', false);
+                      });
             })
             ->exists();
 
-        if ($hasActiveContract) {
+        if ($hasActiveDedicatedJob) {
             return response()->json([
                 'success' => 'failed',
-                'message' => 'Anda sedang terikat kontrak aktif dan tidak dapat melamar lowongan baru.',
+                'message' => 'Anda sedang terikat pekerjaan penuh (Kontrak/Fee Reguler) dan tidak dapat melamar lowongan baru.',
             ], 403);
         }
 
@@ -229,20 +231,22 @@ class ApplicationController extends Controller
             ], 409);
         }
 
-        // Cek apakah pekerja terikat kontrak non-infal aktif
-        // Infal boleh diproses di banyak tempat secara bersamaan
-        $hasActiveContract = Application::where('servant_id', $servant->id)
+        $hasActiveDedicatedJob = Application::where('servant_id', $servant->id)
             ->where('status', 'accepted')
-            ->where(function ($q) {
-                $q->where('is_infal', false)->orWhereNull('is_infal');
+            ->where(function ($query) {
+                $query->where('salary_type', 'contract')
+                      ->orWhere(function ($q) {
+                          $q->where('salary_type', 'fee')
+                            ->where('is_infal', false);
+                      });
             })
             ->exists();
 
-        if ($hasActiveContract) {
-            return response()->json([
+        if ($hasActiveDedicatedJob) {
+             return response()->json([
                 'success' => 'failed',
-                'message' => 'Pekerja sedang terikat kontrak dan tidak dapat diproses untuk lowongan baru.',
-            ], 409);
+                'message' => 'Pelamar ini sedang terikat pekerjaan penuh (Kontrak/Fee Reguler).',
+            ], 403);
         }
 
         try {

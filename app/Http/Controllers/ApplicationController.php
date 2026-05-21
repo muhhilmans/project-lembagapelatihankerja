@@ -159,6 +159,20 @@ class ApplicationController extends Controller
                     $update->update([
                         'status' => $data['status'],
                     ]);
+
+                    if ($update->salary_type == 'contract' || ($update->salary_type == 'fee' && !$update->is_infal)) {
+                        $servantDetail = \App\Models\ServantDetail::where('user_id', $update->servant_id)->first();
+                        if ($servantDetail) {
+                            $servantDetail->update(['working_status' => true]);
+                        }
+
+                        Application::where('servant_id', $update->servant_id)
+                            ->where('id', '!=', $update->id)
+                            ->update([
+                                'status' => 'rejected',
+                                'notes_rejected' => 'Telah diterima bekerja',
+                            ]);
+                    }
                 } else {
                     $update->update([
                         'status' => $data['status'],
@@ -228,17 +242,19 @@ class ApplicationController extends Controller
                     'file_contract' => str_replace('public/', '', $path),
                 ]);
 
-                $servantDetail = ServantDetail::where('user_id', $servant->id)->first();
-                if ($servantDetail) {
-                    $servantDetail->update(['working_status' => true]);
-                }
+                if ($application->salary_type == 'contract' || ($application->salary_type == 'fee' && !$application->is_infal)) {
+                    $servantDetail = ServantDetail::where('user_id', $servant->id)->first();
+                    if ($servantDetail) {
+                        $servantDetail->update(['working_status' => true]);
+                    }
 
-                Application::where('servant_id', $servant->id)
-                    ->where('id', '!=', $application->id)
-                    ->update([
-                        'status' => 'rejected',
-                        'notes_rejected' => 'Telah diterima oleh ' . $employe->name,
-                    ]);
+                    Application::where('servant_id', $servant->id)
+                        ->where('id', '!=', $application->id)
+                        ->update([
+                            'status' => 'rejected',
+                            'notes_rejected' => 'Telah diterima oleh ' . $employe->name,
+                        ]);
+                }
             });
 
             Alert::success('Berhasil', 'File kontrak berhasil diunggah.');
@@ -305,14 +321,20 @@ class ApplicationController extends Controller
             return redirect()->back();
         }
 
-        // Cek apakah pekerja terikat kontrak aktif (salary_type = contract dengan status = accepted)
-        $hasActiveContract = Application::where('servant_id', $request->servant_id)
+        // Cek apakah pekerja terikat pekerjaan penuh (Kontrak atau Fee Reguler dengan status = accepted)
+        $hasActiveDedicatedJob = Application::where('servant_id', $request->servant_id)
             ->where('status', 'accepted')
-            ->where('salary_type', 'contract')
+            ->where(function ($query) {
+                $query->where('salary_type', 'contract')
+                      ->orWhere(function ($q) {
+                          $q->where('salary_type', 'fee')
+                            ->where('is_infal', false);
+                      });
+            })
             ->exists();
 
-        if ($hasActiveContract) {
-            Alert::warning('Peringatan', 'Anda sedang terikat kontrak dan tidak dapat melamar lowongan baru.');
+        if ($hasActiveDedicatedJob) {
+            Alert::warning('Peringatan', 'Anda sedang terikat pekerjaan penuh (Kontrak/Fee Reguler) dan tidak dapat melamar lowongan baru.');
             return redirect()->back();
         }
 
@@ -467,6 +489,20 @@ class ApplicationController extends Controller
                     $update->update([
                         'status' => $data['status'],
                     ]);
+
+                    if ($update->salary_type == 'contract' || ($update->salary_type == 'fee' && !$update->is_infal)) {
+                        $servantDetail = \App\Models\ServantDetail::where('user_id', $update->servant_id)->first();
+                        if ($servantDetail) {
+                            $servantDetail->update(['working_status' => true]);
+                        }
+
+                        Application::where('servant_id', $update->servant_id)
+                            ->where('id', '!=', $update->id)
+                            ->update([
+                                'status' => 'rejected',
+                                'notes_rejected' => 'Telah diterima bekerja',
+                            ]);
+                    }
                 } else {
                     $update->update([
                         'status' => $data['status'],
@@ -525,22 +561,24 @@ class ApplicationController extends Controller
             ]);
 
             if ($status == 'accepted') {
-                DB::transaction(function () use ($vacancy, $user) {
+                DB::transaction(function () use ($vacancy, $user, $applyJob) {
                     $acceptedCount = Application::where('vacancy_id', $vacancy->id)
                         ->where('status', 'accepted')
                         ->count();
 
-                    $updateUser = ServantDetail::where('user_id', $user->id)->first();
-                    if ($updateUser) {
-                        $updateUser->update([
-                            'working_status' => true,
+                    if ($applyJob->salary_type == 'contract' || ($applyJob->salary_type == 'fee' && !$applyJob->is_infal)) {
+                        $updateUser = ServantDetail::where('user_id', $user->id)->first();
+                        if ($updateUser) {
+                            $updateUser->update([
+                                'working_status' => true,
+                            ]);
+                        }
+
+                        Application::where('servant_id', $user->id)->where('status', '!=', 'accepted')->update([
+                            'status' => 'rejected',
+                            'notes_rejected' => 'Telah diterima oleh ' . $vacancy->user->name,
                         ]);
                     }
-
-                    Application::where('servant_id', $user->id)->where('status', '!=', 'accepted')->update([
-                        'status' => 'rejected',
-                        'notes_rejected' => 'Telah diterima oleh ' . $vacancy->user->name,
-                    ]);
 
                     if ($acceptedCount >= $vacancy->limit) {
                         Application::where('vacancy_id', $vacancy->id)
