@@ -54,13 +54,14 @@ Route::middleware('jwt.auth')->group(function () {
         // Kelola Pekerja
         Route::get('/all-worker', [WorkerController::class, 'allWorker']);
         Route::get('/all-worker/{id}', [WorkerController::class, 'showWorker']);
-        Route::post('/all-worker/{application}/presence', [WorkerController::class, 'presenceWorker']);
-        Route::put('/all-worker/{application}/presence/{salary}', [WorkerController::class, 'updatePresenceWorker']);
         Route::put('/all-worker/{application}/reject', [WorkerController::class, 'rejectWorker']);
         Route::post('/all-worker/{application}/complaint-worker', [WorkerController::class, 'complaintWorker']);
 
         // Pengaturan Gaji & Kontrak (set salary type, amounts, dates)
         Route::post('/all-worker/{application}/set-salary', [WorkerController::class, 'setSalary']);
+
+        // Upload dokumen kontrak → status accepted
+        Route::post('/all-worker/{application}/upload-contract', [WorkerController::class, 'uploadContractFile']);
 
         // Pembaruan Sistem Pembayaran Gaji (Contract vs Fee)
         Route::post('/all-worker/{application}/uploadPayment-contract', [WorkerController::class, 'uploadMajikanContract']);

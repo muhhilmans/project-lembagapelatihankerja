@@ -58,6 +58,7 @@ class ApplicationController extends Controller
         $hires = Application::with(['servant', 'employe'])
             ->where('employe_id', $user->id)
             ->whereNotNull('employe_id')
+            ->whereNotIn('status', ['accepted', 'rejected', 'laidoff'])
             ->paginate(10);
 
         $indies = Application::with(['vacancy.user', 'servant'])
@@ -65,6 +66,7 @@ class ApplicationController extends Controller
                 $query->where('id', $user->id);
             })
             ->whereNotNull('vacancy_id')
+            ->whereNotIn('status', ['accepted', 'rejected', 'laidoff'])
             ->paginate(10);
 
         try {
@@ -411,7 +413,7 @@ class ApplicationController extends Controller
     public function chooseStatus(Request $request, Application $application)
     {
         $validator = Validator::make($request->all(), [
-            'status'          => ['required', 'string'],
+            'status' => ['required', 'in:choose,rejected'],
         ]);
 
         if ($validator->fails()) {

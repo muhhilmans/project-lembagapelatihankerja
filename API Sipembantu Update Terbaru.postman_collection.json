@@ -6302,7 +6302,7 @@
                             "response": []
                         },
                         {
-                            "name": "Pengaduan",
+                            "name": "Pengaduan Pekerja",
                             "request": {
                                 "auth": {
                                     "type": "bearer",
@@ -6326,15 +6326,16 @@
                                     "mode": "formdata",
                                     "formdata": [
                                         {
-                                            "key": "message",
+                                            "key": "complaint_type_id",
                                             "value": "",
+                                            "description": "ID tipe pengaduan dari GET /complaint-types",
                                             "type": "text",
                                             "uuid": "2edbfece-cad0-4c36-8850-60432f1ccf5f"
                                         },
                                         {
-                                            "key": "urgency_level",
+                                            "key": "description",
                                             "value": "",
-                                            "description": "Pilihannya: LOW, MEDIUM, HIGH, CRITICAL",
+                                            "description": "Deskripsi pengaduan (minimal 20 karakter)",
                                             "type": "text",
                                             "uuid": "98ccf081-0818-4155-9194-bcbd811f297e"
                                         }
@@ -6452,392 +6453,6 @@
                                     ],
                                     "cookie": [],
                                     "body": "{\n    \"success\": \"success\",\n    \"message\": \"Data detail pekerja.\",\n    \"data\": {\n        \"user\": {\n            \"id\": \"a0047b24-8711-4bab-b4c1-3d12306881f6\",\n            \"name\": \"Majikan 1\",\n            \"username\": \"majikan1\",\n            \"email\": \"majikan1@gmail.com\",\n            \"role\": \"majikan\",\n            \"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzY4ODc4ODQxLCJleHAiOjE3NzE0NzA4NDEsIm5iZiI6MTc2ODg3ODg0MSwianRpIjoiNDlGSDN0MllJTnVSMjV3QyIsInN1YiI6ImEwMDQ3YjI0LTg3MTEtNGJhYi1iNGMxLTNkMTIzMDY4ODFmNiIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.fRF1Sv6Nl5RpaVSL9tQJb7tfB8SV6qEzn-AH8wnBIhs\"\n        },\n        \"detail\": {\n            \"id\": \"a01862fa-e525-481b-b180-2b4f14f882df\",\n            \"servant_id\": \"a0047b95-0af9-499c-8fa2-560166b2950b\",\n            \"client\": \"Majikan 1\",\n            \"status\": \"accepted\",\n            \"salary\": 4000000,\n            \"work_start_date\": \"2025-11-03\",\n            \"servant_detail\": {\n                \"id\": \"a0047b95-0af9-499c-8fa2-560166b2950b\",\n                \"name\": \"pembantu1\",\n                \"username\": \"pembantu1\",\n                \"email\": \"pembantu1@gmail.com\",\n                \"gender\": \"not_filled\",\n                \"place_of_birth\": \"-\",\n                \"date_of_birth\": null,\n                \"religion\": \"-\",\n                \"marital_status\": \"not_filled\",\n                \"children\": 0,\n                \"last_education\": \"not_filled\",\n                \"phone\": \"-\",\n                \"emergency_number\": \"-\",\n                \"address\": \"-\",\n                \"rt\": null,\n                \"rw\": null,\n                \"village\": null,\n                \"district\": null,\n                \"regency\": null,\n                \"province\": null,\n                \"is_bank\": 0,\n                \"bank_name\": \"-\",\n                \"account_number\": \"-\",\n                \"is_bpjs\": 0,\n                \"type_bpjs\": \"Ketenagakerjaan\",\n                \"number_bpjs\": \"-\",\n                \"photo\": null,\n                \"identity_card\": null,\n                \"family_card\": null,\n                \"working_status\": 1,\n                \"experience\": \"-\",\n                \"description\": \"-\",\n                \"is_inval\": 0,\n                \"is_stay\": 0,\n                \"profession\": \"Pembantu Rumah tangga (PRT/ART)\",\n                \"skills\": [\n                    {\n                        \"id\": \"a00a062e-e95b-4496-93d0-c57032dd4de3\",\n                        \"user_id\": \"a0047b95-0af9-499c-8fa2-560166b2950b\",\n                        \"skill\": \"Menabung\",\n                        \"keahlian\": \"master\"\n                    }\n                ]\n            }\n        },\n        \"gaji\": [\n            {\n                \"id\": \"a09f6339-ba9f-485c-b0b9-5ee047a73dc6\",\n                \"application_id\": \"a01862fa-e525-481b-b180-2b4f14f882df\",\n                \"month\": \"2025-12-01\",\n                \"presence\": 10,\n                \"total_salary\": 1290323,\n                \"total_salary_majikan\": 1387097,\n                \"status\": null,\n                \"payment_majikan_image\": \"Majikan_1/pembantu1/proof_majikan_Dec-2025_pembantu1.png\",\n                \"payment_pembantu_image\": null,\n                \"voucher\": null\n            },\n            {\n                \"id\": \"a0e0d09f-1381-4055-ac33-54ccae57c508\",\n                \"application_id\": \"a01862fa-e525-481b-b180-2b4f14f882df\",\n                \"month\": \"2026-01-01\",\n                \"presence\": 21,\n                \"total_salary\": 2709678,\n                \"total_salary_majikan\": 2912904,\n                \"status\": null,\n                \"payment_majikan_image\": null,\n                \"payment_pembantu_image\": null,\n                \"voucher\": null\n            }\n        ]\n    }\n}"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "Absensi",
-                            "request": {
-                                "auth": {
-                                    "type": "bearer",
-                                    "bearer": [
-                                        {
-                                            "key": "token",
-                                            "value": "{{token}}",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json",
-                                        "type": "text"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "formdata",
-                                    "formdata": [
-                                        {
-                                            "key": "month",
-                                            "value": "2026-01",
-                                            "description": "Y-mm",
-                                            "type": "text",
-                                            "uuid": "75d2fdeb-50f7-4f04-90c6-99c496d5a511"
-                                        },
-                                        {
-                                            "key": "presence",
-                                            "value": "20",
-                                            "type": "text",
-                                            "uuid": "1eb5e302-e5ac-4cb1-9f59-442cef00ad9a"
-                                        },
-                                        {
-                                            "key": "voucher",
-                                            "value": "",
-                                            "description": "optional",
-                                            "type": "text",
-                                            "uuid": "d670310c-9177-4816-a5c2-de35c7e17db9"
-                                        }
-                                    ]
-                                },
-                                "url": {
-                                    "raw": "{{base_url}}api/all-worker/{{applicant_id}}/presence",
-                                    "host": [
-                                        "{{base_url}}api"
-                                    ],
-                                    "path": [
-                                        "all-worker",
-                                        "{{applicant_id}}",
-                                        "presence"
-                                    ]
-                                }
-                            },
-                            "response": [
-                                {
-                                    "name": "Success",
-                                    "originalRequest": {
-                                        "method": "POST",
-                                        "header": [
-                                            {
-                                                "key": "Accept",
-                                                "value": "application/json",
-                                                "type": "text"
-                                            }
-                                        ],
-                                        "body": {
-                                            "mode": "formdata",
-                                            "formdata": [
-                                                {
-                                                    "key": "month",
-                                                    "value": "2026-01",
-                                                    "description": "Y-mm",
-                                                    "type": "text",
-                                                    "uuid": "75d2fdeb-50f7-4f04-90c6-99c496d5a511"
-                                                },
-                                                {
-                                                    "key": "presence",
-                                                    "value": "20",
-                                                    "type": "text",
-                                                    "uuid": "1eb5e302-e5ac-4cb1-9f59-442cef00ad9a"
-                                                },
-                                                {
-                                                    "key": "voucher",
-                                                    "value": "",
-                                                    "description": "optional",
-                                                    "type": "text",
-                                                    "uuid": "d670310c-9177-4816-a5c2-de35c7e17db9"
-                                                }
-                                            ]
-                                        },
-                                        "url": {
-                                            "raw": "{{base_url}}api/all-worker/{{applicant_id}}/presence",
-                                            "host": [
-                                                "{{base_url}}api"
-                                            ],
-                                            "path": [
-                                                "all-worker",
-                                                "{{applicant_id}}",
-                                                "presence"
-                                            ]
-                                        }
-                                    },
-                                    "status": "Created",
-                                    "code": 201,
-                                    "_postman_previewlanguage": null,
-                                    "header": [
-                                        {
-                                            "key": "Date",
-                                            "value": "Tue, 20 Jan 2026 01:58:52 GMT"
-                                        },
-                                        {
-                                            "key": "Content-Type",
-                                            "value": "application/json"
-                                        },
-                                        {
-                                            "key": "Content-Length",
-                                            "value": "279"
-                                        },
-                                        {
-                                            "key": "Connection",
-                                            "value": "keep-alive"
-                                        },
-                                        {
-                                            "key": "X-Powered-By",
-                                            "value": "PHP/8.3.19"
-                                        },
-                                        {
-                                            "key": "Cache-Control",
-                                            "value": "no-cache, private"
-                                        },
-                                        {
-                                            "key": "X-RateLimit-Limit",
-                                            "value": "60"
-                                        },
-                                        {
-                                            "key": "X-RateLimit-Remaining",
-                                            "value": "57"
-                                        },
-                                        {
-                                            "key": "Access-Control-Allow-Origin",
-                                            "value": "*"
-                                        },
-                                        {
-                                            "key": "Content-Encoding",
-                                            "value": "br"
-                                        },
-                                        {
-                                            "key": "platform",
-                                            "value": "hostinger"
-                                        },
-                                        {
-                                            "key": "panel",
-                                            "value": "hpanel"
-                                        },
-                                        {
-                                            "key": "Retry-After",
-                                            "value": "60"
-                                        },
-                                        {
-                                            "key": "Content-Security-Policy",
-                                            "value": "upgrade-insecure-requests"
-                                        },
-                                        {
-                                            "key": "Server",
-                                            "value": "hcdn"
-                                        },
-                                        {
-                                            "key": "alt-svc",
-                                            "value": "h3=\":443\"; ma=86400"
-                                        },
-                                        {
-                                            "key": "x-hcdn-request-id",
-                                            "value": "8de4e7a50c018b6a3042433233c839c3-imm-edge3"
-                                        },
-                                        {
-                                            "key": "x-hcdn-cache-status",
-                                            "value": "DYNAMIC"
-                                        },
-                                        {
-                                            "key": "x-hcdn-upstream-rt",
-                                            "value": "0.864"
-                                        }
-                                    ],
-                                    "cookie": [],
-                                    "body": "{\n    \"status\": \"success\",\n    \"message\": \"Absensi pekerja berhasil dikirimkan!\",\n    \"data\": {\n        \"application_id\": \"a01862fa-e525-481b-b180-2b4f14f882df\",\n        \"month\": \"2026-01-01\",\n        \"presence\": \"20\",\n        \"total_salary\": 2580646,\n        \"total_salary_majikan\": 2774194,\n        \"total_salary_pembantu\": 2516130,\n        \"voucher_id\": null,\n        \"id\": \"a0e0d09f-1381-4055-ac33-54ccae57c508\",\n        \"updated_at\": \"2026-01-20T01:58:52.000000Z\",\n        \"created_at\": \"2026-01-20T01:58:52.000000Z\"\n    }\n}"
-                                }
-                            ]
-                        },
-                        {
-                            "name": "Edit Absensi",
-                            "request": {
-                                "auth": {
-                                    "type": "bearer",
-                                    "bearer": [
-                                        {
-                                            "key": "token",
-                                            "value": "{{token}}",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json",
-                                        "type": "text"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "formdata",
-                                    "formdata": [
-                                        {
-                                            "key": "_method",
-                                            "value": "PUT",
-                                            "type": "text",
-                                            "uuid": "cb4b5e00-7538-4e2b-879a-ebb8198dd247"
-                                        },
-                                        {
-                                            "key": "month",
-                                            "value": "2026-01",
-                                            "description": "Y-mm",
-                                            "type": "text",
-                                            "uuid": "544b865c-36cc-48d4-9e18-a0f3ad36d4d3"
-                                        },
-                                        {
-                                            "key": "presence",
-                                            "value": "21",
-                                            "type": "text",
-                                            "uuid": "26604ef4-361e-4145-9ebb-7abfe71f39f0"
-                                        }
-                                    ]
-                                },
-                                "url": {
-                                    "raw": "{{base_url}}api/all-worker/{{applicant_id}}/presence/{{worker_salary_id}}",
-                                    "host": [
-                                        "{{base_url}}api"
-                                    ],
-                                    "path": [
-                                        "all-worker",
-                                        "{{applicant_id}}",
-                                        "presence",
-                                        "{{worker_salary_id}}"
-                                    ]
-                                }
-                            },
-                            "response": [
-                                {
-                                    "name": "success",
-                                    "originalRequest": {
-                                        "method": "POST",
-                                        "header": [
-                                            {
-                                                "key": "Accept",
-                                                "value": "application/json",
-                                                "type": "text"
-                                            }
-                                        ],
-                                        "body": {
-                                            "mode": "formdata",
-                                            "formdata": [
-                                                {
-                                                    "key": "_method",
-                                                    "value": "PUT",
-                                                    "type": "text",
-                                                    "uuid": "cb4b5e00-7538-4e2b-879a-ebb8198dd247"
-                                                },
-                                                {
-                                                    "key": "month",
-                                                    "value": "2026-01",
-                                                    "description": "Y-mm",
-                                                    "type": "text",
-                                                    "uuid": "544b865c-36cc-48d4-9e18-a0f3ad36d4d3"
-                                                },
-                                                {
-                                                    "key": "presence",
-                                                    "value": "21",
-                                                    "type": "text",
-                                                    "uuid": "26604ef4-361e-4145-9ebb-7abfe71f39f0"
-                                                }
-                                            ]
-                                        },
-                                        "url": {
-                                            "raw": "{{base_url}}api/all-worker/{{applicant_id}}/presence/{{worker_salary_id}}",
-                                            "host": [
-                                                "{{base_url}}api"
-                                            ],
-                                            "path": [
-                                                "all-worker",
-                                                "{{applicant_id}}",
-                                                "presence",
-                                                "{{worker_salary_id}}"
-                                            ]
-                                        }
-                                    },
-                                    "status": "Created",
-                                    "code": 201,
-                                    "_postman_previewlanguage": null,
-                                    "header": [
-                                        {
-                                            "key": "Date",
-                                            "value": "Tue, 20 Jan 2026 02:03:50 GMT"
-                                        },
-                                        {
-                                            "key": "Content-Type",
-                                            "value": "application/json"
-                                        },
-                                        {
-                                            "key": "Content-Length",
-                                            "value": "85"
-                                        },
-                                        {
-                                            "key": "Connection",
-                                            "value": "keep-alive"
-                                        },
-                                        {
-                                            "key": "X-Powered-By",
-                                            "value": "PHP/8.3.19"
-                                        },
-                                        {
-                                            "key": "Cache-Control",
-                                            "value": "no-cache, private"
-                                        },
-                                        {
-                                            "key": "X-RateLimit-Limit",
-                                            "value": "60"
-                                        },
-                                        {
-                                            "key": "X-RateLimit-Remaining",
-                                            "value": "57"
-                                        },
-                                        {
-                                            "key": "Access-Control-Allow-Origin",
-                                            "value": "*"
-                                        },
-                                        {
-                                            "key": "Content-Encoding",
-                                            "value": "br"
-                                        },
-                                        {
-                                            "key": "platform",
-                                            "value": "hostinger"
-                                        },
-                                        {
-                                            "key": "panel",
-                                            "value": "hpanel"
-                                        },
-                                        {
-                                            "key": "Retry-After",
-                                            "value": "60"
-                                        },
-                                        {
-                                            "key": "Content-Security-Policy",
-                                            "value": "upgrade-insecure-requests"
-                                        },
-                                        {
-                                            "key": "Server",
-                                            "value": "hcdn"
-                                        },
-                                        {
-                                            "key": "alt-svc",
-                                            "value": "h3=\":443\"; ma=86400"
-                                        },
-                                        {
-                                            "key": "x-hcdn-request-id",
-                                            "value": "b0c9af7f29c2cd2d8361a3f2658a8ffb-imm-edge4"
-                                        },
-                                        {
-                                            "key": "x-hcdn-cache-status",
-                                            "value": "DYNAMIC"
-                                        },
-                                        {
-                                            "key": "x-hcdn-upstream-rt",
-                                            "value": "0.991"
-                                        }
-                                    ],
-                                    "cookie": [],
-                                    "body": "{\n    \"status\": \"success\",\n    \"message\": \"Absensi pekerja berhasil diperbarui!\",\n    \"data\": true\n}"
                                 }
                             ]
                         },
@@ -7188,13 +6803,14 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"salary_type\": \"fee\",\n    \"is_infal\": false,\n    \"fee_salary_regular\": 2000000,\n    \"fee_frequency_regular\": \"monthly\",\n    \"fee_end_date_regular\": \"2026-06-01\",\n    \"scheme_id\": null,\n    \"deduction_amount\": 0\n}",
+                                    "raw": "{\n    \"salary_type\": \"contract\",\n    \"contract_salary\": 2500000,\n    \"contract_start_date\": \"2026-06-01\",\n    \"contract_end_date\": \"2026-12-01\",\n    \"admin_fee\": 150000,\n    \"garansi_id\": null,\n    \"garansi_price\": null,\n    \"warranty_duration\": null,\n    \"deduction_amount\": 0,\n    \"scheme_id\": null\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
                                         }
                                     }
                                 },
+                                "description": "## Set Salary & Kontrak\n\nDigunakan oleh **majikan** untuk menetapkan skema gaji sebelum upload kontrak.\n\n> ⚠️ Jika status lamaran masih `interview`, otomatis naik ke `passed` setelah berhasil.\n\nAlur lengkap: **set-salary** → upload kontrak via `POST /all-worker/{id}/upload-contract` → status jadi `accepted`.\n\n---\n\n### 1. salary_type: `contract` (Kontrak Bulanan)\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| salary_type | ✅ | `\"contract\"` |\n| contract_salary | ✅ | Gaji pokok (angka, misal: 2500000) |\n| contract_start_date | ✅ | Tanggal mulai kerja (YYYY-MM-DD) |\n| contract_end_date | ❌ | Tanggal selesai kontrak |\n| admin_fee | ❌ | Biaya admin lembaga |\n| garansi_id | ❌ | UUID dari tabel `garansis` — jika diisi, warranty_duration otomatis dari nama garansi |\n| garansi_price | ❌ | Harga garansi |\n| warranty_duration | ❌ | Isi manual jika garansi_id null |\n| deduction_amount | ❌ | Total potongan (default 0) |\n| scheme_id | ❌ | UUID skema pembayaran dari tabel `schemes` |\n\n---\n\n### 2. salary_type: `fee` — Regular (is_infal: false)\n\nPembantu non-infal, bekerja dari rumah majikan.\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| salary_type | ✅ | `\"fee\"` |\n| is_infal | ✅ | `false` |\n| fee_salary_regular | ❌ | Nominal gaji |\n| fee_frequency_regular | ❌ | Frekuensi: `\"daily\"`, `\"weekly\"`, `\"monthly\"` |\n| fee_end_date_regular | ❌ | Tanggal selesai kontrak majikan → work_end_date pembantu = tanggal ini + 7 hari |\n| deduction_amount | ❌ | Potongan |\n| scheme_id | ❌ | UUID skema |\n\n---\n\n### 3. salary_type: `fee` — Infal Harian/Mingguan/Bulanan (is_infal: true)\n\nPembantu infal yang dibayar per hari, minggu, atau bulan.\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| salary_type | ✅ | `\"fee\"` |\n| is_infal | ✅ | `true` |\n| infal_frequency | ✅ | `\"daily\"`, `\"weekly\"`, atau `\"monthly\"` |\n| fee_salary_infal | ❌ | Nominal gaji |\n| infal_start_date | ❌ | Tanggal mulai |\n| infal_end_date | ❌ | Tanggal selesai |\n| deduction_amount | ❌ | Potongan |\n\n---\n\n### 4. salary_type: `fee` — Infal Per Jam (is_infal: true, infal_frequency: hourly)\n\nPembantu infal yang dibayar per jam.\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| salary_type | ✅ | `\"fee\"` |\n| is_infal | ✅ | `true` |\n| infal_frequency | ✅ | `\"hourly\"` |\n| infal_hourly_rate | ❌ | Tarif per jam |\n| infal_start_date | ❌ | Tanggal mulai |\n| infal_time_in | ❌ | Jam masuk (format HH:MM, misal: `\"08:00\"`) |\n| infal_time_out | ❌ | Jam keluar (format HH:MM, misal: `\"17:00\"`) |\n| deduction_amount | ❌ | Potongan |",
                                 "url": {
                                     "raw": "{{base_url}}api/all-worker/{{applicant_id}}/set-salary",
                                     "host": [
@@ -7207,7 +6823,112 @@
                                     ]
                                 }
                             },
-                            "response": []
+                            "response": [
+                                {
+                                    "name": "Contoh: Contract (Bulanan)",
+                                    "originalRequest": {
+                                        "method": "POST",
+                                        "header": [
+                                            {"key": "Accept", "value": "application/json", "type": "text"},
+                                            {"key": "Content-Type", "value": "application/json", "type": "text"}
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"salary_type\": \"contract\",\n    \"contract_salary\": 2500000,\n    \"contract_start_date\": \"2026-06-01\",\n    \"contract_end_date\": \"2026-12-01\",\n    \"admin_fee\": 150000,\n    \"garansi_id\": null,\n    \"garansi_price\": null,\n    \"warranty_duration\": \"3 Bulan\",\n    \"deduction_amount\": 50000,\n    \"scheme_id\": null\n}",
+                                            "options": {"raw": {"language": "json"}}
+                                        },
+                                        "url": {
+                                            "raw": "{{base_url}}api/all-worker/{{applicant_id}}/set-salary",
+                                            "host": ["{{base_url}}api"],
+                                            "path": ["all-worker", "{{applicant_id}}", "set-salary"]
+                                        }
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "_postman_previewlanguage": "json",
+                                    "header": [],
+                                    "cookie": [],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Pengaturan gaji berhasil disimpan.\",\n    \"data\": {\n        \"id\": \"abc-123-uuid\",\n        \"servant_id\": \"servant-uuid\",\n        \"vacancy_id\": \"vacancy-uuid\",\n        \"employe_id\": null,\n        \"status\": \"passed\",\n        \"salary_type\": \"contract\",\n        \"salary\": 2500000,\n        \"admin_fee\": 150000,\n        \"deduction_amount\": 50000,\n        \"scheme_id\": null,\n        \"work_start_date\": \"2026-06-01\",\n        \"work_end_date\": \"2026-12-01\",\n        \"garansi_id\": null,\n        \"garansi_price\": null,\n        \"warranty_duration\": \"3 Bulan\",\n        \"is_infal\": 0,\n        \"infal_frequency\": null,\n        \"infal_time_in\": null,\n        \"infal_time_out\": null,\n        \"infal_hourly_rate\": null,\n        \"file_contract\": null,\n        \"servant\": {\"id\": \"servant-uuid\", \"name\": \"Pembantu 1\"},\n        \"vacancy\": {\"id\": \"vacancy-uuid\", \"title\": \"Lowongan Test\"},\n        \"scheme\": null\n    }\n}"
+                                },
+                                {
+                                    "name": "Contoh: Fee Regular (is_infal: false)",
+                                    "originalRequest": {
+                                        "method": "POST",
+                                        "header": [
+                                            {"key": "Accept", "value": "application/json", "type": "text"},
+                                            {"key": "Content-Type", "value": "application/json", "type": "text"}
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"salary_type\": \"fee\",\n    \"is_infal\": false,\n    \"fee_salary_regular\": 2000000,\n    \"fee_frequency_regular\": \"monthly\",\n    \"fee_end_date_regular\": \"2026-06-01\",\n    \"deduction_amount\": 0,\n    \"scheme_id\": null\n}",
+                                            "options": {"raw": {"language": "json"}}
+                                        },
+                                        "url": {
+                                            "raw": "{{base_url}}api/all-worker/{{applicant_id}}/set-salary",
+                                            "host": ["{{base_url}}api"],
+                                            "path": ["all-worker", "{{applicant_id}}", "set-salary"]
+                                        }
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "_postman_previewlanguage": "json",
+                                    "header": [],
+                                    "cookie": [],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Pengaturan gaji berhasil disimpan.\",\n    \"data\": {\n        \"id\": \"abc-123-uuid\",\n        \"servant_id\": \"servant-uuid\",\n        \"vacancy_id\": \"vacancy-uuid\",\n        \"employe_id\": null,\n        \"status\": \"passed\",\n        \"salary_type\": \"fee\",\n        \"salary\": 2000000,\n        \"admin_fee\": null,\n        \"deduction_amount\": 0,\n        \"scheme_id\": null,\n        \"is_infal\": 0,\n        \"infal_frequency\": \"monthly\",\n        \"work_start_date\": null,\n        \"work_end_date\": \"2026-06-08\",\n        \"infal_time_in\": null,\n        \"infal_time_out\": null,\n        \"infal_hourly_rate\": null,\n        \"warranty_duration\": null,\n        \"file_contract\": null,\n        \"servant\": {\"id\": \"servant-uuid\", \"name\": \"Pembantu 1\"},\n        \"vacancy\": {\"id\": \"vacancy-uuid\", \"title\": \"Lowongan Test\"},\n        \"scheme\": null\n    }\n}"
+                                },
+                                {
+                                    "name": "Contoh: Fee Infal Harian (is_infal: true, frequency: daily)",
+                                    "originalRequest": {
+                                        "method": "POST",
+                                        "header": [
+                                            {"key": "Accept", "value": "application/json", "type": "text"},
+                                            {"key": "Content-Type", "value": "application/json", "type": "text"}
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"salary_type\": \"fee\",\n    \"is_infal\": true,\n    \"infal_frequency\": \"daily\",\n    \"fee_salary_infal\": 150000,\n    \"infal_start_date\": \"2026-06-01\",\n    \"infal_end_date\": \"2026-06-30\",\n    \"deduction_amount\": 0,\n    \"scheme_id\": null\n}",
+                                            "options": {"raw": {"language": "json"}}
+                                        },
+                                        "url": {
+                                            "raw": "{{base_url}}api/all-worker/{{applicant_id}}/set-salary",
+                                            "host": ["{{base_url}}api"],
+                                            "path": ["all-worker", "{{applicant_id}}", "set-salary"]
+                                        }
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "_postman_previewlanguage": "json",
+                                    "header": [],
+                                    "cookie": [],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Pengaturan gaji berhasil disimpan.\",\n    \"data\": {\n        \"id\": \"abc-123-uuid\",\n        \"servant_id\": \"servant-uuid\",\n        \"vacancy_id\": \"vacancy-uuid\",\n        \"employe_id\": null,\n        \"status\": \"passed\",\n        \"salary_type\": \"fee\",\n        \"salary\": 150000,\n        \"admin_fee\": null,\n        \"deduction_amount\": 0,\n        \"scheme_id\": null,\n        \"is_infal\": 1,\n        \"infal_frequency\": \"daily\",\n        \"work_start_date\": \"2026-06-01\",\n        \"work_end_date\": \"2026-06-30\",\n        \"infal_time_in\": null,\n        \"infal_time_out\": null,\n        \"infal_hourly_rate\": null,\n        \"warranty_duration\": null,\n        \"file_contract\": null,\n        \"servant\": {\"id\": \"servant-uuid\", \"name\": \"Pembantu 1\"},\n        \"vacancy\": {\"id\": \"vacancy-uuid\", \"title\": \"Lowongan Test\"},\n        \"scheme\": null\n    }\n}"
+                                },
+                                {
+                                    "name": "Contoh: Fee Infal Per Jam (is_infal: true, frequency: hourly)",
+                                    "originalRequest": {
+                                        "method": "POST",
+                                        "header": [
+                                            {"key": "Accept", "value": "application/json", "type": "text"},
+                                            {"key": "Content-Type", "value": "application/json", "type": "text"}
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"salary_type\": \"fee\",\n    \"is_infal\": true,\n    \"infal_frequency\": \"hourly\",\n    \"infal_hourly_rate\": 25000,\n    \"infal_start_date\": \"2026-06-01\",\n    \"infal_time_in\": \"08:00\",\n    \"infal_time_out\": \"17:00\",\n    \"deduction_amount\": 0,\n    \"scheme_id\": null\n}",
+                                            "options": {"raw": {"language": "json"}}
+                                        },
+                                        "url": {
+                                            "raw": "{{base_url}}api/all-worker/{{applicant_id}}/set-salary",
+                                            "host": ["{{base_url}}api"],
+                                            "path": ["all-worker", "{{applicant_id}}", "set-salary"]
+                                        }
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "_postman_previewlanguage": "json",
+                                    "header": [],
+                                    "cookie": [],
+                                    "body": "{\n    \"success\": true,\n    \"message\": \"Pengaturan gaji berhasil disimpan.\",\n    \"data\": {\n        \"id\": \"abc-123-uuid\",\n        \"servant_id\": \"servant-uuid\",\n        \"vacancy_id\": \"vacancy-uuid\",\n        \"employe_id\": null,\n        \"status\": \"passed\",\n        \"salary_type\": \"fee\",\n        \"salary\": null,\n        \"admin_fee\": null,\n        \"deduction_amount\": 0,\n        \"scheme_id\": null,\n        \"is_infal\": 1,\n        \"infal_frequency\": \"hourly\",\n        \"work_start_date\": \"2026-06-01\",\n        \"work_end_date\": null,\n        \"infal_time_in\": \"08:00\",\n        \"infal_time_out\": \"17:00\",\n        \"infal_hourly_rate\": 25000,\n        \"warranty_duration\": null,\n        \"file_contract\": null,\n        \"servant\": {\"id\": \"servant-uuid\", \"name\": \"Pembantu 1\"},\n        \"vacancy\": {\"id\": \"vacancy-uuid\", \"title\": \"Lowongan Test\"},\n        \"scheme\": null\n    }\n}"
+                                }
+                            ]
                         },
                         {
                             "name": "Tukar Pembantu (Swap)",
@@ -7297,7 +7018,7 @@
                             "response": []
                         },
                         {
-                            "name": "Pengaduan",
+                            "name": "Pengaduan Pekerjaan",
                             "request": {
                                 "auth": {
                                     "type": "bearer",
@@ -7321,15 +7042,16 @@
                                     "mode": "formdata",
                                     "formdata": [
                                         {
-                                            "key": "message",
+                                            "key": "complaint_type_id",
                                             "value": "",
+                                            "description": "ID tipe pengaduan dari GET /complaint-types",
                                             "type": "text",
                                             "uuid": "1de1ebfc-88b2-4e30-9158-29c91f3e6127"
                                         },
                                         {
-                                            "key": "urgency_level",
+                                            "key": "description",
                                             "value": "",
-                                            "description": "Pilihannya: LOW, MEDIUM, HIGH, CRITICAL",
+                                            "description": "Deskripsi pengaduan (minimal 20 karakter)",
                                             "type": "text",
                                             "uuid": "5913cee7-3451-45b8-acc5-656267e43339"
                                         }

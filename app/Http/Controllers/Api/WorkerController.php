@@ -3,16 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
-use App\Models\Voucher;
+use App\Models\User;
+use App\Models\Urgency;
 use App\Models\Garansi;
 use App\Models\Pengaduan;
 use App\Models\Application;
 use App\Traits\ApiResponse;
 use App\Models\WorkerSalary;
+use App\Models\ServantDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Notifications\GeneralNotification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -114,10 +117,10 @@ class WorkerController extends Controller
                         $q->where('user_id', $user->id);
                     });
             })
-            ->where('status', 'accepted')
+            ->whereIn('status', ['accepted', 'laidoff', 'rejected'])
             ->find($id);
 
-        $workerSalaries = WorkerSalary::with(['voucher'])->where('application_id', $id)->get();
+        $workerSalaries = WorkerSalary::where('application_id', $id)->get();
 
         if (!$worker) {
             return response()->json([
@@ -218,291 +221,6 @@ class WorkerController extends Controller
         }
     }
 
-    /**
-     * Menyimpan absensi pekerja dan menghitung gaji.
-     *
-     * @param Request $request
-     * @param Application $application
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function presenceWorker(Request $request, Application $application)
-    {
-        if (!$application) {
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Data pekerjaan tidak ditemukan.',
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'month' => 'required',
-            'presence' => 'required|integer|min:0',
-            'voucher' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Validasi gagal!',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $data = $validator->validated();
-
-        $schemaSalary = optional($application->schemaSalary);
-        $bpjsClient = $schemaSalary->bpjs_client ? 20000 : 0;
-        $bpjsMitra = $schemaSalary->bpjs_mitra ? 20000 : 0;
-
-        $voucher = null;
-        if (!empty($data['voucher'])) {
-            $voucher = Voucher::where('code', $data['voucher'])->first();
-
-            if (!$voucher) {
-                return response()->json([
-                    'success' => 'failed',
-                    'message' => 'Kode voucher tidak ditemukan',
-                ], 400);
-            }
-
-            if (!$voucher->is_active) {
-                return response()->json([
-                    'success' => 'failed',
-                    'message' => 'Kode voucher sudah tidak aktif',
-                ], 400);
-            }
-
-            if ($voucher->expired_date && $voucher->expired_date < Carbon::now()->format('Y-m-d')) {
-                return response()->json([
-                    'success' => 'failed',
-                    'message' => 'Kode voucher sudah tidak berlaku',
-                ], 400);
-            }
-
-            $usedCount = WorkerSalary::where('voucher_id', $voucher->id)->count();
-            $usedInApplication = $application->workerSalary()->where('voucher_id', $voucher->id)->count();
-
-            if ($voucher->people_used && $usedCount >= $voucher->people_used) {
-                if (!($voucher->time_used && $usedInApplication < $voucher->time_used)) {
-                    return response()->json([
-                        'success' => 'failed',
-                        'message' => 'Kode voucher telah mencapai batas penggunaan',
-                    ], 400);
-                }
-            }
-
-            if ($voucher->time_used && $usedInApplication >= $voucher->time_used) {
-                return response()->json([
-                    'success' => 'failed',
-                    'message' => 'Kode voucher telah mencapai batas penggunaan pada pekerja ini',
-                ], 400);
-            }
-        }
-
-        $month = Carbon::createFromFormat('Y-m', $data['month']);
-        $daysInMonth = $month->daysInMonth;
-        $daySalary = $application->salary / $daysInMonth;
-
-        $totalSalary = $data['presence'] * $daySalary;
-        $discount = $voucher ? ($application->schemaSalary->adds_client - ($voucher->discount / 100)) : $application->schemaSalary->adds_client;
-
-        $majikanBonus = $totalSalary * $discount;
-        $totalSalaryMajikan = ($totalSalary + $majikanBonus) + $bpjsClient;
-
-        $addSalaryPembantu = $totalSalary * $application->schemaSalary->adds_mitra;
-        $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - $bpjsMitra;
-
-        $dataSalary = [
-            'day_salary' => ceil($daySalary),
-            'total_salary' => ceil($totalSalary),
-            'total_salary_majikan' => ceil($totalSalaryMajikan),
-            'total_salary_pembantu' => ceil($totalSalaryPembantu),
-        ];
-
-        try {
-            DB::beginTransaction();
-
-            $store = WorkerSalary::create([
-                'application_id' => $application->id,
-                'month' => Carbon::createFromFormat('Y-m', $data['month'])->startOfMonth()->format('Y-m-d'),
-                'presence' => $data['presence'],
-                'total_salary' => $dataSalary['total_salary'],
-                'total_salary_majikan' => $dataSalary['total_salary_majikan'],
-                'total_salary_pembantu' => $dataSalary['total_salary_pembantu'],
-                'voucher_id' => $voucher ? $voucher->id : null,
-            ]);
-
-            DB::commit();
-
-            // try {
-            //     $bulan = Carbon::parse($store->month)->translatedFormat('F Y');
-            //     NotificationDispatched::dispatch(
-            //         "Laporan Absensi & Gaji bulan {$bulan} telah diterbitkan.",
-            //         $application->servant_id,
-            //         'success'
-            //     );
-            // } catch (\Exception $e) {
-            //     Log::error("Gagal kirim notif presenceWorker: " . $e->getMessage());
-            // }
-
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Absensi pekerja berhasil dikirimkan!',
-                'data'    => $store
-            ], 201);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Terjadi kesalahan saat mengirimkan absensi.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
-            ], 500);
-        }
-    }
-
-    /**
-     * Memperbarui absensi pekerja dan menghitung ulang gaji.
-     *
-     * @param Request $request
-     * @param Application $application
-     * @param WorkerSalary $salary
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function updatePresenceWorker(Request $request, Application $application, WorkerSalary $salary)
-    {
-        if (!$salary) {
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Data gaji pekerja tidak ditemukan.',
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'month' => 'required',
-            'presence' => 'required|integer|min:0',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Validasi gagal!',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $data = $validator->validated();
-
-        $schemaSalary = optional($application->schemaSalary);
-        $bpjsClient = $schemaSalary->bpjs_client ? 20000 : 0;
-        $bpjsMitra = $schemaSalary->bpjs_mitra ? 20000 : 0;
-
-        $voucher = null;
-        if (!empty($data['voucher'])) {
-            $voucher = Voucher::where('code', $data['voucher'])->first();
-
-            if (!$voucher) {
-                return response()->json([
-                    'success' => 'failed',
-                    'message' => 'Kode voucher tidak ditemukan',
-                ], 400);
-            }
-
-            if (!$voucher->is_active || ($voucher->expired_date && $voucher->expired_date < now()->format('Y-m-d'))) {
-                return response()->json([
-                    'success' => 'failed',
-                    'message' => 'Kode voucher tidak aktif atau sudah kadaluarsa',
-                ], 400);
-            }
-
-            $usedCount = WorkerSalary::where('voucher_id', $voucher->id)->count();
-            $usedInApplication = $application->workerSalary()->where('voucher_id', $voucher->id)->count();
-
-            if ($voucher->people_used && $usedCount >= $voucher->people_used) {
-                if (!($voucher->time_used && $usedInApplication < $voucher->time_used)) {
-                    return response()->json([
-                        'success' => 'failed',
-                        'message' => 'Kode voucher telah mencapai batas penggunaan',
-                    ], 400);
-                }
-            }
-
-            if ($voucher->time_used && $usedInApplication >= $voucher->time_used) {
-                return response()->json([
-                    'success' => 'failed',
-                    'message' => 'Kode voucher telah mencapai batas penggunaan pada pekerja ini',
-                ], 400);
-            }
-        }
-
-        $month = Carbon::createFromFormat('Y-m', $data['month']);
-        $daysInMonth = $month->daysInMonth;
-        $daySalary = $application->salary / $daysInMonth;
-
-        $totalSalary = $data['presence'] * $daySalary;
-        $discount = $voucher ? ($schemaSalary->adds_client - ($voucher->discount / 100)) : $schemaSalary->adds_client;
-
-        $majikanBonus = $totalSalary * $discount;
-        $totalSalaryMajikan = ($totalSalary + $majikanBonus) + $bpjsClient;
-
-        $addSalaryPembantu = $totalSalary * $schemaSalary->adds_mitra;
-        $totalSalaryPembantu = ($totalSalary - $addSalaryPembantu) - $bpjsMitra;
-
-        $dataSalary = [
-            'day_salary' => ceil($daySalary),
-            'total_salary' => ceil($totalSalary),
-            'total_salary_majikan' => ceil($totalSalaryMajikan),
-            'total_salary_pembantu' => ceil($totalSalaryPembantu),
-        ];
-
-        try {
-            DB::beginTransaction();
-
-            $update = $salary->update([
-                'month' => $month->startOfMonth()->format('Y-m-d'),
-                'presence' => $data['presence'],
-                'total_salary' => $dataSalary['total_salary'],
-                'total_salary_majikan' => $dataSalary['total_salary_majikan'],
-                'total_salary_pembantu' => $dataSalary['total_salary_pembantu'],
-                'voucher_id' => $voucher ? $voucher->id : $salary->voucher_id,
-            ]);
-
-            DB::commit();
-
-            // try {
-            //     $bulan = Carbon::parse($salary->month)->translatedFormat('F Y');
-            //     NotificationDispatched::dispatch(
-            //         "Revisi: Data Absensi bulan {$bulan} telah diperbarui oleh Majikan.",
-            //         $application->servant_id,
-            //         'info'
-            //     );
-            // } catch (\Exception $e) {
-            //     Log::error("Gagal kirim notif updatePresenceWorker: " . $e->getMessage());
-            // }
-
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Absensi pekerja berhasil diperbarui!',
-                'data'    => $update
-            ], 201);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Terjadi kesalahan saat memperbarui absensi.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
-            ], 500);
-        }
-    }
 
     public function setSalary(Request $request, Application $application)
     {
@@ -646,6 +364,93 @@ class WorkerController extends Controller
         }
     }
 
+    public function uploadContractFile(Request $request, Application $application)
+    {
+        $user = auth()->user();
+        $isOwner = (string) $application->employe_id === (string) $user->id
+            || (string) ($application->vacancy?->user_id) === (string) $user->id;
+
+        if (!$isOwner) {
+            return $this->errorResponse('Anda tidak memiliki akses ke kontrak ini.', [], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'work_start_date' => 'required|date',
+            'file_contract'   => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        if ($validator->fails()) return $this->validationErrorResponse($validator);
+
+        try {
+            $servant  = User::findOrFail($application->servant_id);
+            $employer = $application->employe ?? $application->vacancy?->user;
+
+            $employerName = str_replace(' ', '_', $employer?->name ?? 'employer');
+            $servantName  = str_replace(' ', '_', $servant->name);
+            $prefix       = $application->employe_id ? 'hire' : 'vacancy';
+
+            $directory   = "contracts/{$prefix}_{$employerName}";
+            $fileName    = "contract_{$servantName}." . $request->file('file_contract')->getClientOriginalExtension();
+            $storagePath = "public/{$directory}";
+
+            if (!Storage::exists($storagePath)) {
+                Storage::makeDirectory($storagePath);
+            }
+
+            if ($application->file_contract && Storage::exists('public/' . $application->file_contract)) {
+                Storage::delete('public/' . $application->file_contract);
+            }
+
+            $path = $request->file('file_contract')->storeAs($storagePath, $fileName);
+
+            DB::beginTransaction();
+
+            $application->update([
+                'status'          => 'accepted',
+                'work_start_date' => $request->work_start_date,
+                'file_contract'   => str_replace('public/', '', $path),
+            ]);
+
+            // Update working_status pembantu
+            $servantDetail = ServantDetail::where('user_id', $servant->id)->first();
+            if ($servantDetail) {
+                $servantDetail->update(['working_status' => true]);
+            }
+
+            // Tolak semua lamaran lain milik pembantu ini
+            Application::where('servant_id', $servant->id)
+                ->where('id', '!=', $application->id)
+                ->whereNotIn('status', ['accepted', 'rejected', 'laidoff'])
+                ->update([
+                    'status'          => 'rejected',
+                    'notes_rejected'  => 'Telah diterima oleh ' . ($employer?->name ?? '-'),
+                ]);
+
+            // Tutup lowongan jika kuota terpenuhi
+            if ($application->vacancy_id) {
+                $vacancy       = $application->vacancy;
+                $acceptedCount = Application::where('vacancy_id', $vacancy->id)->where('status', 'accepted')->count();
+                if ($acceptedCount >= $vacancy->limit) {
+                    Application::where('vacancy_id', $vacancy->id)
+                        ->whereIn('status', ['pending', 'schedule', 'interview', 'passed', 'verify'])
+                        ->update(['status' => 'rejected']);
+                    $vacancy->update(['status' => false]);
+                }
+            }
+
+            DB::commit();
+
+            return $this->successResponse(
+                $application->fresh(['servant:id,name', 'vacancy:id,title']),
+                'File kontrak berhasil diunggah. Status kontrak menjadi aktif.'
+            );
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Error uploadContractFile: {$th->getMessage()}");
+            return $this->errorResponse('Gagal mengunggah file kontrak.', [], 500);
+        }
+    }
+
     /**
      * Mengunggah bukti pembayaran majikan.
      *
@@ -735,8 +540,6 @@ class WorkerController extends Controller
                 $totalSalaryPembantu = $gajiPokokBersih - $mitraDeductions;
             }
 
-            // 6. Operasi Database Transaction [cite: 101]
-            // Menyimpan status menggunakan firstOrCreate dan update dari Eloquent [cite: 102]
             $salary = WorkerSalary::firstOrCreate(
                 [
                     'id' => $data['worker_salary_id'] ?? null,
@@ -745,7 +548,7 @@ class WorkerController extends Controller
                 ],
                 [
                     'presence' => max(0, $quantity - $absenceDays),
-                    'absence' => $absenceDays, // Kolom digabung dan disimpan [cite: 103]
+                    'absence' => $absenceDays,
                     'absence_reason' => $data['absence_reason'] ?? null,
                     'extra_deduction' => $extraDeduction,
                     'total_salary' => $gajiPokokBersih,
@@ -865,11 +668,12 @@ class WorkerController extends Controller
 
             try {
                 $majikanName = auth()->user()->name;
-                NotificationDispatched::dispatch(
-                    "PENTING: Kontrak kerja Anda dengan {$majikanName} telah diakhiri (Status: {$datas['status']}).",
-                    $application->servant_id,
-                    'warning'
-                );
+                $application->servant->notify(new GeneralNotification(
+                    title: 'Kontrak Kerja Diakhiri',
+                    body: "Kontrak kerja Anda dengan {$majikanName} telah diakhiri (Status: {$datas['status']}).",
+                    type: 'contract_ended',
+                    data: ['application_id' => $application->id]
+                ));
             } catch (\Exception $e) {
                 Log::error("Gagal kirim notif rejectWorker: " . $e->getMessage());
             }
@@ -903,77 +707,62 @@ class WorkerController extends Controller
      */
     public function complaintWorker(Request $request, Application $application)
     {
+        $user = auth()->user();
+
+        $isOwner = (string) ($application->employe_id ?? $application->vacancy?->user_id) === (string) $user->id;
+        if (!$isOwner) {
+            return $this->errorResponse('Anda tidak memiliki akses ke kontrak ini.', [], 403);
+        }
+
         $validator = Validator::make($request->all(), [
-            'message' => ['required'],
-            'urgency_level' => ['required', 'in:LOW,MEDIUM,HIGH,CRITICAL'], // Wajib ada
+            'complaint_type_id' => ['required', 'exists:urgencies,id'],
+            'description'       => ['required', 'string', 'min:20'],
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Validasi gagal!',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->validationErrorResponse($validator);
         }
-
-        $data = $validator->validated();
 
         try {
             DB::beginTransaction();
 
-            $user = auth()->user();
+            $urgency = Urgency::find($request->complaint_type_id);
 
-            $complaint = Pengaduan::where('contract_id', $application->id)
-                ->where('reporter_id', $user->id)
-                ->first();
-
-            if ($complaint) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'Pengaduan pekerja sudah dikirimkan. Silakan coba lagi.',
-                    'data'    => $complaint
-                ], 409);
-            }
-
-            $store = Pengaduan::create([
-                'contract_id' => $application->id,
-                'reporter_id' => $user->id,
-                'reported_user_id' => $application->servant_id, // (Atau $employerId untuk complaintWork)
-                'description' => $data['message'],
-                'urgency_level' => $data['urgency_level'], // Masukkan datanya ke DB
-                'status' => 'open',
+            $complaint = Pengaduan::create([
+                'contract_id'       => $application->id,
+                'complaint_type_id' => $request->complaint_type_id,
+                'urgency_level'     => $urgency->default_urgency ?? 'LOW',
+                'reporter_id'       => $user->id,
+                'reported_user_id'  => $application->servant_id,
+                'description'       => $request->description,
+                'status'            => 'open',
             ]);
-
-            if (!$store) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'Pengaduan pekerja gagal disimpan. Silakan coba lagi.'
-                ], 502);
-            }
 
             DB::commit();
 
-            // Notify...
+            try {
+                $admins = User::role(['admin', 'superadmin'])->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new GeneralNotification(
+                        title: 'Pengaduan Baru Masuk',
+                        body: "{$user->name} mengajukan pengaduan baru dengan urgensi {$complaint->urgency_level}.",
+                        type: 'complaint_new',
+                        data: ['complaint_id' => $complaint->id]
+                    ));
+                }
+            } catch (\Throwable $e) {
+                Log::warning("Gagal kirim notif complaint baru: {$e->getMessage()}");
+            }
 
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Pengaduan pekerja berhasil dikirimkan!',
-                'data'    => $store
-            ], 201);
+            return $this->successResponse(
+                $complaint->load(['complaintType:id,name,default_urgency', 'reporter:id,name', 'reportedUser:id,name']),
+                'Pengaduan pekerja berhasil dikirimkan!',
+                201
+            );
         } catch (\Throwable $th) {
             DB::rollBack();
-            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Terjadi kesalahan saat mengirimkan aduan.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
-            ], 500);
+            Log::error("complaintWorker Error: {$th->getMessage()}");
+            return $this->errorResponse('Terjadi kesalahan saat mengirimkan aduan.', [], 500);
         }
     }
 
@@ -1078,7 +867,7 @@ class WorkerController extends Controller
         $user = auth()->user();
         $worker = Application::with(['servant', 'employe', 'vacancy'])
             ->where('servant_id', $user->id)
-            ->where('status', 'accepted')
+            ->whereIn('status', ['accepted', 'laidoff', 'rejected'])
             ->find($id);
 
         $workerSalaries = WorkerSalary::with(['voucher'])->where('application_id', $id)->get();
@@ -1184,79 +973,62 @@ class WorkerController extends Controller
      */
     public function complaintWork(Request $request, Application $application)
     {
+        $user = auth()->user();
+
+        if ((string) $application->servant_id !== (string) $user->id) {
+            return $this->errorResponse('Anda tidak memiliki akses ke kontrak ini.', [], 403);
+        }
+
         $validator = Validator::make($request->all(), [
-            'message' => ['required'],
-            'urgency_level' => ['required', 'in:LOW,MEDIUM,HIGH,CRITICAL'], // Wajib ada
+            'complaint_type_id' => ['required', 'exists:urgencies,id'],
+            'description'       => ['required', 'string', 'min:20'],
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Validasi gagal!',
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->validationErrorResponse($validator);
         }
-
-        $data = $validator->validated();
 
         try {
             DB::beginTransaction();
 
-            $user = auth()->user();
+            $urgency    = Urgency::find($request->complaint_type_id);
+            $employerId = $application->employe_id ?? $application->vacancy?->user_id;
 
-            $complaint = Pengaduan::where('contract_id', $application->id)
-                ->where('reporter_id', $user->id)
-                ->first();
-
-            if ($complaint) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'Pengaduan pekerjaan sudah dikirimkan. Silakan coba lagi.',
-                    'data'    => $complaint
-                ], 409);
-            }
-
-            $employerId = $application->employe_id ?? ($application->vacancy ? $application->vacancy->user_id : null);
-
-            $store = Pengaduan::create([
-                'contract_id'      => $application->id,
-                'reporter_id'      => $user->id,
-                'reported_user_id' => $employerId,
-                'description'      => $data['message'],
-                'urgency_level'    => $data['urgency_level'],
-                'status'           => 'open',
+            $complaint = Pengaduan::create([
+                'contract_id'       => $application->id,
+                'complaint_type_id' => $request->complaint_type_id,
+                'urgency_level'     => $urgency->default_urgency ?? 'LOW',
+                'reporter_id'       => $user->id,
+                'reported_user_id'  => $employerId,
+                'description'       => $request->description,
+                'status'            => 'open',
             ]);
-
-            if (!$store) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 'failed',
-                    'message' => 'Pengaduan pekerjaan gagal disimpan. Silakan coba lagi.'
-                ], 502);
-            }
 
             DB::commit();
 
-             // Notify...
+            try {
+                $admins = User::role(['admin', 'superadmin'])->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new GeneralNotification(
+                        title: 'Pengaduan Baru Masuk',
+                        body: "{$user->name} mengajukan pengaduan baru dengan urgensi {$complaint->urgency_level}.",
+                        type: 'complaint_new',
+                        data: ['complaint_id' => $complaint->id]
+                    ));
+                }
+            } catch (\Throwable $e) {
+                Log::warning("Gagal kirim notif complaint baru: {$e->getMessage()}");
+            }
 
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Pengaduan pekerjaan berhasil dikirimkan!',
-                'data'    => $store
-            ], 201);
+            return $this->successResponse(
+                $complaint->load(['complaintType:id,name,default_urgency', 'reporter:id,name', 'reportedUser:id,name']),
+                'Pengaduan pekerjaan berhasil dikirimkan!',
+                201
+            );
         } catch (\Throwable $th) {
             DB::rollBack();
-            Log::error("message: '{$th->getMessage()}',  file: '{$th->getFile()}',  line: {$th->getLine()}");
-            return response()->json([
-                'success' => 'failed',
-                'message' => 'Terjadi kesalahan saat mengirimkan aduan.',
-                'error'   => [
-                    'message' => $th->getMessage(),
-                    'file' => $th->getFile(),
-                    'line' => $th->getLine()
-                ]
-            ], 500);
+            Log::error("complaintWork Error: {$th->getMessage()}");
+            return $this->errorResponse('Terjadi kesalahan saat mengirimkan aduan.', [], 500);
         }
     }
 
@@ -1395,5 +1167,3 @@ class WorkerController extends Controller
         }
     }
 }
-
-

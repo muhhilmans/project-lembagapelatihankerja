@@ -10,7 +10,8 @@
       "Bash(python3 -c ' *)",
       "Bash(php -r ' *)",
       "Bash(php \"C:/Projects/project-lembagapelatihankerja/fix_postman.php\")",
-      "Bash(grep -v \"^\\\\s*//\")"
+      "Bash(grep -v \"^\\\\s*//\")",
+      "Bash(php -l \"C:/Projects/project-lembagapelatihankerja/app/Http/Controllers/Api/WorkerController.php\")"
     ]
   }
 }
