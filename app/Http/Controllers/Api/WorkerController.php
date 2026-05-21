@@ -411,20 +411,23 @@ class WorkerController extends Controller
                 'file_contract'   => str_replace('public/', '', $path),
             ]);
 
-            // Update working_status pembantu
-            $servantDetail = ServantDetail::where('user_id', $servant->id)->first();
-            if ($servantDetail) {
-                $servantDetail->update(['working_status' => true]);
-            }
+            $isInfal = (bool) $application->is_infal;
 
-            // Tolak semua lamaran lain milik pembantu ini
-            Application::where('servant_id', $servant->id)
-                ->where('id', '!=', $application->id)
-                ->whereNotIn('status', ['accepted', 'rejected', 'laidoff'])
-                ->update([
-                    'status'          => 'rejected',
-                    'notes_rejected'  => 'Telah diterima oleh ' . ($employer?->name ?? '-'),
-                ]);
+            // Infal boleh kerja di banyak tempat — tidak dikunci
+            if (!$isInfal) {
+                $servantDetail = ServantDetail::where('user_id', $servant->id)->first();
+                if ($servantDetail) {
+                    $servantDetail->update(['working_status' => true]);
+                }
+
+                Application::where('servant_id', $servant->id)
+                    ->where('id', '!=', $application->id)
+                    ->whereNotIn('status', ['accepted', 'rejected', 'laidoff'])
+                    ->update([
+                        'status'         => 'rejected',
+                        'notes_rejected' => 'Telah diterima oleh ' . ($employer?->name ?? '-'),
+                    ]);
+            }
 
             // Tutup lowongan jika kuota terpenuhi
             if ($application->vacancy_id) {
@@ -460,15 +463,56 @@ class WorkerController extends Controller
      */
     public function uploadMajikanContract(Request $request, Application $application)
     {
+        $user = auth()->user();
+        $isOwner = (string) $application->employe_id === (string) $user->id
+            || (string) ($application->vacancy?->user_id) === (string) $user->id;
+
+        if (!$isOwner) {
+            return $this->errorResponse('Anda tidak memiliki akses ke kontrak ini.', [], 403);
+        }
+
         $validator = Validator::make($request->all(), [
+            'month'         => 'required|date_format:Y-m',
             'proof_majikan' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'worker_salary_id' => 'required|exists:worker_salaries,id'
         ]);
 
-        if ($validator->fails()) return $this->errorResponse($validator->messages()->all()[0]);
+        if ($validator->fails()) return $this->validationErrorResponse($validator);
         if ($application->salary_type !== 'contract') return $this->errorResponse('Tipe gaji bukan kontrak bulanan.');
 
-        return $this->processUploadMajikan($request, $application, 'Contract');
+        $monthDate = Carbon::createFromFormat('Y-m', $request->month)->startOfMonth()->format('Y-m-d');
+
+        DB::beginTransaction();
+        try {
+            $salary = WorkerSalary::firstOrCreate(
+                ['application_id' => $application->id, 'month' => $monthDate],
+                [
+                    'presence'              => 0,
+                    'total_salary'          => $application->salary,
+                    'total_salary_majikan'  => $application->salary + ($application->admin_fee ?? 0),
+                    'total_salary_pembantu' => $application->salary,
+                ]
+            );
+
+            $majikanName = str_replace(' ', '_', ($application->vacancy ? $application->vacancy->user->name : $application->employe->name));
+            $servantName = str_replace(' ', '_', $application->servant->name);
+            $date        = Carbon::parse($salary->month)->format('M-Y');
+            $directory   = "payments/{$majikanName}/{$servantName}";
+            $baseFileName = "proof_majikan_contract_{$date}_{$servantName}";
+
+            if ($salary->payment_majikan_image && Storage::disk('public')->exists("payments/{$salary->payment_majikan_image}")) {
+                Storage::disk('public')->delete("payments/{$salary->payment_majikan_image}");
+            }
+
+            $path = $this->convertAndStoreToWebp($request->file('proof_majikan'), $directory, $baseFileName);
+            $salary->update(['payment_majikan_image' => $path]);
+
+            DB::commit();
+            return $this->successResponse($salary, 'Berhasil mengupload bukti pembayaran kontrak.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Error uploadMajikanContract: {$th->getMessage()}");
+            return $this->errorResponse('Kesalahan sistem saat memproses bukti pembayaran kontrak.', [], 500);
+        }
     }
 
     public function uploadMajikanFee(Request $request, Application $application)
@@ -1032,6 +1076,123 @@ class WorkerController extends Controller
         }
     }
 
+    public function uploadAdminContract(Request $request, Application $application)
+    {
+        $validator = Validator::make($request->all(), [
+            'month'      => 'required|date_format:Y-m',
+            'proof_admin' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        if ($validator->fails()) return $this->validationErrorResponse($validator);
+        if ($application->salary_type !== 'contract') return $this->errorResponse('Tipe gaji bukan kontrak bulanan.');
+
+        $monthDate = Carbon::createFromFormat('Y-m', $request->month)->startOfMonth()->format('Y-m-d');
+
+        DB::beginTransaction();
+        try {
+            $salary = WorkerSalary::firstOrCreate(
+                ['application_id' => $application->id, 'month' => $monthDate],
+                [
+                    'presence'              => 0,
+                    'total_salary'          => $application->salary,
+                    'total_salary_majikan'  => $application->salary + ($application->admin_fee ?? 0),
+                    'total_salary_pembantu' => $application->salary,
+                ]
+            );
+
+            $majikanName  = str_replace(' ', '_', ($application->vacancy ? $application->vacancy->user->name : $application->employe->name));
+            $servantName  = str_replace(' ', '_', $application->servant->name);
+            $date         = Carbon::parse($salary->month)->format('M-Y');
+            $directory    = "payments/{$majikanName}/{$servantName}";
+            $baseFileName = "proof_admin_contract_{$date}_{$servantName}";
+
+            if ($salary->payment_pembantu_image && Storage::disk('public')->exists("payments/{$salary->payment_pembantu_image}")) {
+                Storage::disk('public')->delete("payments/{$salary->payment_pembantu_image}");
+            }
+
+            $path = $this->convertAndStoreToWebp($request->file('proof_admin'), $directory, $baseFileName);
+            $salary->update(['payment_pembantu_image' => $path]);
+
+            DB::commit();
+            return $this->successResponse($salary, 'Berhasil mengupload bukti pembayaran ke pembantu.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error("Error uploadAdminContract: {$th->getMessage()}");
+            return $this->errorResponse('Kesalahan sistem saat memproses bukti pembayaran.', [], 500);
+        }
+    }
+
+    public function uploadAdminFee(Request $request, Application $application, WorkerSalary $salary)
+    {
+        $validator = Validator::make($request->all(), [
+            'proof_admin' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        if ($validator->fails()) return $this->validationErrorResponse($validator);
+
+        try {
+            $majikanName  = str_replace(' ', '_', ($application->vacancy ? $application->vacancy->user->name : $application->employe->name));
+            $servantName  = str_replace(' ', '_', $application->servant->name);
+            $date         = Carbon::parse($salary->month)->format('M-Y');
+            $directory    = "payments/{$majikanName}/{$servantName}";
+            $baseFileName = "proof_admin_{$date}_{$servantName}";
+
+            if ($salary->payment_pembantu_image && Storage::disk('public')->exists("payments/{$salary->payment_pembantu_image}")) {
+                Storage::disk('public')->delete("payments/{$salary->payment_pembantu_image}");
+            }
+
+            $path = $this->convertAndStoreToWebp($request->file('proof_admin'), $directory, $baseFileName);
+
+            DB::transaction(function () use ($salary, $path) {
+                $salary->update(['payment_pembantu_image' => $path]);
+            });
+
+            return $this->successResponse($salary, 'Berhasil mengupload bukti pembayaran ke pembantu.');
+        } catch (\Throwable $th) {
+            Log::error("Error uploadAdminFee: {$th->getMessage()}");
+            return $this->errorResponse('Kesalahan sistem saat memproses bukti pembayaran.', [], 500);
+        }
+    }
+
+    public function verifyMajikanPayment(Request $request, Application $application)
+    {
+        $validator = Validator::make($request->all(), [
+            'month'  => 'required|date_format:Y-m',
+            'action' => 'required|in:verified,rejected',
+        ]);
+
+        if ($validator->fails()) return $this->validationErrorResponse($validator);
+
+        try {
+            $monthDate = Carbon::createFromFormat('Y-m', $request->month)->startOfMonth()->format('Y-m-d');
+
+            $salary = WorkerSalary::where('application_id', $application->id)
+                ->where('month', $monthDate)
+                ->firstOrFail();
+
+            if ($request->action === 'verified') {
+                $salary->update([
+                    'payment_majikan_status'      => 'verified',
+                    'payment_majikan_verified_at' => now(),
+                ]);
+                return $this->successResponse($salary, 'Pembayaran majikan telah diverifikasi.');
+            } else {
+                if ($salary->payment_majikan_image && Storage::disk('public')->exists('payments/' . $salary->payment_majikan_image)) {
+                    Storage::disk('public')->delete('payments/' . $salary->payment_majikan_image);
+                }
+                $salary->update([
+                    'payment_majikan_status'      => 'rejected',
+                    'payment_majikan_image'       => null,
+                    'payment_majikan_verified_at' => null,
+                ]);
+                return $this->successResponse($salary, 'Pembayaran majikan ditolak. Majikan dapat mengupload ulang.');
+            }
+        } catch (\Throwable $th) {
+            Log::error("Error verifyMajikanPayment: {$th->getMessage()}");
+            return $this->errorResponse('Kesalahan sistem saat memverifikasi pembayaran.', [], 500);
+        }
+    }
+
     private function convertAndStoreToWebp($file, $directory, $baseFileName)
     {
         if (!Storage::disk('public')->exists($directory)) {
@@ -1100,19 +1261,29 @@ class WorkerController extends Controller
     public function extendContract(Request $request, Application $application)
     {
         $validator = Validator::make($request->all(), [
-            'new_work_end_date' => 'required|date|after:today',
+            'extend_months' => 'required|integer|min:1',
         ]);
 
         if ($validator->fails()) return $this->validationErrorResponse($validator);
 
         try {
             DB::beginTransaction();
+
+            if ($application->work_end_date) {
+                $endDate = Carbon::parse($application->work_end_date);
+            } else {
+                $startDate = $application->work_start_date ? Carbon::parse($application->work_start_date) : Carbon::now();
+                $endDate = $startDate->copy()->addMonths(12);
+            }
+
+            $newEndDate = $endDate->addMonths((int) $request->extend_months);
+
             $application->update([
-                'work_end_date' => $request->new_work_end_date
+                'work_end_date' => $newEndDate->format('Y-m-d'),
             ]);
             DB::commit();
 
-            return $this->successResponse($application, 'Durasi kontrak berhasil diperpanjang.');
+            return $this->successResponse($application, 'Durasi kontrak berhasil diperpanjang selama ' . $request->extend_months . ' bulan.');
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error("Error extendContract: {$th->getMessage()}");
@@ -1122,44 +1293,28 @@ class WorkerController extends Controller
 
     public function swapServant(Request $request, Application $application)
     {
-        $validator = Validator::make($request->all(), [
-            'new_servant_id' => 'required|exists:users,id',
-            'swap_reason' => 'required|string',
-        ]);
+        $user = auth()->user();
+        $isOwner = (string) $application->employe_id === (string) $user->id
+            || (string) ($application->vacancy?->user_id) === (string) $user->id;
 
-        if ($validator->fails()) return $this->validationErrorResponse($validator);
-
-        // Validasi garansi masih aktif
-        $warrantyEndsAt = Carbon::parse($application->work_start_date)->addMonths($application->warranty_duration);
-        if (Carbon::now()->greaterThan($warrantyEndsAt)) {
-            return $this->errorResponse('Masa garansi penukaran pembantu sudah habis.', [], 403);
+        if (!$isOwner) {
+            return $this->errorResponse('Anda tidak memiliki akses ke kontrak ini.', [], 403);
         }
 
         try {
             DB::beginTransaction();
 
-            // 1. Akhiri kontrak pembantu lama
-            $application->update([
-                'status' => 'laidoff',
-                'work_end_date' => Carbon::now()->format('Y-m-d'),
-                'end_reason' => 'Ditukar (Swap): ' . $request->swap_reason
-            ]);
+            $startDate = Carbon::parse($application->work_start_date);
+            $endDate   = $startDate->copy()->addMonths(1);
 
-            // 2. Buat kontrak baru untuk pembantu pengganti dengan sisa waktu/garansi
-            $newApp = Application::create([
-                'servant_id' => $request->new_servant_id,
-                'employe_id' => $application->employe_id,
-                'vacancy_id' => $application->vacancy_id,
-                'status' => 'accepted',
-                'salary_type' => $application->salary_type,
-                'salary' => $application->salary,
-                'warranty_duration' => $application->warranty_duration, // Mewarisi durasi garansi awal
-                'work_start_date' => Carbon::now()->format('Y-m-d'),
-                'work_end_date' => $application->work_end_date, // Mewarisi target selesai
+            $application->update([
+                'status'          => 'laidoff',
+                'work_end_date'   => $endDate->format('Y-m-d'),
+                'notes_rejected'  => 'Diganti dengan pembantu lain. (Tukar Pembantu)',
             ]);
 
             DB::commit();
-            return $this->successResponse($newApp, 'Pembantu berhasil ditukar menggunakan Garansi.');
+            return $this->successResponse($application, 'Pembantu berhasil ditukar. Silakan pekerjakan pembantu pengganti.');
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error("Error swapServant: {$th->getMessage()}");

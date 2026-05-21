@@ -74,6 +74,7 @@ Route::middleware('jwt.auth')->group(function () {
 
         // Kelola Lowongan
         Route::apiResource('vacancy', VacancyController::class);
+        Route::post('/vacancy/{id}/restore', [VacancyController::class, 'restore']);
         Route::post('/vacancy/{vacancy}/apply-recom/{recomServant}', [ApplicationController::class, 'applyRecom']);
 
         // Kelola Profil
@@ -118,6 +119,11 @@ Route::middleware('jwt.auth')->group(function () {
     Route::middleware('role_api:admin,superadmin')->group(function () {
         Route::put('/complaints/{id}/status', [ComplaintController::class, 'changeStatus']);
         Route::post('/complaints/{id}/resolve', [ComplaintController::class, 'resolve']);
+
+        // Manajemen Pembayaran Pekerja
+        Route::post('/all-worker/{application}/uploadPayment-admin-contract', [WorkerController::class, 'uploadAdminContract']);
+        Route::post('/all-worker/{application}/uploadPayment-admin-fee/{salary}', [WorkerController::class, 'uploadAdminFee']);
+        Route::post('/all-worker/{application}/verify-payment', [WorkerController::class, 'verifyMajikanPayment']);
     });
 
     // ==========================================

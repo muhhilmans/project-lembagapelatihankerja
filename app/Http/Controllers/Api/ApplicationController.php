@@ -153,9 +153,13 @@ class ApplicationController extends Controller
             ], 409);
         }
 
-        // 2. Validasi: Cek apakah masih terikat kontrak aktif
+        // 2. Validasi: Cek apakah masih terikat kontrak non-infal (contract atau fee reguler)
+        // Infal boleh melamar di banyak tempat secara bersamaan
         $hasActiveContract = Application::where('servant_id', $servantId)
             ->where('status', 'accepted')
+            ->where(function ($q) {
+                $q->where('is_infal', false)->orWhereNull('is_infal');
+            })
             ->exists();
 
         if ($hasActiveContract) {
@@ -225,9 +229,13 @@ class ApplicationController extends Controller
             ], 409);
         }
 
-        // Cek apakah pekerja terikat kontrak aktif (Perbaikan BUG $servantId -> $servant->id)
+        // Cek apakah pekerja terikat kontrak non-infal aktif
+        // Infal boleh diproses di banyak tempat secara bersamaan
         $hasActiveContract = Application::where('servant_id', $servant->id)
             ->where('status', 'accepted')
+            ->where(function ($q) {
+                $q->where('is_infal', false)->orWhereNull('is_infal');
+            })
             ->exists();
 
         if ($hasActiveContract) {

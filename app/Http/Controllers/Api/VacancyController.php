@@ -256,6 +256,27 @@ class VacancyController extends Controller
         }
     }
 
+    public function restore($id)
+    {
+        $vacancy = Vacancy::withTrashed()->find($id);
+
+        if (!$vacancy) {
+            return $this->errorResponse('Data lowongan tidak ditemukan!', [], 404);
+        }
+
+        if ($vacancy->user_id !== auth()->id()) {
+            return $this->errorResponse('Unauthorized', [], 403);
+        }
+
+        try {
+            $vacancy->restore();
+            return $this->successResponse($vacancy->fresh(), 'Lowongan berhasil dipulihkan.');
+        } catch (\Throwable $th) {
+            Log::error("Restore Vacancy Error: " . $th->getMessage());
+            return $this->errorResponse('Terjadi kesalahan saat memulihkan lowongan.', [], 500);
+        }
+    }
+
     public function seekVacancy(Request $request)
     {
         $professionId = $request->input('profession_id');

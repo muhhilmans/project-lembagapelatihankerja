@@ -11,7 +11,16 @@
       "Bash(php -r ' *)",
       "Bash(php \"C:/Projects/project-lembagapelatihankerja/fix_postman.php\")",
       "Bash(grep -v \"^\\\\s*//\")",
-      "Bash(php -l \"C:/Projects/project-lembagapelatihankerja/app/Http/Controllers/Api/WorkerController.php\")"
+      "Bash(php -l \"C:/Projects/project-lembagapelatihankerja/app/Http/Controllers/Api/WorkerController.php\")",
+      "Bash(python3 -c \"import json; print\\('ok'\\)\")",
+      "Bash(python -c \"import json; print\\('ok'\\)\")",
+      "Bash(node -e \"console.log\\('ok'\\)\")",
+      "Bash(node --input-type=commonjs)",
+      "Bash(Remove-Item patch-postman.js)",
+      "Bash(del \"c:\\\\Projects\\\\project-lembagapelatihankerja\\\\patch-postman.js\")",
+      "Bash(node -e ' *)",
+      "Bash(node --input-type=commonjs -e ' *)",
+      "Bash(node fix-postman.js --input-type=commonjs)"
     ]
   }
 }

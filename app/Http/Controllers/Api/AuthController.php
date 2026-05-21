@@ -85,9 +85,14 @@ class AuthController extends Controller
             return $this->errorResponse('Kombinasi akun dan password salah.', [], 401);
         }
 
-        // 6. Cek Verifikasi Email
+        // 6. Cek Status Aktif Akun
+        if (!$user->is_active) {
+            auth('api')->setToken($token)->logout();
+            return $this->errorResponse('Akun Anda telah dinonaktifkan. Hubungi admin.', [], 403);
+        }
+
+        // 7. Cek Verifikasi Email
         if ($user->email_verified_at == null) {
-            // Jika belum verifikasi, logout token yang baru saja dibuat
             auth('api')->setToken($token)->logout();
             return $this->errorResponse('Email belum diverifikasi!', ['email' => $user->email], 401);
         }

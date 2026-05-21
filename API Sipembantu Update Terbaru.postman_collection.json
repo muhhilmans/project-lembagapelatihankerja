@@ -30,7 +30,8 @@
                             "path": [
                                 "professions"
                             ]
-                        }
+                        },
+                        "description": "Mengambil semua data profesi yang tersedia.\n\nDigunakan saat registrasi mitra untuk memilih profesi, dan sebagai filter di halaman cari mitra / cari lowongan."
                     },
                     "response": []
                 },
@@ -63,7 +64,8 @@
                             "path": [
                                 "schedule-interview"
                             ]
-                        }
+                        },
+                        "description": "Mengambil jadwal interview terdekat untuk user yang login.\n\n- **Majikan**: menampilkan lamaran miliknya yang sedang berstatus `interview`\n- **Mitra**: menampilkan lamarannya yang berstatus `interview`\n\nMaks 3 data, diurutkan dari yang terbaru."
                     },
                     "response": [
                         {
@@ -173,7 +175,8 @@
                             "path": [
                                 "pushLaLongtitude"
                             ]
-                        }
+                        },
+                        "description": "## Update Koordinat GPS\n\nMenyimpan posisi latitude/longitude user yang sedang login. Digunakan untuk fitur Live Tracking.\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| latitude | ✅ | Koordinat lintang (angka) |\n| longitude | ✅ | Koordinat bujur (angka) |"
                     },
                     "response": [
                         {
@@ -287,7 +290,8 @@
                                     "type": "string"
                                 }
                             ]
-                        }
+                        },
+                        "description": "Mengambil lokasi real-time semua pekerja aktif.\n\nHanya menampilkan user yang sudah pernah push koordinat via `POST /pushLaLongtitude`."
                     },
                     "response": []
                 }
@@ -380,7 +384,8 @@
                             "path": [
                                 "login"
                             ]
-                        }
+                        },
+                        "description": "## Login\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| account | ✅ | Email **atau** username terdaftar |\n| password | ✅ | Password |\n\n**Ketentuan:**\n- Sistem otomatis mendeteksi apakah `account` berupa email atau username\n- Jika akun tidak aktif → **403**\n- Jika email belum diverifikasi OTP → **401**\n- Token lama otomatis di-blacklist saat login baru\n- Token berlaku **30 hari**"
                     },
                     "response": [
                         {
@@ -754,7 +759,8 @@
                             "path": [
                                 "logout"
                             ]
-                        }
+                        },
+                        "description": "Menonaktifkan token JWT yang sedang digunakan.\nSetelah logout, token tidak dapat dipakai lagi."
                     },
                     "response": [
                         {
@@ -924,7 +930,8 @@
                             "path": [
                                 "register-employe"
                             ]
-                        }
+                        },
+                        "description": "## Registrasi Majikan\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| name | ✅ | Nama lengkap |\n| email | ✅ | Email unik |\n| username | ✅ | Username unik |\n| password | ✅ | Min 8 karakter |\n| password_confirmation | ✅ | Harus sama dengan password |\n| phone | ✅ | Nomor telepon |\n| address | ✅ | Alamat |"
                     },
                     "response": [
                         {
@@ -1222,45 +1229,33 @@
                             "formdata": [
                                 {
                                     "key": "name",
-                                    "value": "{{name}}",
-                                    "type": "text",
-                                    "uuid": "9a82a32a-1fc4-4e2e-ba7e-e0608dedd280"
+                                    "value": "",
+                                    "type": "text"
                                 },
                                 {
                                     "key": "username",
-                                    "value": "{{username}}",
-                                    "type": "text",
-                                    "uuid": "82f390b7-8173-4967-bf39-ce0a54657575"
+                                    "value": "",
+                                    "type": "text"
                                 },
                                 {
                                     "key": "email",
-                                    "value": "sulthanaja12@gmail.com",
-                                    "type": "text",
-                                    "uuid": "02a8d396-06e6-4473-8652-0b3951330172"
+                                    "value": "",
+                                    "type": "text"
                                 },
                                 {
                                     "key": "password",
-                                    "value": "{{password}}",
-                                    "type": "text",
-                                    "uuid": "757e9eab-f2b6-4679-b9a8-5400a15b9734"
+                                    "value": "",
+                                    "type": "text"
                                 },
                                 {
-                                    "key": "phone",
-                                    "value": "{{phone}}",
-                                    "type": "text",
-                                    "uuid": "19877ad4-9b09-42ab-9d87-f0721cc27efc"
-                                },
-                                {
-                                    "key": "address",
-                                    "value": "{{address}}",
-                                    "type": "text",
-                                    "uuid": "239efd95-ab57-458b-b719-7b9b8509c4ad"
+                                    "key": "password_confirmation",
+                                    "value": "",
+                                    "type": "text"
                                 },
                                 {
                                     "key": "profession_id",
-                                    "value": "{{profession_id}}",
-                                    "type": "text",
-                                    "uuid": "bf64f562-6919-46d7-bc0d-201744b4b114"
+                                    "value": "",
+                                    "type": "text"
                                 }
                             ]
                         },
@@ -1272,7 +1267,8 @@
                             "path": [
                                 "register-servant"
                             ]
-                        }
+                        },
+                        "description": "## Registrasi Mitra (Pembantu)\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| name | ✅ | Nama lengkap |\n| email | ✅ | Email unik |\n| username | ✅ | Username unik |\n| password | ✅ | Min 8 karakter |\n| password_confirmation | ✅ | Harus sama dengan password |\n| profession_id | ✅ | ID profesi (dari `GET /professions`) |\n\n**Catatan:** Data pribadi lengkap (tempat lahir, tanggal lahir, gender, agama, dll) diisi via `POST /profile/pembantu/{id}/edit` setelah registrasi.\n\nSetelah registrasi:\n- Akun otomatis `is_active = false` — belum bisa login\n- Kode OTP 6 digit dikirim ke email (berlaku 5 menit)"
                     },
                     "response": [
                         {
@@ -1601,7 +1597,8 @@
                             "path": [
                                 "verify-otp"
                             ]
-                        }
+                        },
+                        "description": "## Verifikasi OTP\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| email | ✅ | Email yang didaftarkan |\n| otp | ✅ | Kode OTP 6 digit dari email |"
                     },
                     "response": [
                         {
@@ -1869,7 +1866,8 @@
                                 "verify-otp",
                                 "resend"
                             ]
-                        }
+                        },
+                        "description": "## Kirim Ulang OTP\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| email | ✅ | Email yang didaftarkan |"
                     },
                     "response": [
                         {
@@ -2025,7 +2023,8 @@
                             "path": [
                                 "vacancy"
                             ]
-                        }
+                        },
+                        "description": "## Daftar Lowongan Milik Majikan\n\n**Query params (opsional):**\n| Param | Keterangan |\n|---|---|\n| search | Cari berdasarkan judul, deskripsi, atau persyaratan |\n| page | Halaman (10 per halaman) |\n\nLowongan yang kuota terpenuhi otomatis diarsipkan."
                     },
                     "response": [
                         {
@@ -2165,7 +2164,8 @@
                                 "vacancy",
                                 "{{vacancy_id}}"
                             ]
-                        }
+                        },
+                        "description": "## Detail Lowongan Majikan\n\nMenunjukkan detail lowongan beserta:\n- **pelamar**: lamaran yang belum accepted\n- **rekomendasi**: mitra yang direkomendasikan sistem (belum melamar + tidak sedang bekerja)"
                     },
                     "response": [
                         {
@@ -2441,7 +2441,8 @@
                             "path": [
                                 "vacancy"
                             ]
-                        }
+                        },
+                        "description": "## Buat Lowongan Baru\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| title | ✅ | Judul lowongan |\n| profession_ids | ✅ | Array ID profesi (dari GET /professions) |\n| closing_date | ✅ | Tanggal tutup (YYYY-MM-DD) |\n| limit | ✅ | Jumlah mitra yang dibutuhkan |\n| description | ✅ | Deskripsi pekerjaan |\n| requirements | ✅ | Persyaratan |\n| benefits | ❌ | Keuntungan / fasilitas |"
                     },
                     "response": [
                         {
@@ -2665,7 +2666,8 @@
                                 "vacancy",
                                 "{{vacancy_id}}"
                             ]
-                        }
+                        },
+                        "description": "## Edit Lowongan\n\nField sama seperti Create.\n\n> ℹ️ Jika limit dinaikkan melewati jumlah accepted saat ini, lowongan otomatis diaktifkan kembali."
                     },
                     "response": [
                         {
@@ -2852,7 +2854,8 @@
                                 "vacancy",
                                 "{{vacancy_id}}"
                             ]
-                        }
+                        },
+                        "description": "## Hapus Lowongan\n\n> ⚠️ Lowongan hanya bisa dihapus jika **belum ada pelamar**. Jika sudah ada pelamar → gagal dengan HTTP 422."
                     },
                     "response": [
                         {
@@ -3012,7 +3015,34 @@
                                 "apply-recom",
                                 "{{recom_id}}"
                             ]
-                        }
+                        },
+                        "description": "## Setujui Rekomendasi Mitra\n\nMajikan menyetujui mitra yang direkomendasikan sistem, langsung ke tahap `schedule`.\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| interview_date | ✅ | Tanggal interview (YYYY-MM-DD) |\n| notes | ❌ | Catatan interview |"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Restore",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}api/vacancy/{{vacancy_id}}/restore",
+                            "host": [
+                                "{{base_url}}api"
+                            ],
+                            "path": [
+                                "vacancy",
+                                "{{vacancy_id}}",
+                                "restore"
+                            ]
+                        },
+                        "description": "## Pulihkan Lowongan yang Diarsipkan\n\nMemulihkan lowongan yang sebelumnya dihapus (soft-delete / diarsipkan).\n\nTidak butuh body.\n\n> ℹ️ Hanya owner lowongan yang bisa melakukan restore."
                     },
                     "response": []
                 }
@@ -3059,7 +3089,8 @@
                                     "disabled": true
                                 }
                             ]
-                        }
+                        },
+                        "description": "## Cari Lowongan (Mitra)\n\nMenunjukkan semua lowongan aktif.\n\n**Query params (opsional):**\n| Param | Keterangan |\n|---|---|\n| profession_id | Filter berdasarkan UUID profesi |\n| page | Halaman (5 per halaman) |\n\nResponse menyertakan daftar `professions` untuk keperluan filter."
                     },
                     "response": [
                         {
@@ -3163,7 +3194,8 @@
                                 "seek-vacancy",
                                 "{{vacancy_id}}"
                             ]
-                        }
+                        },
+                        "description": "## Detail Lowongan (Mitra)\n\nMenunjukkan detail lowongan beserta status lamaran mitra yang login:\n- `Sudah melamar` — sudah pernah apply\n- `Belum melamar` — belum pernah apply"
                     },
                     "response": [
                         {
@@ -3263,7 +3295,8 @@
                                 "{{vacancy_id}}",
                                 "favorite"
                             ]
-                        }
+                        },
+                        "description": "Toggle favorit lowongan.\n\n- Belum difavoritkan → ditambahkan\n- Sudah difavoritkan → dihapus\n\nTidak butuh body."
                     },
                     "response": [
                         {
@@ -3357,7 +3390,8 @@
                                 "seek-vacancy",
                                 "my-favorites"
                             ]
-                        }
+                        },
+                        "description": "## Favorit Lowongan (Mitra)\n\nMengambil daftar lowongan yang sudah difavoritkan oleh mitra yang login.\n\nTidak butuh parameter tambahan — diambil otomatis dari token."
                     },
                     "response": [
                         {
@@ -3466,7 +3500,8 @@
                                         "majikan",
                                         "{{id_majikan}}"
                                     ]
-                                }
+                                },
+                                "description": "## Profil Majikan\n\nMengambil profil majikan berdasarkan ID.\nField: `name`, `email`, `username`, `address`, `phone`, `identity_card`."
                             },
                             "response": [
                                 {
@@ -3621,7 +3656,8 @@
                                         "{{id_majikan}}",
                                         "edit"
                                     ]
-                                }
+                                },
+                                "description": "## Update Profil Majikan\n\nGunakan `Content-Type: multipart/form-data`.\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| name | ✅ | Nama lengkap |\n| phone | ✅ | Nomor telepon |\n| address | ✅ | Alamat |\n| username | ❌ | Harus unik |\n| email | ❌ | Harus unik |\n| identity_card | ❌ | KTP (jpeg/png/jpg/gif/svg, max 2MB) |"
                             },
                             "response": [
                                 {
@@ -3783,7 +3819,8 @@
                                         "pembantu",
                                         "{{id_pembantu}}"
                                     ]
-                                }
+                                },
+                                "description": "## Profil Mitra (Pembantu)\n\nMengambil profil pembantu lengkap beserta `servant_details` dan `servant_skills`.\n\nURL foto/dokumen sudah berupa full URL `asset()` siap dipakai."
                             },
                             "response": [
                                 {
@@ -4114,7 +4151,8 @@
                                         "{{id_pembantu}}",
                                         "edit"
                                     ]
-                                }
+                                },
+                                "description": "## Update Profil Mitra\n\nGunakan `Content-Type: multipart/form-data`.\n\n**Wajib:** `name`, `place_of_birth`, `date_of_birth`, `gender`, `religion`, `marital_status`, `children`, `last_education`, `phone`, `emergency_number`, `address`, `rt`, `rw`, `province`, `regency`, `district`, `village`, `experience`, `description`\n\n**Opsional:**\n| Field | Keterangan |\n|---|---|\n| email / username | Harus unik |\n| profession_ids[] | Array UUID profesi (sync — mengganti semua profesi lama) |\n| is_bank | boolean — jika 1, `bank_name` dan `account_number` wajib |\n| is_bpjs | boolean — jika 1, `type_bpjs` dan `number_bpjs` wajib |\n| photo / identity_card / family_card | Gambar max 2MB |\n| latitude / longitude | Koordinat GPS |"
                             },
                             "response": [
                                 {
@@ -4447,7 +4485,8 @@
                                         "{{id_pembantu}}",
                                         "skill"
                                     ]
-                                }
+                                },
+                                "description": "## Tambah Keahlian\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| skill | ✅ | Nama keahlian (misal: Memasak) |\n| level | ✅ | Tingkat (misal: beginner / intermediate / master) |"
                             },
                             "response": [
                                 {
@@ -4599,7 +4638,8 @@
                                         "skill",
                                         "{{skill_id}}"
                                     ]
-                                }
+                                },
+                                "description": "## Update Keahlian\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| skill | ✅ | Nama keahlian baru |\n| level | ✅ | Tingkat keahlian baru |"
                             },
                             "response": [
                                 {
@@ -4734,7 +4774,8 @@
                                         "skill",
                                         "{{skill_id}}"
                                     ]
-                                }
+                                },
+                                "description": "Menghapus keahlian berdasarkan ID skill. Tidak butuh body."
                             },
                             "response": []
                         },
@@ -4770,7 +4811,8 @@
                                         "{{id_pembantu}}",
                                         "change-inval"
                                     ]
-                                }
+                                },
+                                "description": "Toggle status **infal** (kerja harian/tidak menginap).\n\nTidak butuh body — setiap request membalik `is_inval` (0 ↔ 1)."
                             },
                             "response": [
                                 {
@@ -4879,7 +4921,8 @@
                                         "{{id_pembantu}}",
                                         "change-stay"
                                     ]
-                                }
+                                },
+                                "description": "Toggle status **tinggal** (bersedia menginap).\n\nTidak butuh body — setiap request membalik `is_stay` (0 ↔ 1)."
                             },
                             "response": [
                                 {
@@ -5003,7 +5046,8 @@
                             "path": [
                                 "apply-job"
                             ]
-                        }
+                        },
+                        "description": "## Apply Lamaran (Mitra)\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| vacancy_id | ✅ | UUID lowongan |\n\n**Validasi otomatis:**\n- Tidak bisa melamar lowongan yang sama dua kali\n- Tidak bisa melamar jika sedang terikat kontrak aktif (`status: accepted`)"
                     },
                     "response": [
                         {
@@ -5117,7 +5161,8 @@
                             "path": [
                                 "all-application"
                             ]
-                        }
+                        },
+                        "description": "## Daftar Lamaran Milik Mitra\n\n- `hires`: lamaran via hire langsung\n- `indies`: lamaran via lowongan\n\nMasing-masing dipaginasi 10 per halaman."
                     },
                     "response": [
                         {
@@ -5239,7 +5284,8 @@
                                 "{{applicant_id}}",
                                 "choose"
                             ]
-                        }
+                        },
+                        "description": "## Pilih / Tolak Tawaran (Mitra)\n\n| Field | Wajib | Nilai |\n|---|---|---|\n| status | ✅ | `choose` (terima) atau `rejected` (tolak) |\n\n> ⚠️ Hanya bisa dilakukan saat status lamaran = `passed`.\n\nJika `rejected` → proses selesai.\nJika `choose` → lanjut ke tahap konfirmasi oleh majikan (`verify`)."
                     },
                     "response": []
                 }
@@ -5314,7 +5360,8 @@
                                     "disabled": true
                                 }
                             ]
-                        }
+                        },
+                        "description": "## Cari Mitra (Client)\n\nOtomatis menyembunyikan mitra yang sedang dalam proses lamaran dengan majikan yang login.\n\n**Query params (semua opsional):**\n| Param | Keterangan |\n|---|---|\n| name / search | Cari berdasarkan nama |\n| religion | Filter agama |\n| is_inval | `1` = hanya mitra infal |\n| is_stay | `1` = hanya mitra bersedia menginap |\n| professions[] | Array UUID profesi — `professions[]=uuid1&professions[]=uuid2` |\n| page | Halaman (10 per halaman) |"
                     },
                     "response": [
                         {
@@ -5419,7 +5466,8 @@
                                 "detail",
                                 "{{id_pembantu}}"
                             ]
-                        }
+                        },
+                        "description": "## Detail Mitra (Client)\n\nMenunjukkan profil lengkap mitra berdasarkan ID user."
                     },
                     "response": [
                         {
@@ -5538,7 +5586,8 @@
                                 "{{id_pembantu}}",
                                 "hire"
                             ]
-                        }
+                        },
+                        "description": "## Hire Mitra Langsung\n\nMerekrut mitra langsung tanpa lowongan. Status lamaran = `pending`.\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| employe_id | ✅ | UUID majikan (user yang login) |"
                     },
                     "response": [
                         {
@@ -5657,7 +5706,8 @@
                                 "{{servant_id}}",
                                 "favorite"
                             ]
-                        }
+                        },
+                        "description": "Toggle favorit mitra.\n\n- Belum difavoritkan → ditambahkan\n- Sudah difavoritkan → dihapus\n\nTidak butuh body."
                     },
                     "response": [
                         {
@@ -5763,7 +5813,8 @@
                                 "seek-mitra",
                                 "my-favorites"
                             ]
-                        }
+                        },
+                        "description": "Mengambil daftar mitra yang difavoritkan oleh majikan yang login."
                     },
                     "response": [
                         {
@@ -5872,7 +5923,8 @@
                             "path": [
                                 "all-applicant"
                             ]
-                        }
+                        },
+                        "description": "## Daftar Pelamar (Client)\n\nMenunjukkan semua lamaran yang masuk (kecuali yang sudah `accepted`, `rejected`, atau `laidoff`).\n\n- `hires`: pelamar via hire langsung\n- `indies`: pelamar via lowongan\n\nMasing-masing dipaginasi 10 per halaman."
                     },
                     "response": [
                         {
@@ -6016,7 +6068,8 @@
                                 "{{applicant_id}}",
                                 "change"
                             ]
-                        }
+                        },
+                        "description": "## Ubah Status Pelamar (Client)\n\n| status yang dikirim | Field tambahan |\n|---|---|\n| `schedule` | `interview_date` (date), `notes_interview` (string) |\n| `interview` | `link_interview` (URL), `notes_interview` (string) |\n| `passed` | `salary` (numeric) |\n| `verify` | `notes_verify` (string) |\n| `rejected` | `notes_rejected` (string) |\n\n> ⚠️ Tidak bisa mengubah status yang sudah `accepted`, `rejected`, atau `laidoff`."
                     },
                     "response": [
                         {
@@ -6168,7 +6221,8 @@
                                     "path": [
                                         "all-worker"
                                     ]
-                                }
+                                },
+                                "description": "## Daftar Pekerja (Client)\n\n**Query params:**\n| Param | Keterangan |\n|---|---|\n| search | Cari berdasarkan nama atau email pekerja |\n| active_page | Halaman data aktif (status: accepted) |\n| history_page | Halaman data riwayat (laidoff / rejected) |\n\nResponse terbagi: `datas` (aktif) dan `historyDatas` (riwayat)."
                             },
                             "response": [
                                 {
@@ -6297,7 +6351,8 @@
                                         "{{applicant_id}}",
                                         "reject"
                                     ]
-                                }
+                                },
+                                "description": "## Tolak / Hentikan Pekerja (Sebelum Kontrak Resmi)\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| status | ✅ | Status baru (misal: `rejected`) |\n| work_end_date | ✅ | Tanggal pemberhentian (YYYY-MM-DD) |\n\n> ℹ️ Untuk mengakhiri kontrak yang sudah `accepted`, gunakan **POST /end-contract**."
                             },
                             "response": []
                         },
@@ -6351,7 +6406,8 @@
                                         "{{applicant_id}}",
                                         "complaint-worker"
                                     ]
-                                }
+                                },
+                                "description": "## Pengaduan tentang Pekerja (Client)\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| complaint_type_id | ✅ | UUID tipe dari `GET /complaint-types` |\n| description | ✅ | Min 20 karakter |\n\nUrgensi otomatis dari `default_urgency` tipe yang dipilih. Admin dinotifikasi via Pusher."
                             },
                             "response": []
                         },
@@ -6385,7 +6441,8 @@
                                         "all-worker",
                                         "{{applicant_id}}"
                                     ]
-                                }
+                                },
+                                "description": "## Detail Pekerja (Client)\n\nMenunjukkan profil pembantu lengkap dan riwayat gaji (`gaji`).\n\n> ℹ️ Bisa diakses meskipun status sudah `laidoff` atau `rejected`."
                             },
                             "response": [
                                 {
@@ -6481,11 +6538,10 @@
                                     "mode": "formdata",
                                     "formdata": [
                                         {
-                                            "key": "worker_salary_id",
-                                            "value": "a0e3253e-c517-439e-a489-60ec9fc16f3b",
-                                            "description": "id",
+                                            "key": "month",
+                                            "value": "2026-05",
                                             "type": "text",
-                                            "uuid": "91914fb5-cbf8-4754-ba0a-cbe26b07a2bd"
+                                            "description": "Format YYYY-MM"
                                         },
                                         {
                                             "key": "proof_majikan",
@@ -6513,7 +6569,8 @@
                                         "{{applicant_id}}",
                                         "uploadPayment-contract"
                                     ]
-                                }
+                                },
+                                "description": "## Upload Bukti Pembayaran — Kontrak Bulanan\n\n`Content-Type: multipart/form-data`\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| month | ✅ | Format: `YYYY-MM` (misal: `2026-05`) — **satu kali per bulan** |\n| proof_majikan | ✅ | File (jpg/jpeg/png/pdf, max 2MB) |\n\n> ℹ️ Record gaji bulan itu dibuat otomatis jika belum ada (`firstOrCreate`). Jika sudah ada, hanya foto bukti yang diperbarui.\n\n> ⚠️ Hanya untuk `salary_type: contract`."
                             },
                             "response": [
                                 {
@@ -6691,7 +6748,8 @@
                                         "{{applicant_id}}",
                                         "uploadPayment-fee"
                                     ]
-                                }
+                                },
+                                "description": "## Upload Bukti Pembayaran — Fee / Infal\n\n`Content-Type: multipart/form-data`. Sekaligus membuat/memperbarui record gaji bulan ini.\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| month | ✅ | Format: `YYYY-MM` (misal: `2026-05`) — **satu kali per bulan** |\n| proof_majikan | ✅ | File (jpg/jpeg/png/pdf, max 2MB) |\n| worker_salary_id | ❌ | UUID record jika sudah ada (dari `data.gaji[].id` di **GET /all-worker/{id}**) |\n| absence_days | ❌ | Jumlah hari tidak hadir |\n| absence_reason | ❌ | Alasan tidak hadir |\n| extra_deduction | ❌ | Potongan tambahan (angka) |\n| quantity | ✅* | Wajib jika `infal_frequency` = `hourly`, `daily`, atau `weekly` |\n\n> ⚠️ Hanya untuk `salary_type: fee`.\n\n> ℹ️ Jika dipanggil lagi dengan `month` yang sama, data gaji bulan itu akan di-update (bukan duplikat)."
                             },
                             "response": []
                         },
@@ -6731,7 +6789,8 @@
                                         "{{applicant_id}}",
                                         "end-contract"
                                     ]
-                                }
+                                },
+                                "description": "## Akhiri Kontrak Kerja\n\nStatus → `laidoff`. `work_end_date` otomatis = hari ini.\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| end_reason | ✅ | Alasan pengakhiran kontrak |"
                             },
                             "response": []
                         },
@@ -6744,10 +6803,10 @@
                                     "mode": "formdata",
                                     "formdata": [
                                         {
-                                            "key": "new_work_end_date",
-                                            "value": "",
+                                            "key": "extend_months",
+                                            "value": "3",
                                             "type": "text",
-                                            "uuid": "be309eff-9916-46b9-816d-42355b488ae4"
+                                            "description": "Jumlah bulan yang ditambahkan (integer, min: 1)"
                                         }
                                     ]
                                 },
@@ -6771,7 +6830,8 @@
                                             "type": "string"
                                         }
                                     ]
-                                }
+                                },
+                                "description": "## Perpanjang Kontrak\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| extend_months | ✅ | Jumlah bulan yang ditambahkan (integer, min: 1) |\n\n> ℹ️ Diperpanjang dari tanggal akhir yang sudah ada. Jika belum ada tanggal akhir, dihitung dari tanggal mulai + 12 bulan sebagai basis."
                             },
                             "response": []
                         },
@@ -6829,18 +6889,36 @@
                                     "originalRequest": {
                                         "method": "POST",
                                         "header": [
-                                            {"key": "Accept", "value": "application/json", "type": "text"},
-                                            {"key": "Content-Type", "value": "application/json", "type": "text"}
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            }
                                         ],
                                         "body": {
                                             "mode": "raw",
                                             "raw": "{\n    \"salary_type\": \"contract\",\n    \"contract_salary\": 2500000,\n    \"contract_start_date\": \"2026-06-01\",\n    \"contract_end_date\": \"2026-12-01\",\n    \"admin_fee\": 150000,\n    \"garansi_id\": null,\n    \"garansi_price\": null,\n    \"warranty_duration\": \"3 Bulan\",\n    \"deduction_amount\": 50000,\n    \"scheme_id\": null\n}",
-                                            "options": {"raw": {"language": "json"}}
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
                                         },
                                         "url": {
                                             "raw": "{{base_url}}api/all-worker/{{applicant_id}}/set-salary",
-                                            "host": ["{{base_url}}api"],
-                                            "path": ["all-worker", "{{applicant_id}}", "set-salary"]
+                                            "host": [
+                                                "{{base_url}}api"
+                                            ],
+                                            "path": [
+                                                "all-worker",
+                                                "{{applicant_id}}",
+                                                "set-salary"
+                                            ]
                                         }
                                     },
                                     "status": "OK",
@@ -6855,18 +6933,36 @@
                                     "originalRequest": {
                                         "method": "POST",
                                         "header": [
-                                            {"key": "Accept", "value": "application/json", "type": "text"},
-                                            {"key": "Content-Type", "value": "application/json", "type": "text"}
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            }
                                         ],
                                         "body": {
                                             "mode": "raw",
                                             "raw": "{\n    \"salary_type\": \"fee\",\n    \"is_infal\": false,\n    \"fee_salary_regular\": 2000000,\n    \"fee_frequency_regular\": \"monthly\",\n    \"fee_end_date_regular\": \"2026-06-01\",\n    \"deduction_amount\": 0,\n    \"scheme_id\": null\n}",
-                                            "options": {"raw": {"language": "json"}}
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
                                         },
                                         "url": {
                                             "raw": "{{base_url}}api/all-worker/{{applicant_id}}/set-salary",
-                                            "host": ["{{base_url}}api"],
-                                            "path": ["all-worker", "{{applicant_id}}", "set-salary"]
+                                            "host": [
+                                                "{{base_url}}api"
+                                            ],
+                                            "path": [
+                                                "all-worker",
+                                                "{{applicant_id}}",
+                                                "set-salary"
+                                            ]
                                         }
                                     },
                                     "status": "OK",
@@ -6881,18 +6977,36 @@
                                     "originalRequest": {
                                         "method": "POST",
                                         "header": [
-                                            {"key": "Accept", "value": "application/json", "type": "text"},
-                                            {"key": "Content-Type", "value": "application/json", "type": "text"}
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            }
                                         ],
                                         "body": {
                                             "mode": "raw",
                                             "raw": "{\n    \"salary_type\": \"fee\",\n    \"is_infal\": true,\n    \"infal_frequency\": \"daily\",\n    \"fee_salary_infal\": 150000,\n    \"infal_start_date\": \"2026-06-01\",\n    \"infal_end_date\": \"2026-06-30\",\n    \"deduction_amount\": 0,\n    \"scheme_id\": null\n}",
-                                            "options": {"raw": {"language": "json"}}
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
                                         },
                                         "url": {
                                             "raw": "{{base_url}}api/all-worker/{{applicant_id}}/set-salary",
-                                            "host": ["{{base_url}}api"],
-                                            "path": ["all-worker", "{{applicant_id}}", "set-salary"]
+                                            "host": [
+                                                "{{base_url}}api"
+                                            ],
+                                            "path": [
+                                                "all-worker",
+                                                "{{applicant_id}}",
+                                                "set-salary"
+                                            ]
                                         }
                                     },
                                     "status": "OK",
@@ -6907,18 +7021,36 @@
                                     "originalRequest": {
                                         "method": "POST",
                                         "header": [
-                                            {"key": "Accept", "value": "application/json", "type": "text"},
-                                            {"key": "Content-Type", "value": "application/json", "type": "text"}
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            }
                                         ],
                                         "body": {
                                             "mode": "raw",
                                             "raw": "{\n    \"salary_type\": \"fee\",\n    \"is_infal\": true,\n    \"infal_frequency\": \"hourly\",\n    \"infal_hourly_rate\": 25000,\n    \"infal_start_date\": \"2026-06-01\",\n    \"infal_time_in\": \"08:00\",\n    \"infal_time_out\": \"17:00\",\n    \"deduction_amount\": 0,\n    \"scheme_id\": null\n}",
-                                            "options": {"raw": {"language": "json"}}
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
                                         },
                                         "url": {
                                             "raw": "{{base_url}}api/all-worker/{{applicant_id}}/set-salary",
-                                            "host": ["{{base_url}}api"],
-                                            "path": ["all-worker", "{{applicant_id}}", "set-salary"]
+                                            "host": [
+                                                "{{base_url}}api"
+                                            ],
+                                            "path": [
+                                                "all-worker",
+                                                "{{applicant_id}}",
+                                                "set-salary"
+                                            ]
                                         }
                                     },
                                     "status": "OK",
@@ -6929,6 +7061,59 @@
                                     "body": "{\n    \"success\": true,\n    \"message\": \"Pengaturan gaji berhasil disimpan.\",\n    \"data\": {\n        \"id\": \"abc-123-uuid\",\n        \"servant_id\": \"servant-uuid\",\n        \"vacancy_id\": \"vacancy-uuid\",\n        \"employe_id\": null,\n        \"status\": \"passed\",\n        \"salary_type\": \"fee\",\n        \"salary\": null,\n        \"admin_fee\": null,\n        \"deduction_amount\": 0,\n        \"scheme_id\": null,\n        \"is_infal\": 1,\n        \"infal_frequency\": \"hourly\",\n        \"work_start_date\": \"2026-06-01\",\n        \"work_end_date\": null,\n        \"infal_time_in\": \"08:00\",\n        \"infal_time_out\": \"17:00\",\n        \"infal_hourly_rate\": 25000,\n        \"warranty_duration\": null,\n        \"file_contract\": null,\n        \"servant\": {\"id\": \"servant-uuid\", \"name\": \"Pembantu 1\"},\n        \"vacancy\": {\"id\": \"vacancy-uuid\", \"title\": \"Lowongan Test\"},\n        \"scheme\": null\n    }\n}"
                                 }
                             ]
+                        },
+                        {
+                            "name": "Upload File Kontrak",
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token_majikan}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json",
+                                        "type": "text"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "work_start_date",
+                                            "value": "2026-06-01",
+                                            "description": "Tanggal mulai kerja (YYYY-MM-DD)",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "file_contract",
+                                            "description": "File kontrak (pdf/jpg/jpeg/png, max 5MB)",
+                                            "type": "file",
+                                            "src": []
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}api/all-worker/{{applicant_id}}/upload-contract",
+                                    "host": [
+                                        "{{base_url}}api"
+                                    ],
+                                    "path": [
+                                        "all-worker",
+                                        "{{applicant_id}}",
+                                        "upload-contract"
+                                    ]
+                                },
+                                "description": "## Upload File Kontrak (TAHAP 12)\n\nMajikan mengupload file kontrak kerja resmi. Setelah berhasil, status → `accepted`.\n\n`Content-Type: multipart/form-data`\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| work_start_date | ✅ | Tanggal mulai kerja (YYYY-MM-DD) |\n| file_contract | ✅ | File kontrak (pdf/jpg/jpeg/png, max 5MB) |\n\n**Alur sebelum endpoint ini:**\n1. Majikan set gaji: `POST /all-worker/{id}/set-salary`\n2. Majikan kirim tawaran ke mitra: `PUT /all-applicant/{id}/change` dengan `status=verify`\n3. Mitra terima tawaran: `PUT /all-application/{id}/choose` dengan `status=choose`\n4. **Majikan upload kontrak** ← tahap ini\n\n**Efek setelah berhasil:**\n- Status → `accepted`\n- Jika **bukan infal**: `working_status` pembantu = `true`, semua lamaran lain pembantu otomatis → `rejected`\n- Jika **infal**: pembantu tetap bisa punya kontrak aktif di tempat lain\n- Jika kuota lowongan terpenuhi → lowongan otomatis ditutup"
+                            },
+                            "response": []
                         },
                         {
                             "name": "Tukar Pembantu (Swap)",
@@ -6949,21 +7134,8 @@
                                 "method": "POST",
                                 "header": [],
                                 "body": {
-                                    "mode": "formdata",
-                                    "formdata": [
-                                        {
-                                            "key": "new_servant_id",
-                                            "value": "",
-                                            "type": "text",
-                                            "uuid": "9937b025-b561-4449-b0ea-cad43e5b67af"
-                                        },
-                                        {
-                                            "key": "swap_reason",
-                                            "value": "",
-                                            "type": "text",
-                                            "uuid": "55612dc5-0fd7-4b33-9c90-99494eac23d8"
-                                        }
-                                    ]
+                                    "mode": "raw",
+                                    "raw": ""
                                 },
                                 "url": {
                                     "raw": "{{base_url}}api/all-worker/{{applicant_id}}/swap-servant",
@@ -6974,6 +7146,131 @@
                                         "all-worker",
                                         "{{applicant_id}}",
                                         "swap-servant"
+                                    ]
+                                },
+                                "description": "## Tukar Pembantu\n\nMengakhiri kontrak pembantu saat ini (status → `laidoff`), dengan `work_end_date` = 1 bulan dari tanggal mulai.\n\nTidak butuh body.\n\n> ℹ️ Setelah ini, majikan perlu merekrut/mempekerjakan pembantu pengganti secara manual via hire atau lowongan."
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Upload Bukti Admin (kontrak)",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{token}}",
+                                        "type": "text"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}api/all-worker/{{applicant_id}}/uploadPayment-admin-contract",
+                                    "host": [
+                                        "{{base_url}}api"
+                                    ],
+                                    "path": [
+                                        "all-worker",
+                                        "{{applicant_id}}",
+                                        "uploadPayment-admin-contract"
+                                    ]
+                                },
+                                "description": "## Upload Bukti Pembayaran Admin → Pembantu (Kontrak Bulanan)\n\n`Content-Type: multipart/form-data` | **Role: Admin / Superadmin**\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| month | ✅ | Format: `YYYY-MM` |\n| proof_admin | ✅ | File bukti transfer ke pembantu (jpg/jpeg/png/pdf, max 2MB) |\n\n> ℹ️ Record gaji bulan itu dibuat otomatis jika belum ada.\n\n> ⚠️ Hanya untuk `salary_type: contract`.",
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "month",
+                                            "value": "2026-05",
+                                            "type": "text",
+                                            "description": "Format YYYY-MM"
+                                        },
+                                        {
+                                            "key": "proof_admin",
+                                            "value": "",
+                                            "type": "file",
+                                            "description": "File bukti transfer ke pembantu (jpg/jpeg/png/pdf, max 2MB)"
+                                        }
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Upload Bukti Admin (fee)",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{token}}",
+                                        "type": "text"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}api/all-worker/{{applicant_id}}/uploadPayment-admin-fee/{{salary_id}}",
+                                    "host": [
+                                        "{{base_url}}api"
+                                    ],
+                                    "path": [
+                                        "all-worker",
+                                        "{{applicant_id}}",
+                                        "uploadPayment-admin-fee",
+                                        "{{salary_id}}"
+                                    ]
+                                },
+                                "description": "## Upload Bukti Pembayaran Admin → Pembantu (Fee / Infal)\n\n`Content-Type: multipart/form-data` | **Role: Admin / Superadmin**\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| proof_admin | ✅ | File bukti transfer ke pembantu (jpg/jpeg/png/pdf, max 2MB) |\n\n> ℹ️ `salary_id` = `data.gaji[].id` dari **GET /all-worker/{id}**.\n\n> ⚠️ Hanya untuk `salary_type: fee`.",
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "proof_admin",
+                                            "value": "",
+                                            "type": "file",
+                                            "description": "File bukti transfer ke pembantu (jpg/jpeg/png/pdf, max 2MB)"
+                                        }
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Verifikasi Pembayaran Majikan",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{token}}",
+                                        "type": "text"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}api/all-worker/{{applicant_id}}/verify-payment",
+                                    "host": [
+                                        "{{base_url}}api"
+                                    ],
+                                    "path": [
+                                        "all-worker",
+                                        "{{applicant_id}}",
+                                        "verify-payment"
+                                    ]
+                                },
+                                "description": "## Verifikasi Pembayaran Majikan (Admin)\n\n**Role: Admin / Superadmin**\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| month | ✅ | Format: `YYYY-MM` — bulan yang diverifikasi |\n| action | ✅ | `verified` (setujui) atau `rejected` (tolak) |\n\n> ℹ️ Jika `rejected`, bukti pembayaran dihapus dan majikan bisa upload ulang.",
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "month",
+                                            "value": "2026-05",
+                                            "type": "text",
+                                            "description": "Format YYYY-MM"
+                                        },
+                                        {
+                                            "key": "action",
+                                            "value": "verified",
+                                            "type": "text",
+                                            "description": "verified atau rejected"
+                                        }
                                     ]
                                 }
                             },
@@ -7013,7 +7310,8 @@
                                     "path": [
                                         "all-work"
                                     ]
-                                }
+                                },
+                                "description": "## Daftar Pekerjaan (Mitra)\n\n**Query params:**\n| Param | Keterangan |\n|---|---|\n| search | Cari berdasarkan nama client |\n| active_page | Halaman data aktif (accepted) |\n| history_page | Halaman data riwayat (laidoff / rejected) |"
                             },
                             "response": []
                         },
@@ -7067,7 +7365,8 @@
                                         "{{applicant_id}}",
                                         "complaint-work"
                                     ]
-                                }
+                                },
+                                "description": "## Pengaduan tentang Majikan (Mitra)\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| complaint_type_id | ✅ | UUID tipe dari `GET /complaint-types` |\n| description | ✅ | Min 20 karakter |\n\nUrgensi otomatis dari `default_urgency` tipe yang dipilih. Admin dinotifikasi via Pusher."
                             },
                             "response": []
                         },
@@ -7101,7 +7400,8 @@
                                         "all-work",
                                         "{{applicant_id}}"
                                     ]
-                                }
+                                },
+                                "description": "## Detail Pekerjaan (Mitra)\n\nMenunjukkan profil pembantu lengkap dan riwayat gaji.\n\n> ℹ️ Bisa diakses meskipun status sudah `laidoff` atau `rejected`."
                             },
                             "response": []
                         }
@@ -7141,7 +7441,8 @@
                             "path": [
                                 "complaint-types"
                             ]
-                        }
+                        },
+                        "description": "Mengambil daftar tipe pengaduan aktif dari tabel `urgencies`.\n\nDigunakan sebagai sumber `complaint_type_id` sebelum membuat pengaduan."
                     },
                     "response": []
                 },
@@ -7174,7 +7475,8 @@
                             "path": [
                                 "complaints"
                             ]
-                        }
+                        },
+                        "description": "## Daftar Pengaduan\n\n**Admin / Superadmin** — melihat semua:\n| Param | Keterangan |\n|---|---|\n| search | Cari berdasarkan nama pelapor atau deskripsi |\n| status | Filter: `open`, `investigating`, `resolved` |\n\n**User biasa** — hanya pengaduan yang melibatkan dirinya:\n| Param | Keterangan |\n|---|---|\n| status | Filter: `open`, `investigating`, `resolved` |\n\nDiurutkan: urgensi tertinggi → status paling open."
                     },
                     "response": []
                 },
@@ -7207,7 +7509,8 @@
                             "path": [
                                 "complaints"
                             ]
-                        }
+                        },
+                        "description": "## Daftar Pengaduan\n\n**Admin / Superadmin** — melihat semua:\n| Param | Keterangan |\n|---|---|\n| search | Cari berdasarkan nama pelapor atau deskripsi |\n| status | Filter: `open`, `investigating`, `resolved` |\n\n**User biasa** — hanya pengaduan yang melibatkan dirinya:\n| Param | Keterangan |\n|---|---|\n| status | Filter: `open`, `investigating`, `resolved` |\n\nDiurutkan: urgensi tertinggi → status paling open."
                     },
                     "response": []
                 },
@@ -7254,7 +7557,8 @@
                             "path": [
                                 "complaints"
                             ]
-                        }
+                        },
+                        "description": "## Buat Pengaduan (Umum)\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| complaint_type_id | ✅ | UUID tipe dari `GET /complaint-types` |\n| description | ✅ | Min 20 karakter |\n| contract_id | ✅ | UUID application / kontrak |\n| reported_user_id | ✅ | UUID pihak yang diadukan (harus pihak lain dalam kontrak) |"
                     },
                     "response": []
                 },
@@ -7288,7 +7592,8 @@
                                 "complaints",
                                 "{{complaint_id}}"
                             ]
-                        }
+                        },
+                        "description": "Detail satu pengaduan.\n\nAdmin dapat melihat semua. User biasa hanya bisa melihat pengaduan yang melibatkan dirinya."
                     },
                     "response": []
                 },
@@ -7337,7 +7642,8 @@
                                 "{{complaint_id}}",
                                 "status"
                             ]
-                        }
+                        },
+                        "description": "## Ubah Status Pengaduan (Admin)\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| status | ✅ | `open`, `investigating`, atau `resolved` |\n| resolution_notes | ✅* | Wajib jika status = `resolved` (min 10 karakter) |\n\nSetelah diubah, pelapor mendapat notifikasi."
                     },
                     "response": []
                 },
@@ -7386,7 +7692,8 @@
                                 "{{complaint_id}}",
                                 "resolve"
                             ]
-                        }
+                        },
+                        "description": "## Selesaikan Pengaduan (Admin)\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| resolution_notes | ✅ | Catatan penyelesaian (min 10 karakter) |"
                     },
                     "response": []
                 }
@@ -7424,7 +7731,8 @@
                             "path": [
                                 "notifications"
                             ]
-                        }
+                        },
+                        "description": "Mengambil semua notifikasi milik user yang login.\nDipaginasi 10 per halaman.\n\nResponse menyertakan `unread_count` — jumlah notifikasi belum dibaca."
                     },
                     "response": []
                 },
@@ -7459,7 +7767,8 @@
                                 "{{notification_id}}",
                                 "read"
                             ]
-                        }
+                        },
+                        "description": "Menandai satu notifikasi sebagai sudah dibaca.\n\nID dari response `GET /notifications`. Tidak butuh body."
                     },
                     "response": []
                 },
@@ -7493,7 +7802,8 @@
                                 "notifications",
                                 "read-all"
                             ]
-                        }
+                        },
+                        "description": "Menandai **semua** notifikasi yang belum dibaca sebagai sudah dibaca. Tidak butuh body."
                     },
                     "response": []
                 }
@@ -7544,7 +7854,8 @@
                                 "reviews",
                                 "{{applicant_id}}"
                             ]
-                        }
+                        },
+                        "description": "## Kirim Ulasan\n\nBisa dilakukan majikan (mereview pembantu) atau mitra (mereview majikan).\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| rating | ✅ | Nilai 1–5 |\n| comment | ✅ | Komentar (max 1000 karakter) |\n\n**Syarat:** status kontrak harus `laidoff`. Setiap user hanya bisa mereview satu kali per kontrak."
                     },
                     "response": [
                         {
@@ -7673,7 +7984,8 @@
                                 "reviews",
                                 "{{applicant_id}}"
                             ]
-                        }
+                        },
+                        "description": "## Kirim Ulasan\n\nBisa dilakukan majikan (mereview pembantu) atau mitra (mereview majikan).\n\n| Field | Wajib | Keterangan |\n|---|---|---|\n| rating | ✅ | Nilai 1–5 |\n| comment | ✅ | Komentar (max 1000 karakter) |\n\n**Syarat:** status kontrak harus `laidoff`. Setiap user hanya bisa mereview satu kali per kontrak."
                     },
                     "response": [
                         {
