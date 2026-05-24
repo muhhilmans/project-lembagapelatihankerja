@@ -499,6 +499,12 @@ class ApplicationController extends Controller
             'file_contract' => $app->file_contract,
             'work_start_date' => $app->work_start_date,
             'work_end_date' => $app->work_end_date,
+            'interview_date' => $app->interview_date,
+            'notes_interview' => $app->notes_interview,
+            'link_interview' => $app->link_interview,
+            'notes_verify' => $app->notes_verify,
+            'notes_rejected' => $app->notes_rejected,
+            'notes_accepted' => $app->notes_accepted,
             'servant_detail' => [
                 'id' => $app->servant->id,
                 'name' => $app->servant->name,
