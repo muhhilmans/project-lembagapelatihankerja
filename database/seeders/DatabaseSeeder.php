@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             RoleandPermissionSeeder::class,
             // ProfessionSeeder::class,
             UserSeeder::class,
+            UrgencySeeder::class,
         ]);
     }
 }
