@@ -20,11 +20,13 @@ class ApplicationController extends Controller
 
         if ($user->hasRole('majikan')) {
             $schedules = Application::with(['vacancy', 'servant', 'employe'])
-                ->whereHas('vacancy', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
+                ->where(function ($query) use ($user) {
+                    $query->where('employe_id', $user->id)
+                        ->orWhereHas('vacancy', function ($q) use ($user) {
+                            $q->where('user_id', $user->id);
+                        });
                 })
-                ->where('employe_id', $user->id)
-                ->where('status', 'interview')
+                ->whereIn('status', ['schedule', 'interview'])
                 ->orderByDesc('updated_at')
                 ->limit(3)
                 ->get();
@@ -32,7 +34,7 @@ class ApplicationController extends Controller
         } elseif ($user->hasRole('pembantu')) {
             $schedules = Application::with(['vacancy', 'servant', 'employe'])
                 ->where('servant_id', $user->id)
-                ->where('status', 'interview')
+                ->whereIn('status', ['schedule', 'interview'])
                 ->orderByDesc('updated_at')
                 ->limit(3)
                 ->get();
