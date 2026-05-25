@@ -69,6 +69,8 @@ class ProfileController extends Controller
                     'bank_name' => $data->employeDetails->bank_name,
                     'account_number' => $data->employeDetails->account_number,
                     'identity_card' => $data->employeDetails->identity_card ? asset("storage/img/identity_card/{$data->employeDetails->identity_card}") : "-",
+                    'latitude' => $data->employeDetails->latitude,
+                    'longitude' => $data->employeDetails->longitude,
                 ],
             ],
         ]);
@@ -92,6 +94,8 @@ class ProfileController extends Controller
             'phone' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
             'identity_card' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'latitude'  => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         if ($validator->fails()) {
@@ -137,6 +141,8 @@ class ProfileController extends Controller
                 'bank_name' => "-",
                 'account_number' => "-",
                 'identity_card' => $data['identity_card'],
+                'latitude'  => $data['latitude'] ?? $user->employeDetails->latitude,
+                'longitude' => $data['longitude'] ?? $user->employeDetails->longitude,
             ]);
 
             if (!$user) {

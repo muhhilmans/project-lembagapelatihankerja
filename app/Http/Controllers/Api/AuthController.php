@@ -293,14 +293,25 @@ class AuthController extends Controller
         $user = auth()->user();
         try {
             $validator = Validator::make($request->all(), [
-                'latitude' => 'required|decimal',
-                'longitude' => 'required|decimal',
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
             ]);
 
-            $user->servantDetails->update([
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
-            ]);
+            if ($validator->fails()) {
+                return $this->validationErrorResponse($validator);
+            }
+
+            if ($user->hasRole('pembantu')) {
+                $user->servantDetails->update([
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                ]);
+            } elseif ($user->hasRole('majikan')) {
+                $user->employeDetails->update([
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                ]);
+            }
 
             return response()->json([
                 'status' => 'success',

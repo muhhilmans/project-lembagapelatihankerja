@@ -20,6 +20,8 @@ class EmployeDetail extends Model
         'bank_name',
         'account_number',
         'identity_card',
+        'latitude',
+        'longitude',
     ];
 
     public function user()

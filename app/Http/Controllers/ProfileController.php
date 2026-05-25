@@ -394,18 +394,35 @@ class ProfileController extends Controller
 
         $user = auth()->user();
 
-        if (!$user->servantDetails) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data pembantu tidak ditemukan.',
-            ], 404);
-        }
-
         try {
-            $user->servantDetails->update([
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
-            ]);
+            if ($user->hasRole('pembantu')) {
+                if (!$user->servantDetails) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Data pembantu tidak ditemukan.',
+                    ], 404);
+                }
+                $user->servantDetails->update([
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                ]);
+            } elseif ($user->hasRole('majikan')) {
+                if (!$user->employeDetails) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Data majikan tidak ditemukan.',
+                    ], 404);
+                }
+                $user->employeDetails->update([
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Role tidak memiliki data lokasi.',
+                ], 403);
+            }
 
             return response()->json([
                 'status' => 'success',
