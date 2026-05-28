@@ -77,6 +77,12 @@ GET  /api/seek-vacancy/{id}     → detail lowongan
 POST /api/apply-job             → apply
 ```
 
+**Query Params (Optional):**
+- `profession_ids`: Filter berdasarkan UUID profesi (bisa multi-id dipisah koma)
+- `search`: Cari berdasarkan judul lowongan atau nama majikan
+- `min_rating`: Filter berdasarkan minimal rata-rata rating majikan (1-5)
+- `page`: Pagination (5 data per halaman)
+
 **Ketentuan apply:**
 - Tidak bisa melamar lowongan yang sama dua kali
 - Tidak bisa melamar jika punya kontrak aktif tipe **contract** atau **fee regular** (`is_infal = false`)
@@ -92,6 +98,17 @@ GET  /api/seek-mitra                      → cari mitra
 GET  /api/seek-mitra/detail/{id}          → detail mitra
 POST /api/seek-mitra/detail/{id}/hire     → hire langsung
 ```
+
+**Query Params (Optional):**
+- `search` / `name`: Cari berdasarkan nama mitra
+- `religion`: Filter berdasarkan agama (Islam, Kristen, dll)
+- `profession_ids`: Filter UUID profesi (bisa multi-id dipisah koma)
+- `is_inval`: 1 = Bersedia, 0 = Tidak (Inval/Infal)
+- `is_stay`: 1 = Bersedia, 0 = Tidak (Pulang Pergi)
+- `min_age` & `max_age`: Range usia mitra
+- `min_experience` & `max_experience`: Range tahun pengalaman kerja
+- `min_rating`: Minimal rating mitra (1-5)
+- `page`: Pagination (10 data per halaman)
 
 **Ketentuan:**
 - Mitra yang muncul di pencarian hanya yang `working_status = false`

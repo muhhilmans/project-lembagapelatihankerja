@@ -279,14 +279,39 @@ class VacancyController extends Controller
 
     public function seekVacancy(Request $request)
     {
-        $professionId = $request->input('profession_id');
+        $professionIds = $request->input('profession_ids') ?? $request->input('profession_id');
+        $search = $request->input('search');
+        $minRating = $request->input('min_rating');
 
         $query = Vacancy::with(['user:id,name', 'professions:id,name'])
             ->where('status', true)
             ->latest();
 
-        if ($professionId) {
-            $query->whereHas('professions', fn($q) => $q->where('professions.id', $professionId));
+        if ($professionIds) {
+            $query->whereHas('professions', function($q) use ($professionIds) {
+                $ids = is_array($professionIds) ? $professionIds : explode(',', $professionIds);
+                $q->whereIn('professions.id', $ids);
+            });
+        }
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%$search%")
+                  ->orWhereHas('user', function($qu) use ($search) {
+                      $qu->where('name', 'like', "%$search%");
+                  });
+            });
+        }
+
+        if ($minRating && $minRating > 0) {
+            $query->whereHas('user', function($q) use ($minRating) {
+                $q->whereIn('id', function($sub) use ($minRating) {
+                    $sub->select('reviewee_id')
+                        ->from('reviews')
+                        ->groupBy('reviewee_id')
+                        ->havingRaw('AVG(rating) >= ?', [$minRating]);
+                });
+            });
         }
 
         $vacancies = $query->paginate(5);
@@ -347,6 +372,7 @@ class VacancyController extends Controller
             'limit' => $vacancy->limit,
             'status' => $vacancy->status,
             'user' => $vacancy->user->name ?? 'Unknown',
+            'user_rating' => $vacancy->user->average_rating ?? 0,
             'is_favorited' => $vacancy->is_favorited,
             'professions' => $vacancy->professions?->map(function($p) {
                 return [

@@ -3083,14 +3083,26 @@
                             ],
                             "query": [
                                 {
-                                    "key": "profession_id",
+                                    "key": "profession_ids",
                                     "value": "",
-                                    "description": "Filter by profession ID (optional)",
+                                    "description": "Filter by profession ID (optional, can be comma separated for multiple IDs)",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "",
+                                    "description": "Search by title or employer name (optional)",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "min_rating",
+                                    "value": "",
+                                    "description": "Filter by minimum employer rating 1-5 (optional)",
                                     "disabled": true
                                 }
                             ]
                         },
-                        "description": "## Cari Lowongan (Mitra)\n\nMenunjukkan semua lowongan aktif.\n\n**Query params (opsional):**\n| Param | Keterangan |\n|---|---|\n| profession_id | Filter berdasarkan UUID profesi |\n| page | Halaman (5 per halaman) |\n\nResponse menyertakan daftar `professions` untuk keperluan filter."
+                        "description": "## Cari Lowongan (Mitra)\n\nMenunjukkan semua lowongan aktif.\n\n**Query params (opsional):**\n| Param | Keterangan |\n|---|---|\n| profession_id | Filter berdasarkan UUID profesi |\n| search | Cari berdasarkan judul lowongan atau nama majikan |\n| min_rating | Filter berdasarkan minimal rating majikan (1-5) |\n| page | Halaman (5 per halaman) |\n\nResponse menyertakan daftar `professions` untuk keperluan filter."
                     },
                     "response": [
                         {
@@ -5353,15 +5365,50 @@
                                     "disabled": true
                                 },
                                 {
-                                    "key": "professions",
+                                    "key": "profession_ids",
                                     "value": null,
-                                    "description": "array",
+                                    "description": "array (UUIDs comma separated)",
+                                    "type": "text",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "min_age",
+                                    "value": "",
+                                    "description": "Minimum age (optional)",
+                                    "type": "text",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "max_age",
+                                    "value": "",
+                                    "description": "Maximum age (optional)",
+                                    "type": "text",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "min_experience",
+                                    "value": "",
+                                    "description": "Minimum years of experience (optional)",
+                                    "type": "text",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "max_experience",
+                                    "value": "",
+                                    "description": "Maximum years of experience (optional)",
+                                    "type": "text",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "min_rating",
+                                    "value": "",
+                                    "description": "Minimum rating 1-5 (optional)",
                                     "type": "text",
                                     "disabled": true
                                 }
                             ]
                         },
-                        "description": "## Cari Mitra (Client)\n\nOtomatis menyembunyikan mitra yang sedang dalam proses lamaran dengan majikan yang login.\n\n**Query params (semua opsional):**\n| Param | Keterangan |\n|---|---|\n| name / search | Cari berdasarkan nama |\n| religion | Filter agama |\n| is_inval | `1` = hanya mitra infal |\n| is_stay | `1` = hanya mitra bersedia menginap |\n| professions[] | Array UUID profesi — `professions[]=uuid1&professions[]=uuid2` |\n| page | Halaman (10 per halaman) |"
+                        "description": "## Cari Mitra (Majikan)\n\nMenunjukkan semua mitra yang statusnya sedang tidak bekerja.\n\n**Query params (opsional):**\n| Param | Keterangan |\n|---|---|\n| name / search | Cari berdasarkan nama |\n| religion | Filter berdasarkan agama |\n| is_inval | 1 = Bersedia, 0 = Tidak (Inval/Infal) |\n| is_stay | 1 = Bersedia, 0 = Tidak (Pulang Pergi) |\n| profession_ids | Filter UUID profesi (bisa multi-id dipisah koma) |\n| min_age | Minimal usia |\n| max_age | Maksimal usia |\n| min_experience | Minimal pengalaman (tahun) |\n| max_experience | Maksimal pengalaman (tahun) |\n| min_rating | Minimal rating (1-5) |\n| page | Halaman (10 per halaman) |"
                     },
                     "response": [
                         {

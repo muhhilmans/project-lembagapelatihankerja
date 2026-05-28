@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use App\Models\Application;
+use App\Models\Profession;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,12 @@ class PartnerController extends Controller
         $religion    = $request->input('religion');
         $isInval     = $request->input('is_inval');
         $isStay      = $request->input('is_stay');
-        $professions = $request->input('professions');
+        $professionIds = $request->input('profession_ids') ?? $request->input('professions');
+        $minAge      = $request->input('min_age');
+        $maxAge      = $request->input('max_age');
+        $minExperience = $request->input('min_experience');
+        $maxExperience = $request->input('max_experience');
+        $minRating   = $request->input('min_rating');
 
         $favoritedIds = $user->favoriteServants()->pluck('servant_detail_id')->toArray();
 
@@ -45,35 +51,60 @@ class PartnerController extends Controller
                 $q->where('name', 'like', "%{$searchName}%");
             })
 
-            // Filter Detail Servant (Agama, Inval, Stay)
-            ->whereHas('servantDetails', function ($query) use ($religion, $isInval, $isStay) {
+            // Filter Detail Servant (Agama, Inval, Stay, Usia, Pengalaman)
+            ->whereHas('servantDetails', function ($query) use ($religion, $isInval, $isStay, $minAge, $maxAge, $minExperience, $maxExperience) {
                 $query->where('working_status', false);
 
                 $query->when($religion, function ($sub) use ($religion) {
                     $sub->where('religion', $religion);
                 });
 
-                $query->when($isInval, function ($sub) {
-                    $sub->where('is_inval', 1);
+                $query->when($isInval !== null, function ($sub) use ($isInval) {
+                    $sub->where('is_inval', $isInval);
                 });
 
-                $query->when($isStay, function ($sub) {
-                    $sub->where('is_stay', 1);
+                $query->when($isStay !== null, function ($sub) use ($isStay) {
+                    $sub->where('is_stay', $isStay);
+                });
+
+                // Filter Usia (Dihitung dari date_of_birth)
+                if ($minAge) {
+                    $query->whereRaw("TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= ?", [$minAge]);
+                }
+                if ($maxAge) {
+                    $query->whereRaw("TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) <= ?", [$maxAge]);
+                }
+
+                // Filter Pengalaman
+                if ($minExperience !== null) {
+                    $query->where('experience', '>=', $minExperience);
+                }
+                if ($maxExperience !== null) {
+                    $query->where('experience', '<=', $maxExperience);
+                }
+            })
+
+            // Filter Minimal Rating
+            ->when($minRating && $minRating > 0, function($q) use ($minRating) {
+                $q->whereIn('id', function($sub) use ($minRating) {
+                    $sub->select('reviewee_id')
+                        ->from('reviews')
+                        ->groupBy('reviewee_id')
+                        ->havingRaw('AVG(rating) >= ?', [$minRating]);
                 });
             })
 
             // Filter Professions (Many-to-Many via ServantDetail)
-            ->when($professions, function ($query) use ($professions) {
-                $query->whereHas('servantDetails.professions', function ($subQuery) use ($professions) {
-                    $ids = is_array($professions) ? $professions : explode(',', $professions);
-                    
+            ->when($professionIds, function ($query) use ($professionIds) {
+                $query->whereHas('servantDetails.professions', function ($subQuery) use ($professionIds) {
+                    $ids = is_array($professionIds) ? $professionIds : explode(',', $professionIds);
                     $subQuery->whereIn('professions.id', $ids);
-                    
-                    // $subQuery->whereIn('professions.name', $ids);
                 });
             })
             ->latest()
             ->paginate(10);
+
+        $professionsList = Profession::select('id', 'name')->get();
 
         $datas = [
             'user' => [
@@ -84,6 +115,7 @@ class PartnerController extends Controller
                 'role' => $user->roles->first()->name,
                 'access_token' => $user->access_token,
             ],
+            'professions' => $professionsList,
             'mitra' => [
                 'data' => $partners->map(function ($partner) use ($favoritedIds) {
                     return [
