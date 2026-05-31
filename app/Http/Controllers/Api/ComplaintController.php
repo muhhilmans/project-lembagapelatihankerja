@@ -113,14 +113,16 @@ class ComplaintController extends Controller
 
         $user = auth()->user();
 
-        // Verifikasi kontrak benar-benar milik user dan masih aktif
+        // Verifikasi kontrak benar-benar milik user
         $application = Application::with('vacancy:id,user_id')
             ->where('id', $request->contract_id)
             ->where(function ($q) use ($user) {
                 $q->where('servant_id', $user->id)
-                  ->orWhere('employe_id', $user->id);
+                  ->orWhere('employe_id', $user->id)
+                  ->orWhereHas('vacancy', function ($v) use ($user) {
+                      $v->where('user_id', $user->id);
+                  });
             })
-            ->whereIn('status', ['accepted', 'contract'])
             ->first();
 
         if (!$application) {

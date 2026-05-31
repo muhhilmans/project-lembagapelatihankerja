@@ -148,7 +148,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/garansis', [GaransiController::class, 'index']);
     Route::get('/garansis/{id}', [GaransiController::class, 'show']);
 
-    // Utility: ambil URL publik dari path file
+    // Utility: ambil base64 dari path file
     Route::get('/file-url', function (\Illuminate\Http\Request $request) {
         $path = $request->input('path');
         if (!$path) {
@@ -157,10 +157,15 @@ Route::middleware('jwt.auth')->group(function () {
         if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
             return response()->json(['success' => false, 'message' => 'File tidak ditemukan.'], 404);
         }
+
+        $file = \Illuminate\Support\Facades\Storage::disk('public')->get($path);
+        $mime = \Illuminate\Support\Facades\Storage::disk('public')->mimeType($path);
+        $base64 = base64_encode($file);
+
         return response()->json([
             'success' => true,
             'path'    => $path,
-            'url'     => url(\Illuminate\Support\Facades\Storage::url($path)),
+            'base64'  => 'data:' . $mime . ';base64,' . $base64,
         ]);
     });
 

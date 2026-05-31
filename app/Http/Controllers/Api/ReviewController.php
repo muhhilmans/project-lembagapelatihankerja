@@ -39,7 +39,8 @@ class ReviewController extends Controller
         }
 
         // 3. Hak Akses — user harus salah satu pihak dalam application
-        if ($user->id !== $application->servant_id && $user->id !== $application->employe_id) {
+        $isEmployer = ($application->employe_id == $user->id) || (optional($application->vacancy)->user_id == $user->id);
+        if ($user->id !== $application->servant_id && !$isEmployer) {
             return response()->json([
                 'status'  => 'error',
                 'message' => 'Anda tidak memiliki akses untuk mereview kontrak ini.',

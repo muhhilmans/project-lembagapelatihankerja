@@ -143,6 +143,7 @@ class WorkerController extends Controller
                     'id' => $worker->id,
                     'servant_id' => $worker->servant_id,
                     'client' => $worker->employe_id ? $worker->employe->name : $worker->vacancy->user->name,
+                    'client_id' => $worker->employe_id ?? ($worker->vacancy->user_id ?? null),
                     'status' => $worker->status,
                     'salary_type' => $worker->salary_type,
                     'salary' => $worker->salary,
@@ -848,6 +849,7 @@ class WorkerController extends Controller
                 return [
                     'id'              => $query->id,
                     'client'          => $query->employe ? $query->employe->name : ($query->vacancy->user->name ?? '-'),
+                    'client_id'       => $query->employe_id ?? ($query->vacancy->user_id ?? null),
                     'status'          => $query->status,
                     'salary_type'     => $query->salary_type,
                     'salary'          => $query->salary,
@@ -947,6 +949,7 @@ class WorkerController extends Controller
                     'id' => $worker->id,
                     'servant_id' => $worker->servant_id,
                     'client' => $worker->employe_id ? $worker->employe->name : $worker->vacancy->user->name,
+                    'client_id' => $worker->employe_id ?? ($worker->vacancy->user_id ?? null),
                     'status' => $worker->status,
                     'salary_type' => $worker->salary_type,
                     'salary' => $worker->salary,
