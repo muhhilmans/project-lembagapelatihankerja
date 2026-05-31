@@ -453,10 +453,10 @@ class WorkerController extends Controller
 
             DB::commit();
 
-            return $this->successResponse(
-                $application->fresh(['servant:id,name', 'vacancy:id,title']),
-                'File kontrak berhasil diunggah. Status kontrak menjadi aktif.'
-            );
+            $fresh = $application->fresh(['servant:id,name', 'vacancy:id,title']);
+            $fresh->uploaded_at = now()->translatedFormat('l, d F Y H:i:s');
+
+            return $this->successResponse($fresh, 'File kontrak berhasil diunggah. Status kontrak menjadi aktif.');
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error("Error uploadContractFile: {$th->getMessage()}");
@@ -1308,6 +1308,45 @@ class WorkerController extends Controller
             DB::rollBack();
             Log::error("Error extendContract: {$th->getMessage()}");
             return $this->errorResponse('Gagal memperpanjang kontrak.', [], 500);
+        }
+    }
+
+    public function extendWarranty(Request $request, Application $application)
+    {
+        $user = auth()->user();
+        $isOwner = (string) $application->employe_id === (string) $user->id
+            || (string) ($application->vacancy?->user_id) === (string) $user->id;
+
+        if (!$isOwner) {
+            return $this->errorResponse('Anda tidak memiliki akses ke kontrak ini.', [], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'garansi_id'    => 'required|exists:garansis,id',
+            'garansi_price' => 'nullable|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) return $this->validationErrorResponse($validator);
+
+        try {
+            $garansiPrice = $request->garansi_price;
+            if (!$garansiPrice) {
+                $garansi = \App\Models\Garansi::find($request->garansi_id);
+                $garansiPrice = $garansi ? $garansi->price : null;
+            }
+
+            $application->update([
+                'garansi_id'    => $request->garansi_id,
+                'garansi_price' => $garansiPrice,
+            ]);
+
+            return $this->successResponse(
+                $application->fresh(['servant:id,name', 'vacancy:id,title']),
+                'Garansi berhasil diperpanjang/diubah.'
+            );
+        } catch (\Throwable $th) {
+            Log::error("Error extendWarranty: {$th->getMessage()}");
+            return $this->errorResponse('Terjadi kesalahan saat memperpanjang garansi.', [], 500);
         }
     }
 

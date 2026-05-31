@@ -19,90 +19,77 @@ class PartnerController extends Controller
     public function allPartner(Request $request)
     {
         $user = auth()->user();
-        // 1. Ambil semua parameter filter titah Yang Mulia
-        $searchName  = $request->input('name') ?? $request->input('search');
-        $religion    = $request->input('religion');
-        $isInval     = $request->input('is_inval');
-        $isStay      = $request->input('is_stay');
+
+        $searchName    = $request->input('name') ?? $request->input('search');
+        $religion      = $request->input('religion');
+        $isInval       = $request->input('is_inval');
+        $isStay        = $request->input('is_stay');
         $professionIds = $request->input('profession_ids') ?? $request->input('professions');
-        $minAge      = $request->input('min_age');
-        $maxAge      = $request->input('max_age');
+        $minAge        = $request->input('min_age');
+        $maxAge        = $request->input('max_age');
         $minExperience = $request->input('min_experience');
         $maxExperience = $request->input('max_experience');
-        $minRating   = $request->input('min_rating');
+        $minRating     = $request->input('min_rating');
+        $lat           = $request->input('lat');
+        $lng           = $request->input('lng');
+        $radius        = $request->input('radius'); // km, opsional
 
         $favoritedIds = $user->favoriteServants()->pluck('servant_detail_id')->toArray();
 
-        $partners = User::with(['roles', 'servantDetails.professions', 'appServant']) 
-            // Filter Role Pembantu & Aktif
-            ->whereHas('roles', function ($query) {
-                $query->where('name', 'pembantu');
-            })
+        $query = User::with(['roles', 'servantDetails.professions', 'appServant', 'servantSkills'])
+            ->whereHas('roles', fn($q) => $q->where('name', 'pembantu'))
             ->where('is_active', true)
-
-            // Filter: TIDAK sedang dalam proses lamaran dengan user ini
-            ->whereDoesntHave('appServant', function ($query) use ($user) {
-                $query->where('employe_id', $user->id)
+            ->whereDoesntHave('appServant', function ($q) use ($user) {
+                $q->where('employe_id', $user->id)
                     ->whereIn('status', ['interview', 'verify', 'passed', 'choose', 'accepted', 'rejected', 'pending']);
             })
-
-            // Filter Nama (Search)
-            ->when($searchName, function ($q) use ($searchName) {
-                $q->where('name', 'like', "%{$searchName}%");
+            ->when($searchName, fn($q) => $q->where('name', 'like', "%{$searchName}%"))
+            ->whereHas('servantDetails', function ($q) use ($religion, $isInval, $isStay, $minAge, $maxAge, $minExperience, $maxExperience) {
+                $q->where('working_status', false);
+                $q->when($religion, fn($s) => $s->where('religion', $religion));
+                $q->when($isInval !== null, fn($s) => $s->where('is_inval', $isInval));
+                $q->when($isStay !== null, fn($s) => $s->where('is_stay', $isStay));
+                if ($minAge) $q->whereRaw("TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= ?", [$minAge]);
+                if ($maxAge) $q->whereRaw("TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) <= ?", [$maxAge]);
+                if ($minExperience !== null) $q->where('experience', '>=', $minExperience);
+                if ($maxExperience !== null) $q->where('experience', '<=', $maxExperience);
             })
+            ->when($minRating && $minRating > 0, fn($q) => $q->whereIn('id', function ($sub) use ($minRating) {
+                $sub->select('reviewee_id')->from('reviews')
+                    ->groupBy('reviewee_id')
+                    ->havingRaw('AVG(rating) >= ?', [$minRating]);
+            }))
+            ->when($professionIds, fn($q) => $q->whereHas('servantDetails.professions', function ($sub) use ($professionIds) {
+                $ids = is_array($professionIds) ? $professionIds : explode(',', $professionIds);
+                $sub->whereIn('professions.id', $ids);
+            }));
 
-            // Filter Detail Servant (Agama, Inval, Stay, Usia, Pengalaman)
-            ->whereHas('servantDetails', function ($query) use ($religion, $isInval, $isStay, $minAge, $maxAge, $minExperience, $maxExperience) {
-                $query->where('working_status', false);
+        // Filter & sort berdasarkan jarak (Haversine)
+        $useDistance = $lat && $lng;
+        if ($useDistance) {
+            $query->join('servant_details AS sd_geo', 'users.id', '=', 'sd_geo.user_id')
+                ->select('users.*')
+                ->selectRaw(
+                    "(6371 * acos(GREATEST(-1, LEAST(1,
+                        cos(radians(?)) * cos(radians(sd_geo.latitude))
+                        * cos(radians(sd_geo.longitude) - radians(?))
+                        + sin(radians(?)) * sin(radians(sd_geo.latitude))
+                    )))) AS distance_km",
+                    [(float) $lat, (float) $lng, (float) $lat]
+                )
+                ->whereNotNull('sd_geo.latitude')
+                ->whereNotNull('sd_geo.longitude');
 
-                $query->when($religion, function ($sub) use ($religion) {
-                    $sub->where('religion', $religion);
-                });
+            if ($radius) {
+                $query->havingRaw("distance_km <= ?", [(float) $radius]);
+            }
 
-                $query->when($isInval !== null, function ($sub) use ($isInval) {
-                    $sub->where('is_inval', $isInval);
-                });
+            $query->orderBy('distance_km');
+        } else {
+            $query->latest();
+        }
 
-                $query->when($isStay !== null, function ($sub) use ($isStay) {
-                    $sub->where('is_stay', $isStay);
-                });
-
-                // Filter Usia (Dihitung dari date_of_birth)
-                if ($minAge) {
-                    $query->whereRaw("TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= ?", [$minAge]);
-                }
-                if ($maxAge) {
-                    $query->whereRaw("TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) <= ?", [$maxAge]);
-                }
-
-                // Filter Pengalaman
-                if ($minExperience !== null) {
-                    $query->where('experience', '>=', $minExperience);
-                }
-                if ($maxExperience !== null) {
-                    $query->where('experience', '<=', $maxExperience);
-                }
-            })
-
-            // Filter Minimal Rating
-            ->when($minRating && $minRating > 0, function($q) use ($minRating) {
-                $q->whereIn('id', function($sub) use ($minRating) {
-                    $sub->select('reviewee_id')
-                        ->from('reviews')
-                        ->groupBy('reviewee_id')
-                        ->havingRaw('AVG(rating) >= ?', [$minRating]);
-                });
-            })
-
-            // Filter Professions (Many-to-Many via ServantDetail)
-            ->when($professionIds, function ($query) use ($professionIds) {
-                $query->whereHas('servantDetails.professions', function ($subQuery) use ($professionIds) {
-                    $ids = is_array($professionIds) ? $professionIds : explode(',', $professionIds);
-                    $subQuery->whereIn('professions.id', $ids);
-                });
-            })
-            ->latest()
-            ->paginate(10);
+        $partners = $query->paginate(10);
 
         $professionsList = Profession::select('id', 'name')->get();
 
@@ -117,10 +104,11 @@ class PartnerController extends Controller
             ],
             'professions' => $professionsList,
             'mitra' => [
-                'data' => $partners->map(function ($partner) use ($favoritedIds) {
+                'data' => $partners->map(function ($partner) use ($favoritedIds, $useDistance) {
                     return [
                         'id'                => $partner->id,
                         'is_favorited'      => in_array($partner->id, $favoritedIds),
+                        'distance_km'       => $useDistance ? round((float) $partner->distance_km, 2) : null,
                         'name'              => $partner->name,
                         'username'          => $partner->username,
                         'email'             => $partner->email,
@@ -206,7 +194,7 @@ class PartnerController extends Controller
     public function showPartner($id)
     {
         $user = auth()->user();
-        $partner = User::with(['roles', 'servantDetails'])->find($id);
+        $partner = User::with(['roles', 'servantDetails.professions', 'servantSkills'])->find($id);
 
         if (!$partner) {
             return response()->json([
@@ -214,6 +202,9 @@ class PartnerController extends Controller
                 'message' => 'Data mitra tidak ditemukan',
             ], 404);
         }
+
+        $favoritedIds = $user->favoriteServants()->pluck('servant_detail_id')->toArray();
+        $isFavorited  = in_array($partner->id, $favoritedIds);
 
         $datas = [
             'user' => [
@@ -226,6 +217,7 @@ class PartnerController extends Controller
             ],
             'partner' => [
                 'id'                => $partner->id,
+                'is_favorited'      => $isFavorited,
                 'name'              => $partner->name,
                 'username'          => $partner->username,
                 'email'             => $partner->email,

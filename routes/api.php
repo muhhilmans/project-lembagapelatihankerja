@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ComplaintController;
+use App\Http\Controllers\Api\GaransiController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\ProfileController;
@@ -70,6 +71,7 @@ Route::middleware('jwt.auth')->group(function () {
         // Pembaruan Operasional Kontrak Kerja
         Route::post('/all-worker/{application}/end-contract', [WorkerController::class, 'endContract']);
         Route::post('/all-worker/{application}/extend-contract', [WorkerController::class, 'extendContract']);
+        Route::post('/all-worker/{application}/extend-warranty', [WorkerController::class, 'extendWarranty']);
         Route::post('/all-worker/{application}/swap-servant', [WorkerController::class, 'swapServant']);
 
         // Kelola Lowongan
@@ -96,6 +98,7 @@ Route::middleware('jwt.auth')->group(function () {
         // Lamaran
         Route::post('/apply-job', [ApplicationController::class, 'applyJob']);
         Route::get('/all-application', [ApplicationController::class, 'allApplication']);
+        Route::get('/all-application/{application}/preview', [ApplicationController::class, 'previewApplication']);
         Route::put('/all-application/{application}/choose', [ApplicationController::class, 'chooseStatus']);
 
         // Kelola Pekerjaan
@@ -140,6 +143,26 @@ Route::middleware('jwt.auth')->group(function () {
 
     // Fitur Live Tracking Maps
     Route::get('/tracking/locations', [TrackingController::class, 'getLocations']);
+
+    // Master Garansi (read-only untuk semua user login, CRUD untuk admin)
+    Route::get('/garansis', [GaransiController::class, 'index']);
+    Route::get('/garansis/{id}', [GaransiController::class, 'show']);
+
+    // Utility: ambil URL publik dari path file
+    Route::get('/file-url', function (\Illuminate\Http\Request $request) {
+        $path = $request->input('path');
+        if (!$path) {
+            return response()->json(['success' => false, 'message' => 'Parameter path diperlukan.'], 400);
+        }
+        if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+            return response()->json(['success' => false, 'message' => 'File tidak ditemukan.'], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'path'    => $path,
+            'url'     => url(\Illuminate\Support\Facades\Storage::url($path)),
+        ]);
+    });
 
     // Ulasan / Review
     Route::post('/reviews/{application}', [ReviewController::class, 'store']);

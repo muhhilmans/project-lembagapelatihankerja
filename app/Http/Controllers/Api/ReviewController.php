@@ -16,7 +16,7 @@ class ReviewController extends Controller
         // 1. Validasi Input
         $validator = Validator::make($request->all(), [
             'rating'  => 'required|integer|min:1|max:5',
-            'comment' => 'required|string|max:1000',
+            'comment' => 'nullable|string|max:1000',
         ]);
 
         if ($validator->fails()) {

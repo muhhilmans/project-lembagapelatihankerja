@@ -364,6 +364,65 @@ class ApplicationController extends Controller
         }
     }
 
+    public function previewApplication(Application $application)
+    {
+        $user = auth()->user();
+
+        if ((string) $application->servant_id !== (string) $user->id) {
+            return response()->json(['success' => 'failed', 'message' => 'Anda tidak memiliki akses ke lamaran ini.'], 403);
+        }
+
+        $employer = $application->employe ?? $application->vacancy?->user;
+
+        $data = [
+            'id'             => $application->id,
+            'status'         => $application->status,
+            'applied_at'     => $application->created_at,
+
+            // Info lowongan / majikan
+            'type'           => $application->vacancy_id ? 'mandiri' : 'hire',
+            'vacancy'        => $application->vacancy ? [
+                'id'    => $application->vacancy->id,
+                'title' => $application->vacancy->title,
+            ] : null,
+            'majikan'        => $employer ? [
+                'id'   => $employer->id,
+                'name' => $employer->name,
+            ] : null,
+
+            // Info interview
+            'interview_date'   => $application->interview_date,
+            'link_interview'   => $application->link_interview,
+            'notes_interview'  => $application->notes_interview,
+
+            // Info tawaran gaji
+            'salary_type'      => $application->salary_type,
+            'is_infal'         => $application->is_infal,
+            'salary'           => $application->salary,
+            'admin_fee'        => $application->admin_fee,
+            'infal_frequency'  => $application->infal_frequency,
+            'infal_time_in'    => $application->infal_time_in,
+            'infal_time_out'   => $application->infal_time_out,
+            'infal_hourly_rate'=> $application->infal_hourly_rate,
+            'work_start_date'  => $application->work_start_date,
+            'work_end_date'    => $application->work_end_date,
+
+            // Info garansi
+            'garansi_id'       => $application->garansi_id,
+            'garansi_price'    => $application->garansi_price,
+            'warranty_duration'=> $application->warranty_duration,
+
+            // Catatan verifikasi
+            'notes_verify'     => $application->notes_verify,
+        ];
+
+        return response()->json([
+            'success' => 'success',
+            'message' => 'Preview detail tawaran lamaran.',
+            'data'    => $data,
+        ]);
+    }
+
     public function allApplication()
     {
         $user = auth()->user();
