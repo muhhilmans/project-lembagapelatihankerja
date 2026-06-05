@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             // ProfessionSeeder::class,
             UserSeeder::class,
             UrgencySeeder::class,
+            AppDocumentSeeder::class,
         ]);
     }
 }
